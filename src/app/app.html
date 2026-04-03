@@ -143,7 +143,11 @@
                   @for (song of topSongs(); track song.title; let i = $index) {
                     <div class="flex items-center gap-3">
                       <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-lg bg-red-500 shrink-0"></div>
+                      <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && song.album_id) {
+                          <img [src]="coverUrl(song.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
                         <p class="text-white/60 text-xs truncate">{{ song.artist }}</p>
@@ -162,7 +166,11 @@
                   @for (artist of topArtists(); track artist.artist; let i = $index) {
                     <div class="flex items-center gap-3">
                       <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-full bg-red-500 shrink-0"></div>
+                      <div class="w-12 h-12 rounded-full shrink-0 overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && artist.artist_id) {
+                          <img [src]="coverUrl(artist.artist_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
                         <p class="text-white/60 text-xs truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
@@ -181,7 +189,11 @@
                   @for (album of topAlbums(); track album.album; let i = $index) {
                     <div class="flex items-center gap-3">
                       <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-lg bg-red-500 shrink-0"></div>
+                      <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && album.album_id) {
+                          <img [src]="coverUrl(album.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
                         <p class="text-white/60 text-xs truncate">{{ album.album_artist }}</p>
@@ -305,7 +317,11 @@
                   @for (track of lateNight(); track track.title; let i = $index) {
                     <div class="flex items-center gap-3">
                       <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-10 h-10 rounded-lg bg-red-500 shrink-0"></div>
+                      <div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && track.album_id) {
+                          <img [src]="coverUrl(track.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-white font-semibold text-sm truncate">{{ track.title }}</p>
                         <p class="text-white/60 text-xs truncate">{{ track.artist }}</p>
@@ -346,7 +362,11 @@
                 <div class="flex-1 flex flex-col gap-2">
                   @for (s of songOfMonth(); track s.month) {
                     <div class="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2">
-                      <div class="w-10 h-10 rounded-lg bg-red-500 shrink-0"></div>
+                      <div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && s.album_id) {
+                          <img [src]="coverUrl(s.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-white font-semibold text-sm truncate">{{ s.title }}</p>
                         <p class="text-white/60 text-xs truncate">{{ s.artist }}</p>

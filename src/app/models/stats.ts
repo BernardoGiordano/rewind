@@ -4,6 +4,8 @@ export interface TopSong {
   album: string;
   plays: number;
   total_minutes: number;
+  album_id: string;
+  artist_id: string;
 }
 
 export interface TopArtist {
@@ -11,6 +13,7 @@ export interface TopArtist {
   plays: number;
   unique_tracks: number;
   total_hours: number;
+  artist_id: string;
 }
 
 export interface TopAlbum {
@@ -18,6 +21,8 @@ export interface TopAlbum {
   album_artist: string;
   plays: number;
   total_minutes: number;
+  album_id: string;
+  artist_id: string;
 }
 
 export interface TopGenre {
@@ -65,6 +70,8 @@ export interface LateNightTrack {
   title: string;
   artist: string;
   late_night_plays: number;
+  album_id: string;
+  artist_id: string;
 }
 
 export interface OnRepeatEntry {
@@ -79,6 +86,8 @@ export interface SongOfMonth {
   title: string;
   artist: string;
   plays: number;
+  album_id: string;
+  artist_id: string;
 }
 
 export interface FavoriteDecade {

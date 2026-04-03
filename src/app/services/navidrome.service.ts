@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import type {
@@ -21,6 +21,18 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class NavidromeService {
   private readonly http = inject(HttpClient);
+
+  readonly coverArtAvailable = signal(false);
+
+  loadConfig(): void {
+    this.http.get<{ coverArtAvailable: boolean }>('/api/config').subscribe({
+      next: (cfg) => this.coverArtAvailable.set(cfg.coverArtAvailable),
+    });
+  }
+
+  coverUrl(id: string, size = 150): string {
+    return `/api/cover/${encodeURIComponent(id)}?size=${size}`;
+  }
 
   getYears(): Observable<string[]> {
     return this.http.get<string[]>('/api/years');

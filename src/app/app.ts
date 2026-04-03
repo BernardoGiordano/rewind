@@ -68,6 +68,12 @@ export class App {
     return y === 'all-time' ? 'All Time' : y;
   });
 
+  readonly coverArtAvailable = this.navidrome.coverArtAvailable;
+
+  coverUrl(id: string, size = 150): string {
+    return this.navidrome.coverUrl(id, size);
+  }
+
   // Bar width helpers using max values
   private maxGenrePlays = 0;
   private maxClockPlays = 0;
@@ -76,6 +82,7 @@ export class App {
 
   constructor() {
     afterNextRender(() => {
+      this.navidrome.loadConfig();
       this.navidrome.getYears().subscribe({
         next: (years) => {
           this.years.set(years);
