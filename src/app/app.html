@@ -1,29 +1,28 @@
-<!-- Sidebar -->
-<header class="bg-slate-50 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-80 lg:items-start lg:overflow-y-auto xl:w-96">
-  <!-- Vertical stat label (desktop only) -->
-  <div class="hidden lg:sticky lg:top-0 lg:flex lg:w-16 lg:flex-none lg:items-center lg:whitespace-nowrap lg:[writing-mode:vertical-rl] lg:px-4 lg:py-12 lg:text-sm/7">
+<!-- Two-column sidebar layout -->
+<div class="flex min-h-screen bg-white dark:bg-slate-950">
+
+  <!-- LEFT BAR — vertical rotated branding + stat label -->
+  <div class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+    <span class="[writing-mode:vertical-rl] rotate-180 font-black text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Wrapped</span>
     @if (selectedDef(); as def) {
-      <span class="font-mono text-slate-500">{{ def.label }}</span>
+      <span class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
     }
   </div>
 
-  <div class="relative z-10 mx-auto px-4 pt-8 pb-4 sm:px-6 lg:min-h-full lg:flex-auto lg:border-x lg:border-slate-200 lg:px-6 lg:py-10 xl:px-8">
-    <!-- Branding -->
-    <div class="text-center lg:text-left">
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Navidrome Wrapped</h1>
-      <p class="mt-1 text-sm text-slate-500">Your listening stats, beautifully wrapped.</p>
-    </div>
+  <!-- RIGHT SIDEBAR — year chips + stat list -->
+  <aside class="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 px-5 py-10 overflow-y-auto">
 
     <!-- Year selector -->
-    <div class="mt-6">
-      <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2" role="heading" aria-level="2">Year</span>
+    <div>
+      <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Year</span>
       <div class="flex flex-wrap gap-2">
         <button
           type="button"
           (click)="selectYear('all-time')"
-          [class]="'px-3 py-1.5 rounded-full text-sm font-medium transition-colors ' + (selectedYear() === 'all-time'
-            ? 'bg-slate-900 text-white'
-            : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200')"
+          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+          [class]="selectedYear() === 'all-time'
+            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'"
         >
           All Time
         </button>
@@ -31,9 +30,10 @@
           <button
             type="button"
             (click)="selectYear(y)"
-            [class]="'px-3 py-1.5 rounded-full text-sm font-medium transition-colors ' + (selectedYear() === y
-              ? 'bg-slate-900 text-white'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200')"
+            class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+            [class]="selectedYear() === y
+              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'"
           >
             {{ y }}
           </button>
@@ -43,16 +43,17 @@
 
     <!-- Stat selector -->
     <nav class="mt-8">
-      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Statistics</h2>
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Statistics</h2>
       <ul role="list" class="space-y-1">
         @for (def of visibleStats(); track def.type) {
           <li>
             <button
               type="button"
               (click)="selectStat(def.type)"
-              [class]="'w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left ' + (selectedStat() === def.type
-                ? 'bg-slate-200/80 text-slate-900'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')"
+              class="cursor-pointer w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left"
+              [class]="selectedStat() === def.type
+                ? 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-900 dark:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'"
             >
               <span class="text-base" aria-hidden="true">{{ def.icon }}</span>
               {{ def.label }}
@@ -61,45 +62,76 @@
         }
       </ul>
     </nav>
-  </div>
-</header>
 
-<!-- Main content -->
-<main class="lg:relative lg:ml-80 xl:ml-96 min-h-screen bg-white">
-  <div class="px-4 py-8 sm:px-6 lg:px-12 lg:py-12">
+    <!-- Dark mode toggle -->
+    <div class="mt-auto pt-6">
+      <button
+        type="button"
+        (click)="toggleDarkMode()"
+        class="cursor-pointer w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+      >
+        @if (darkMode()) {
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+          </svg>
+          Light mode
+        } @else {
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+          Dark mode
+        }
+      </button>
+    </div>
+  </aside>
+
+  <!-- MOBILE HEADER -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+    <h1 class="text-base font-black text-slate-900 dark:text-white">Navidrome Wrapped</h1>
+    <button
+      type="button"
+      (click)="toggleDarkMode()"
+      class="cursor-pointer flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+    >
+      @if (darkMode()) {
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+        </svg>
+        Light
+      } @else {
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+        </svg>
+        Dark
+      }
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT — card + sticky export -->
+  <main class="flex-1 lg:ml-[22rem] xl:ml-[24rem] min-h-screen flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0">
     @if (loading()) {
-      <div class="flex items-center justify-center min-h-[60vh]">
+      <div class="flex-1 flex items-center justify-center">
         <div class="text-center">
-          <div class="inline-block w-8 h-8 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
-          <p class="mt-4 text-sm text-slate-500">Loading stats...</p>
+          <div class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading stats…</p>
         </div>
       </div>
     } @else if (error()) {
-      <div class="flex items-center justify-center min-h-[60vh]">
-        <div class="text-center">
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center px-6">
           <p class="text-red-500 font-medium">{{ error() }}</p>
-          <button type="button" (click)="loadData()" class="mt-4 text-sm text-slate-500 hover:text-slate-700 underline">Retry</button>
+          <button
+            type="button"
+            (click)="loadData()"
+            class="cursor-pointer mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white underline"
+          >Retry</button>
         </div>
       </div>
     } @else {
-      <!-- Card + Export -->
-      <div class="max-w-lg mx-auto">
-        <!-- Export button -->
-        <div class="flex justify-end mb-4">
-          <button
-            type="button"
-            (click)="exportCard()"
-            class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            Export Image
-          </button>
-        </div>
-
-        <!-- The card -->
-        <div #cardElement>
+      <!-- Card area — sized by viewport height so it never overflows -->
+      <div class="flex-1 flex items-center justify-center px-6 py-8 lg:px-12">
+        <div #cardElement style="height: calc(100vh - 68px - 4rem); aspect-ratio: 9/16;" class="min-w-0 max-w-full">
           @switch (selectedStat()) {
             @case ('summary') {
               <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
@@ -139,21 +171,37 @@
             @case ('top-songs') {
               <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
                 <h2 class="text-white/80 text-sm font-semibold uppercase tracking-widest mb-4">Top Songs</h2>
-                <div class="flex-1 flex flex-col gap-3">
+                <div class="flex-1 flex flex-col gap-3 overflow-hidden">
                   @for (song of topSongs(); track song.title; let i = $index) {
-                    <div class="flex items-center gap-3">
-                      <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && song.album_id) {
-                          <img [src]="coverUrl(song.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                    @if (i === 0) {
+                      <div class="flex gap-4 items-center bg-white/10 rounded-2xl p-3 shrink-0">
+                        <div class="w-20 h-20 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                          @if (coverArtAvailable() && song.album_id) {
+                            <img [src]="coverUrl(song.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
+                          <p class="text-white font-black text-lg leading-tight truncate">{{ song.title }}</p>
+                          <p class="text-white/70 text-sm truncate mt-0.5">{{ song.artist }}</p>
+                          <p class="text-white/40 text-xs mt-1.5 font-medium">{{ song.plays }} plays</p>
+                        </div>
                       </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
-                        <p class="text-white/60 text-xs truncate">{{ song.artist }}</p>
+                    } @else {
+                      <div class="flex items-center gap-3">
+                        <span class="text-white/30 text-sm font-black w-5 text-right shrink-0">{{ i + 1 }}</span>
+                        <div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && song.album_id) {
+                            <img [src]="coverUrl(song.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
+                          <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
+                        </div>
+                        <span class="text-white/40 text-xs font-medium shrink-0">{{ song.plays }}</span>
                       </div>
-                      <span class="text-white/50 text-xs font-medium shrink-0">{{ song.plays }} plays</span>
-                    </div>
+                    }
                   }
                 </div>
               </app-card-shell>
@@ -162,21 +210,37 @@
             @case ('top-artists') {
               <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
                 <h2 class="text-white/80 text-sm font-semibold uppercase tracking-widest mb-4">Top Artists</h2>
-                <div class="flex-1 flex flex-col gap-3">
+                <div class="flex-1 flex flex-col gap-3 overflow-hidden">
                   @for (artist of topArtists(); track artist.artist; let i = $index) {
-                    <div class="flex items-center gap-3">
-                      <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-full shrink-0 overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && artist.artist_id) {
-                          <img [src]="coverUrl(artist.artist_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                    @if (i === 0) {
+                      <div class="flex gap-4 items-center bg-white/10 rounded-2xl p-3 shrink-0">
+                        <div class="w-20 h-20 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                          @if (coverArtAvailable() && artist.artist_id) {
+                            <img [src]="coverUrl(artist.artist_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
+                          <p class="text-white font-black text-lg leading-tight truncate">{{ artist.artist }}</p>
+                          <p class="text-white/70 text-sm truncate mt-0.5">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
+                          <p class="text-white/40 text-xs mt-1.5 font-medium">{{ artist.plays }} plays</p>
+                        </div>
                       </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
-                        <p class="text-white/60 text-xs truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
+                    } @else {
+                      <div class="flex items-center gap-3">
+                        <span class="text-white/30 text-sm font-black w-5 text-right shrink-0">{{ i + 1 }}</span>
+                        <div class="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && artist.artist_id) {
+                            <img [src]="coverUrl(artist.artist_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
+                          <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
+                        </div>
+                        <span class="text-white/40 text-xs font-medium shrink-0">{{ artist.plays }}</span>
                       </div>
-                      <span class="text-white/50 text-xs font-medium shrink-0">{{ artist.plays }} plays</span>
-                    </div>
+                    }
                   }
                 </div>
               </app-card-shell>
@@ -185,21 +249,37 @@
             @case ('top-albums') {
               <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
                 <h2 class="text-white/80 text-sm font-semibold uppercase tracking-widest mb-4">Top Albums</h2>
-                <div class="flex-1 flex flex-col gap-3">
+                <div class="flex-1 flex flex-col gap-3 overflow-hidden">
                   @for (album of topAlbums(); track album.album; let i = $index) {
-                    <div class="flex items-center gap-3">
-                      <span class="text-white/40 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && album.album_id) {
-                          <img [src]="coverUrl(album.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                    @if (i === 0) {
+                      <div class="flex gap-4 items-center bg-white/10 rounded-2xl p-3 shrink-0">
+                        <div class="w-20 h-20 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                          @if (coverArtAvailable() && album.album_id) {
+                            <img [src]="coverUrl(album.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
+                          <p class="text-white font-black text-lg leading-tight truncate">{{ album.album }}</p>
+                          <p class="text-white/70 text-sm truncate mt-0.5">{{ album.album_artist }}</p>
+                          <p class="text-white/40 text-xs mt-1.5 font-medium">{{ album.plays }} plays</p>
+                        </div>
                       </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
-                        <p class="text-white/60 text-xs truncate">{{ album.album_artist }}</p>
+                    } @else {
+                      <div class="flex items-center gap-3">
+                        <span class="text-white/30 text-sm font-black w-5 text-right shrink-0">{{ i + 1 }}</span>
+                        <div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && album.album_id) {
+                            <img [src]="coverUrl(album.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
+                          <p class="text-white/50 text-xs truncate">{{ album.album_artist }}</p>
+                        </div>
+                        <span class="text-white/40 text-xs font-medium shrink-0">{{ album.plays }}</span>
                       </div>
-                      <span class="text-white/50 text-xs font-medium shrink-0">{{ album.plays }} plays</span>
-                    </div>
+                    }
                   }
                 </div>
               </app-card-shell>
@@ -406,6 +486,20 @@
           }
         </div>
       </div>
+
+      <!-- Export button — sticky footer -->
+      <div class="sticky bottom-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-center">
+        <button
+          type="button"
+          (click)="exportCard()"
+          class="cursor-pointer inline-flex items-center gap-2 rounded-full bg-slate-900 dark:bg-white px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors shadow-lg"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Export Image
+        </button>
+      </div>
     }
-  </div>
-</main>
+  </main>
+</div>

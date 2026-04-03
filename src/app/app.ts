@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { NavidromeService } from './services/navidrome.service';
 import { CardShellComponent } from './components/card-shell';
 import {
@@ -28,8 +29,11 @@ import {
 })
 export class App {
   private readonly navidrome = inject(NavidromeService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly cardElement = viewChild<ElementRef<HTMLElement>>('cardElement');
+
+  readonly darkMode = signal(false);
 
   readonly years = signal<string[]>([]);
   readonly selectedYear = signal<string>('all-time');
@@ -82,6 +86,11 @@ export class App {
 
   constructor() {
     afterNextRender(() => {
+      if (isPlatformBrowser(this.platformId)) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.darkMode.set(prefersDark);
+        document.documentElement.classList.toggle('dark', prefersDark);
+      }
       this.navidrome.loadConfig();
       this.navidrome.getYears().subscribe({
         next: (years) => {
@@ -94,6 +103,14 @@ export class App {
         error: () => this.loadData(),
       });
     });
+  }
+
+  toggleDarkMode(): void {
+    const next = !this.darkMode();
+    this.darkMode.set(next);
+    if (isPlatformBrowser(this.platformId)) {
+      document.documentElement.classList.toggle('dark', next);
+    }
   }
 
   selectYear(year: string): void {

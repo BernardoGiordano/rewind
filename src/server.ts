@@ -250,15 +250,15 @@ function getSummary(db: Database, uid: string, year: number | null) {
   }
   return queryOne(db, `
     SELECT
-      SUM(a.play_count) AS total_plays,
+      COUNT(*) AS total_plays,
       COUNT(DISTINCT mf.id) AS unique_songs,
       COUNT(DISTINCT mf.artist) AS unique_artists,
       COUNT(DISTINCT mf.album_id) AS unique_albums,
-      ROUND(SUM(mf.duration * a.play_count) / 3600.0, 1) AS total_hours,
-      ROUND(SUM(mf.duration * a.play_count) / 86400.0, 1) AS total_days
-    FROM annotation a
-    JOIN media_file mf ON a.item_id = mf.id
-    WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0
+      ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
+      ROUND(SUM(mf.duration) / 86400.0, 1) AS total_days
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ?
   `, [uid]);
 }
 
@@ -276,13 +276,13 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
-    SELECT mf.title, mf.artist, mf.album, a.play_count AS plays,
-      ROUND(mf.duration * a.play_count / 60.0, 1) AS total_minutes,
+    SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
+      ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
-    FROM annotation a
-    JOIN media_file mf ON a.item_id = mf.id
-    WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0
-    ORDER BY a.play_count DESC LIMIT 5
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ?
+    GROUP BY mf.id ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }
 
@@ -300,12 +300,12 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
-    SELECT mf.artist, SUM(a.play_count) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
-      ROUND(SUM(mf.duration * a.play_count) / 3600.0, 1) AS total_hours,
+    SELECT mf.artist, COUNT(*) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
+      ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
       mf.artist_id
-    FROM annotation a
-    JOIN media_file mf ON a.item_id = mf.id
-    WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ?
     GROUP BY mf.artist ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }
@@ -324,12 +324,12 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
-    SELECT mf.album, mf.album_artist, SUM(a.play_count) AS plays,
-      ROUND(SUM(mf.duration * a.play_count) / 60.0, 1) AS total_minutes,
+    SELECT mf.album, mf.album_artist, COUNT(*) AS plays,
+      ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
-    FROM annotation a
-    JOIN media_file mf ON a.item_id = mf.id
-    WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ?
     GROUP BY mf.album_id ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }
@@ -348,11 +348,11 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
-    SELECT mf.genre, SUM(a.play_count) AS plays,
-      ROUND(SUM(mf.duration * a.play_count) / 3600.0, 1) AS total_hours
-    FROM annotation a
-    JOIN media_file mf ON a.item_id = mf.id
-    WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.genre != ''
+    SELECT mf.genre, COUNT(*) AS plays,
+      ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.genre != ''
     GROUP BY mf.genre ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }

@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans:
     Satoshi, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
@@ -12,5 +14,5 @@ html {
 }
 
 body {
-  @apply bg-white text-slate-900 min-h-screen;
+  @apply bg-white text-slate-900 min-h-screen dark:bg-slate-950 dark:text-slate-100;
 }
