@@ -1,0 +1,39 @@
+<main class="container">
+  <h1>Navidrome Wrapped — PoC</h1>
+  <p class="subtitle">Top 5 tracks by play count</p>
+
+  @if (loading()) {
+    <p class="state-msg">Loading from database…</p>
+  } @else if (error()) {
+    <p class="state-msg error">Error: {{ error() }}</p>
+  } @else if (tracks().length === 0) {
+    <p class="state-msg">No tracks found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Artist</th>
+          <th>Album</th>
+          <th>Plays</th>
+          <th>Duration</th>
+          <th>Total listened</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (track of tracks(); track track.title; let i = $index) {
+          <tr>
+            <td class="rank">{{ i + 1 }}</td>
+            <td>{{ track.title }}</td>
+            <td>{{ track.artist }}</td>
+            <td>{{ track.album }}</td>
+            <td class="num">{{ track.play_count }}</td>
+            <td class="num">{{ track.track_duration_min }} min</td>
+            <td class="num">{{ track.total_min_listened }} min</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</main>
