@@ -589,7 +589,7 @@
           @if (storiesMode()) {
             <!-- Progress bars -->
             <div
-              class="absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
+              class="export-ignore absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
               aria-hidden="true"
             >
               @for (stat of visibleStats(); track stat.type; let i = $index) {
@@ -607,29 +607,11 @@
               }
             </div>
 
-            <!-- Pause / Resume button — top right -->
-            <button
-              type="button"
-              (click)="toggleStoriesPause()"
-              class="cursor-pointer absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
-              [attr.aria-label]="storiesPaused() ? 'Resume autoplay' : 'Pause autoplay'"
-            >
-              @if (storiesPaused()) {
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-                </svg>
-              } @else {
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
-                </svg>
-              }
-            </button>
-
             <!-- Prev button — left edge (narrow) -->
             <button
               type="button"
               (click)="storiesPrev()"
-              class="cursor-pointer absolute left-0 top-0 h-full w-16 z-10 flex items-center justify-start pl-3 group"
+              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 flex items-center justify-start pl-3 group"
               aria-label="Previous card"
             >
               <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
@@ -643,7 +625,7 @@
             <button
               type="button"
               (click)="storiesNext()"
-              class="cursor-pointer absolute right-0 top-0 h-full w-16 z-10 flex items-center justify-end pr-3 group"
+              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 flex items-center justify-end pr-3 group"
               aria-label="Next card"
             >
               <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
@@ -653,23 +635,40 @@
               </div>
             </button>
           }
-        </div>
-      </div>
 
-      <!-- Export button — desktop only, icon anchored outside bottom-right of card -->
-      <div class="hidden lg:block">
-        <div class="flex justify-end" style="max-width: calc(100vh - 68px - 4rem); aspect-ratio: 9/16; margin: 0 auto;">
-          <button
-            type="button"
-            (click)="exportCard()"
-            class="cursor-pointer mt-2 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="Export image"
-            title="Export image"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-          </button>
+          <!-- Bottom-right overlay: pause/resume (stories only) + export (always) -->
+          <div class="export-ignore absolute bottom-3 right-3 z-20 flex items-center gap-2">
+            @if (storiesMode()) {
+              <button
+                type="button"
+                (click)="toggleStoriesPause()"
+                class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+                [attr.aria-label]="storiesPaused() ? 'Resume autoplay' : 'Pause autoplay'"
+              >
+                @if (storiesPaused()) {
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                  </svg>
+                } @else {
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+                  </svg>
+                }
+              </button>
+            }
+            <!-- Export / download button — always visible -->
+            <button
+              type="button"
+              (click)="exportCard()"
+              class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+              aria-label="Export image"
+              title="Export image"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     }

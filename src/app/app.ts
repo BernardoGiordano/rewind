@@ -39,6 +39,7 @@ export class App {
   readonly storiesMode = signal(false);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
+  readonly exporting = signal(false);
 
   private storiesTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -258,12 +259,19 @@ export class App {
     const el = this.cardElement()?.nativeElement;
     if (!el) return;
 
+    this.exporting.set(true);
+    // Allow Angular to re-render (removes rounded corners via noRound input)
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     const { default: html2canvas } = await import('html2canvas-pro');
     const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
+      ignoreElements: (element) => element.classList.contains('export-ignore'),
     });
+
+    this.exporting.set(false);
 
     const link = document.createElement('a');
     link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
