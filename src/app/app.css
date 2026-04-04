@@ -68,3 +68,13 @@ app-card-shell .h-6 { height: 1.5em; }
 .stories-bar-active {
   animation: stories-fill 10s linear forwards;
 }
+
+.stories-bar-paused {
+  animation: stories-fill 10s linear forwards;
+  animation-play-state: paused;
+}
+
+/* Stat headings inside the card use monospace */
+/* app-card-shell h2 {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+} */

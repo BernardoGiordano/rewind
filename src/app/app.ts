@@ -37,6 +37,7 @@ export class App {
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
   readonly storiesMode = signal(false);
+  readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
 
   private storiesTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -140,6 +141,7 @@ export class App {
 
   storiesNext(): void {
     if (!this.storiesMode()) return;
+    this.storiesPaused.set(false);
     this.advanceStories();
   }
 
@@ -148,8 +150,19 @@ export class App {
     const prev = Math.max(0, this.storiesIndex() - 1);
     this.storiesIndex.set(prev);
     this.selectStat(stats[prev].type);
+    this.storiesPaused.set(false);
     if (this.storiesMode()) {
       this.runStoriesTimer();
+    }
+  }
+
+  toggleStoriesPause(): void {
+    if (this.storiesPaused()) {
+      this.storiesPaused.set(false);
+      this.runStoriesTimer();
+    } else {
+      this.storiesPaused.set(true);
+      this.clearStoriesTimer();
     }
   }
 
@@ -160,11 +173,13 @@ export class App {
     const idx = stats.findIndex(s => s.type === currentType);
     this.storiesIndex.set(idx >= 0 ? idx : 0);
     this.storiesMode.set(true);
+    this.storiesPaused.set(false);
     this.runStoriesTimer();
   }
 
   private stopStories(): void {
     this.storiesMode.set(false);
+    this.storiesPaused.set(false);
     this.clearStoriesTimer();
   }
 
@@ -212,6 +227,7 @@ export class App {
       const idx = stats.findIndex(s => s.type === type);
       if (idx >= 0 && idx !== this.storiesIndex()) {
         this.storiesIndex.set(idx);
+        this.storiesPaused.set(false);
         this.runStoriesTimer();
       }
     }

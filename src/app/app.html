@@ -3,7 +3,7 @@
 
   <!-- LEFT BAR — vertical rotated branding + stat label -->
   <div class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-    <span class="[writing-mode:vertical-rl] rotate-180 font-black text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
+    <span class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
     @if (selectedDef(); as def) {
       <span class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
     }
@@ -108,7 +108,7 @@
 
   <!-- MOBILE HEADER -->
   <div class="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
-    <h1 class="text-base font-black text-slate-900 dark:text-white">Navidrome Rewind</h1>
+    <h1 class="text-base font-mono font-bold text-slate-900 dark:text-white">Navidrome Rewind</h1>
 
     <!-- Menu trigger -->
     <div class="relative">
@@ -598,18 +598,38 @@
                     <div class="h-full w-full bg-white rounded-full"></div>
                   } @else if (i === storiesIndex()) {
                     <div
-                      class="h-full bg-white rounded-full stories-bar-active"
+                      class="h-full bg-white rounded-full"
+                      [class.stories-bar-active]="!storiesPaused()"
+                      [class.stories-bar-paused]="storiesPaused()"
                     ></div>
                   }
                 </div>
               }
             </div>
 
-            <!-- Prev button — left third -->
+            <!-- Pause / Resume button — top right -->
+            <button
+              type="button"
+              (click)="toggleStoriesPause()"
+              class="cursor-pointer absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+              [attr.aria-label]="storiesPaused() ? 'Resume autoplay' : 'Pause autoplay'"
+            >
+              @if (storiesPaused()) {
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                </svg>
+              } @else {
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+
+            <!-- Prev button — left edge (narrow) -->
             <button
               type="button"
               (click)="storiesPrev()"
-              class="cursor-pointer absolute left-0 top-0 h-full w-1/3 z-10 flex items-center justify-start pl-3 group"
+              class="cursor-pointer absolute left-0 top-0 h-full w-16 z-10 flex items-center justify-start pl-3 group"
               aria-label="Previous card"
             >
               <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
@@ -619,11 +639,11 @@
               </div>
             </button>
 
-            <!-- Next button — right third -->
+            <!-- Next button — right edge (narrow) -->
             <button
               type="button"
               (click)="storiesNext()"
-              class="cursor-pointer absolute right-0 top-0 h-full w-1/3 z-10 flex items-center justify-end pr-3 group"
+              class="cursor-pointer absolute right-0 top-0 h-full w-16 z-10 flex items-center justify-end pr-3 group"
               aria-label="Next card"
             >
               <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
@@ -636,18 +656,21 @@
         </div>
       </div>
 
-      <!-- Export button — desktop only sticky footer -->
-      <div class="hidden lg:flex sticky bottom-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-t border-slate-100 dark:border-slate-800 px-6 py-4 justify-center">
-        <button
-          type="button"
-          (click)="exportCard()"
-          class="cursor-pointer inline-flex items-center gap-2 rounded-full bg-slate-900 dark:bg-white px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors shadow-lg"
-        >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
-          Export Image
-        </button>
+      <!-- Export button — desktop only, icon anchored outside bottom-right of card -->
+      <div class="hidden lg:block">
+        <div class="flex justify-end" style="max-width: calc(100vh - 68px - 4rem); aspect-ratio: 9/16; margin: 0 auto;">
+          <button
+            type="button"
+            (click)="exportCard()"
+            class="cursor-pointer mt-2 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Export image"
+            title="Export image"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+          </button>
+        </div>
       </div>
     }
   </main>

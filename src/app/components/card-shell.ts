@@ -12,8 +12,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       [class]="'w-full h-full overflow-hidden relative flex flex-col bg-gradient-to-br lg:rounded-xl ' + gradient()"
     >
       <div class="px-8 pt-8 flex items-center justify-between shrink-0">
-        <span class="text-white/60 text-sm font-semibold tracking-[0.2em] uppercase">Navidrome Rewind</span>
-        <span class="text-white/80 text-sm font-bold bg-white/10 px-3 py-1 rounded-full">{{ yearLabel() }}</span>
+        <span class="text-white/60 text-sm font-mono tracking-[0.2em] uppercase">Navidrome Rewind</span>
+        <span class="text-white/80 text-sm font-mono bg-white/10 px-3 py-1 rounded-full">{{ yearLabel() }}</span>
       </div>
 
       <div class="flex-1 flex flex-col px-8 pt-4 pb-6 overflow-hidden">
@@ -25,7 +25,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
           </svg>
-          <span class="text-xs font-medium tracking-wider uppercase">Navidrome Rewind</span>
+          <span class="text-xs font-mono tracking-wider uppercase">Navidrome Rewind</span>
         </div>
       </div>
     </div>
