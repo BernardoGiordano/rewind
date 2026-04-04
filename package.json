@@ -1,5 +1,5 @@
 {
-  "name": "wrapped",
+  "name": "rewind",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,8 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:wrapped": "node --env-file=.env dist/wrapped/server/server.mjs",
-    "dev": "npm run build && npm run serve:ssr:wrapped"
+    "serve:ssr:rewind": "node --env-file=.env dist/rewind/server/server.mjs",
+    "dev": "npm run build && npm run serve:ssr:rewind"
   },
   "private": true,
   "packageManager": "npm@10.9.7",

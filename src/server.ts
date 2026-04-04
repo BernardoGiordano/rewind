@@ -79,7 +79,7 @@ function buildSubsonicAuthParams(user: string, apiKey: string): URLSearchParams 
     t: token,
     s: salt,
     v: '1.16.1',
-    c: 'navidrome-wrapped',
+    c: 'navidrome-rewind',
     f: 'json',
   });
   return params;
@@ -519,7 +519,7 @@ async function bootstrap() {
   if (isMainModule(import.meta.url) || process.env['pm_id']) {
     const port = process.env['PORT'] || 4000;
 
-    console.log('--- Navidrome Wrapped ---');
+    console.log('--- Navidrome Rewind ---');
     console.log('DB path:          ', resolveDbPath());
     console.log('Cover art:        ', isCoverArtAvailable() ? '✓ enabled' : '✗ disabled (set NAVIDROME_URL, NAVIDROME_USER, NAVIDROME_API_KEY)');
     if (isCoverArtAvailable()) {

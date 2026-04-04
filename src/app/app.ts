@@ -160,7 +160,7 @@ export class App {
     });
 
     const link = document.createElement('a');
-    link.download = `navidrome-wrapped-${this.selectedStat()}-${this.selectedYear()}.png`;
+    link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   }

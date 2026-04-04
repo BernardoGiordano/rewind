@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "wrapped": {
+    "rewind": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -63,10 +63,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "wrapped:build:production"
+              "buildTarget": "rewind:build:production"
             },
             "development": {
-              "buildTarget": "wrapped:build:development"
+              "buildTarget": "rewind:build:development"
             }
           },
           "defaultConfiguration": "development"
