@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavidromeService } from './services/navidrome.service';
 import { CardShellComponent } from './components/card-shell';
@@ -30,10 +30,17 @@ import {
 export class App {
   private readonly navidrome = inject(NavidromeService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly cardElement = viewChild<ElementRef<HTMLElement>>('cardElement');
 
   readonly darkMode = signal(false);
+  readonly mobileMenuOpen = signal(false);
+  readonly storiesMode = signal(false);
+  readonly storiesIndex = signal(0);
+  readonly storiesProgress = signal(0);
+
+  private storiesInterval: ReturnType<typeof setInterval> | null = null;
 
   readonly years = signal<string[]>([]);
   readonly selectedYear = signal<string>('all-time');
@@ -103,6 +110,16 @@ export class App {
         error: () => this.loadData(),
       });
     });
+
+    this.destroyRef.onDestroy(() => this.clearStoriesTimer());
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 
   toggleDarkMode(): void {
@@ -111,6 +128,77 @@ export class App {
     if (isPlatformBrowser(this.platformId)) {
       document.documentElement.classList.toggle('dark', next);
     }
+  }
+
+  toggleStoriesMode(): void {
+    this.mobileMenuOpen.set(false);
+    if (this.storiesMode()) {
+      this.stopStories();
+    } else {
+      this.startStories();
+    }
+  }
+
+  storiesNext(): void {
+    if (!this.storiesMode()) return;
+    this.advanceStories();
+  }
+
+  storiesPrev(): void {
+    const stats = this.visibleStats();
+    const prev = Math.max(0, this.storiesIndex() - 1);
+    this.storiesIndex.set(prev);
+    this.selectStat(stats[prev].type);
+    if (this.storiesMode()) {
+      this.runStoriesTimer();
+    }
+  }
+
+  private startStories(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const stats = this.visibleStats();
+    const currentType = this.selectedStat();
+    const idx = stats.findIndex(s => s.type === currentType);
+    this.storiesIndex.set(idx >= 0 ? idx : 0);
+    this.storiesMode.set(true);
+    this.runStoriesTimer();
+  }
+
+  private stopStories(): void {
+    this.storiesMode.set(false);
+    this.clearStoriesTimer();
+  }
+
+  private clearStoriesTimer(): void {
+    if (this.storiesInterval !== null) {
+      clearInterval(this.storiesInterval);
+      this.storiesInterval = null;
+    }
+  }
+
+  private runStoriesTimer(): void {
+    this.clearStoriesTimer();
+    this.storiesProgress.set(0);
+    this.storiesInterval = setInterval(() => {
+      const current = this.storiesProgress();
+      if (current >= 100) {
+        this.advanceStories();
+      } else {
+        this.storiesProgress.set(current + 1);
+      }
+    }, 100);
+  }
+
+  private advanceStories(): void {
+    const stats = this.visibleStats();
+    const next = this.storiesIndex() + 1;
+    if (next >= stats.length) {
+      this.stopStories();
+      return;
+    }
+    this.storiesIndex.set(next);
+    this.selectStat(stats[next].type);
+    this.runStoriesTimer();
   }
 
   selectYear(year: string): void {

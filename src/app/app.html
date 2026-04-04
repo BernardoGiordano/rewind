@@ -63,8 +63,28 @@
       </ul>
     </nav>
 
-    <!-- Dark mode toggle -->
-    <div class="mt-auto pt-6">
+    <!-- Dark mode toggle + Stories toggle -->
+    <div class="mt-auto pt-6 space-y-1">
+      <button
+        type="button"
+        (click)="toggleStoriesMode()"
+        class="cursor-pointer w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        [attr.aria-pressed]="storiesMode()"
+        [attr.aria-label]="storiesMode() ? 'Stop stories autoplay' : 'Start stories autoplay'"
+      >
+        @if (storiesMode()) {
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+          </svg>
+          Stop autoplay
+        } @else {
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+          </svg>
+          Autoplay stories
+        }
+      </button>
+
       <button
         type="button"
         (click)="toggleDarkMode()"
@@ -72,12 +92,12 @@
         [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
       >
         @if (darkMode()) {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
           </svg>
           Light mode
         } @else {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
           </svg>
           Dark mode
@@ -89,27 +109,98 @@
   <!-- MOBILE HEADER -->
   <div class="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
     <h1 class="text-base font-black text-slate-900 dark:text-white">Navidrome Rewind</h1>
-    <button
-      type="button"
-      (click)="toggleDarkMode()"
-      class="cursor-pointer flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-    >
-      @if (darkMode()) {
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+
+    <!-- Menu trigger -->
+    <div class="relative">
+      <button
+        type="button"
+        id="mobile-menu-trigger"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        [attr.aria-controls]="mobileMenuOpen() ? 'mobile-menu' : null"
+        aria-haspopup="true"
+        aria-label="Open options menu"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
         </svg>
-        Light
-      } @else {
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-        </svg>
-        Dark
+      </button>
+
+      @if (mobileMenuOpen()) {
+        <!-- Click-outside backdrop -->
+        <div
+          class="fixed inset-0 z-10"
+          (click)="closeMobileMenu()"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Dropdown menu -->
+        <div
+          id="mobile-menu"
+          role="menu"
+          aria-labelledby="mobile-menu-trigger"
+          aria-orientation="vertical"
+          class="absolute right-0 top-full mt-2 w-52 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-20 py-1 focus:outline-none"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            (click)="toggleStoriesMode()"
+            class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+          >
+            @if (storiesMode()) {
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+              </svg>
+              Stop autoplay
+            } @else {
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+              </svg>
+              Autoplay stories
+            }
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            (click)="toggleDarkMode(); closeMobileMenu()"
+            class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+          >
+            @if (darkMode()) {
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+              </svg>
+              Light mode
+            } @else {
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+              </svg>
+              Dark mode
+            }
+          </button>
+
+          <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+
+          <button
+            type="button"
+            role="menuitem"
+            (click)="exportCard(); closeMobileMenu()"
+            class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Export image
+          </button>
+        </div>
       }
-    </button>
+    </div>
   </div>
 
   <!-- MAIN CONTENT — card + sticky export -->
-  <main class="flex-1 lg:ml-[22rem] xl:ml-[24rem] min-h-screen flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0">
+  <main class="flex-1 lg:ml-[22rem] xl:ml-[24rem] flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen">
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center">
@@ -129,372 +220,431 @@
         </div>
       </div>
     } @else {
-      <!-- Card area — sized by viewport height so it never overflows -->
-      <div class="flex-1 flex items-center justify-center p-6 lg:px-12">
-        <div #cardElement style="height: calc(100vh - 68px - 4rem); aspect-ratio: 9/16;" class="min-w-0 max-w-full">
-          @switch (selectedStat()) {
-            @case ('summary') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                @if (summaryData(); as d) {
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Your Year in Music</h2>
-                  <div class="flex-1 flex flex-col justify-center gap-6">
-                    <div class="text-center">
-                      <p class="text-7xl font-black text-white">{{ formatNum(d.total_hours) }}</p>
-                      <p class="text-white/60 text-lg font-medium mt-1">hours listened</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-5">
-                      <div class="bg-white/10 rounded-2xl p-5 text-center">
-                        <p class="text-3xl font-bold text-white">{{ formatNum(d.total_plays) }}</p>
-                        <p class="text-white/60 text-base mt-1">songs played</p>
-                      </div>
-                      <div class="bg-white/10 rounded-2xl p-5 text-center">
-                        <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_artists) }}</p>
-                        <p class="text-white/60 text-base mt-1">artists</p>
-                      </div>
-                      <div class="bg-white/10 rounded-2xl p-5 text-center">
-                        <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_albums) }}</p>
-                        <p class="text-white/60 text-base mt-1">albums</p>
-                      </div>
-                      <div class="bg-white/10 rounded-2xl p-5 text-center">
-                        <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_songs) }}</p>
-                        <p class="text-white/60 text-base mt-1">unique songs</p>
-                      </div>
-                    </div>
-                    <div class="text-center">
-                      <p class="text-2xl font-semibold text-white/80">That's {{ formatNum(d.total_days) }} days of music!</p>
-                    </div>
-                  </div>
-                }
-              </app-card-shell>
-            }
+      <!-- Card area -->
+      <div class="flex-1 flex items-center justify-center lg:p-6 lg:px-12">
 
-            @case ('top-songs') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Songs</h2>
-                <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                  @for (song of topSongs(); track song.title; let i = $index) {
-                    @if (i === 0) {
-                      <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                        <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                          @if (coverArtAvailable() && song.album_id) {
-                            <img [src]="coverUrl(song.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
-                          <p class="text-white font-black text-3xl leading-tight truncate">{{ song.title }}</p>
-                          <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
-                          <p class="text-white/40 text-lg mt-2 font-medium">{{ song.plays }} plays</p>
-                        </div>
-                      </div>
-                    } @else {
-                      <div class="flex items-center gap-4">
-                        <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                        <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                          @if (coverArtAvailable() && song.album_id) {
-                            <img [src]="coverUrl(song.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
-                          <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
-                        </div>
-                        <span class="text-white/40 text-lg font-medium shrink-0">{{ song.plays }}</span>
-                      </div>
-                    }
-                  }
-                </div>
-              </app-card-shell>
-            }
+        <!-- Outer wrapper: full-screen on mobile, auto-sized on desktop -->
+        <div class="relative w-full h-[calc(100dvh-56px)] lg:h-auto lg:w-auto lg:max-w-full">
 
-            @case ('top-artists') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Artists</h2>
-                <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                  @for (artist of topArtists(); track artist.artist; let i = $index) {
-                    @if (i === 0) {
-                      <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                        <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                          @if (coverArtAvailable() && artist.artist_id) {
-                            <img [src]="coverUrl(artist.artist_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
+          <!-- The exported card element -->
+          <div
+            #cardElement
+            class="w-full h-full lg:w-auto lg:h-[calc(100vh-68px-4rem)] lg:aspect-[9/16] min-w-0"
+          >
+            @switch (selectedStat()) {
+              @case ('summary') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  @if (summaryData(); as d) {
+                    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Your Year in Music</h2>
+                    <div class="flex-1 flex flex-col justify-center gap-6">
+                      <div class="text-center">
+                        <p class="text-7xl font-black text-white">{{ formatNum(d.total_hours) }}</p>
+                        <p class="text-white/60 text-lg font-medium mt-1">hours listened</p>
+                      </div>
+                      <div class="grid grid-cols-2 gap-5">
+                        <div class="bg-white/10 rounded-2xl p-5 text-center">
+                          <p class="text-3xl font-bold text-white">{{ formatNum(d.total_plays) }}</p>
+                          <p class="text-white/60 text-base mt-1">songs played</p>
                         </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
-                          <p class="text-white font-black text-3xl leading-tight truncate">{{ artist.artist }}</p>
-                          <p class="text-white/70 text-xl truncate mt-1">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                          <p class="text-white/40 text-lg mt-2 font-medium">{{ artist.plays }} plays</p>
+                        <div class="bg-white/10 rounded-2xl p-5 text-center">
+                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_artists) }}</p>
+                          <p class="text-white/60 text-base mt-1">artists</p>
+                        </div>
+                        <div class="bg-white/10 rounded-2xl p-5 text-center">
+                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_albums) }}</p>
+                          <p class="text-white/60 text-base mt-1">albums</p>
+                        </div>
+                        <div class="bg-white/10 rounded-2xl p-5 text-center">
+                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_songs) }}</p>
+                          <p class="text-white/60 text-base mt-1">unique songs</p>
                         </div>
                       </div>
-                    } @else {
-                      <div class="flex items-center gap-4">
-                        <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                        <div class="w-16 h-16 rounded-full shrink-0 overflow-hidden bg-white/10">
-                          @if (coverArtAvailable() && artist.artist_id) {
-                            <img [src]="coverUrl(artist.artist_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-xl truncate">{{ artist.artist }}</p>
-                          <p class="text-white/50 text-lg truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                        </div>
-                        <span class="text-white/40 text-lg font-medium shrink-0">{{ artist.plays }}</span>
-                      </div>
-                    }
-                  }
-                </div>
-              </app-card-shell>
-            }
-
-            @case ('top-albums') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Albums</h2>
-                <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                  @for (album of topAlbums(); track album.album; let i = $index) {
-                    @if (i === 0) {
-                      <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                        <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                          @if (coverArtAvailable() && album.album_id) {
-                            <img [src]="coverUrl(album.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
-                          <p class="text-white font-black text-3xl leading-tight truncate">{{ album.album }}</p>
-                          <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
-                          <p class="text-white/40 text-lg mt-2 font-medium">{{ album.plays }} plays</p>
-                        </div>
-                      </div>
-                    } @else {
-                      <div class="flex items-center gap-4">
-                        <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                        <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                          @if (coverArtAvailable() && album.album_id) {
-                            <img [src]="coverUrl(album.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
-                          <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
-                        </div>
-                        <span class="text-white/40 text-lg font-medium shrink-0">{{ album.plays }}</span>
-                      </div>
-                    }
-                  }
-                </div>
-              </app-card-shell>
-            }
-
-            @case ('top-genres') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Genres</h2>
-                <div class="flex-1 flex flex-col gap-4">
-                  @for (genre of topGenres(); track genre.genre; let i = $index) {
-                    <div class="bg-white/10 rounded-2xl p-5">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                          <span class="text-white/40 text-2xl font-black">{{ i + 1 }}</span>
-                          <p class="text-white font-semibold text-xl">{{ genre.genre }}</p>
-                        </div>
-                        <span class="text-white/50 text-base font-medium">{{ genre.plays }} plays</span>
-                      </div>
-                      <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
-                        <div class="h-full bg-white/40 rounded-full" [style.width.%]="genreBarWidth(genre.plays)"></div>
+                      <div class="text-center">
+                        <p class="text-2xl font-semibold text-white/80">That's {{ formatNum(d.total_days) }} days of music!</p>
                       </div>
                     </div>
                   }
-                </div>
-              </app-card-shell>
-            }
+                </app-card-shell>
+              }
 
-            @case ('listening-clock') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Clock</h2>
-                <div class="flex-1 flex flex-col justify-center gap-1.5">
-                  @for (hour of listeningClock(); track hour.hour) {
-                    <div class="flex items-center gap-3">
-                      <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0">{{ padHour(hour.hour) }}</span>
-                      <div class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
-                        <div class="h-full bg-white/50 rounded-full transition-all" [style.width.%]="clockBarWidth(hour.plays)"></div>
-                      </div>
-                      <span class="text-white/30 text-sm w-10 text-right shrink-0">{{ hour.plays }}</span>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
-
-            @case ('monthly-trends') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Monthly Trends</h2>
-                <div class="flex-1 flex flex-col gap-3">
-                  @for (m of monthlyTrends(); track m.month) {
-                    <div class="bg-white/10 rounded-xl p-4">
-                      <div class="flex items-center justify-between mb-1">
-                        <span class="text-white font-semibold text-lg">{{ formatMonth(m.month) }}</span>
-                        <span class="text-white/50 text-base">{{ m.plays }} plays</span>
-                      </div>
-                      <div class="flex gap-3 text-white/40 text-sm">
-                        <span>{{ m.unique_songs }} songs</span>
-                        <span>{{ m.unique_artists }} artists</span>
-                        <span>{{ m.hours }}h</span>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
-
-            @case ('day-of-week') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Day of the Week</h2>
-                <div class="flex-1 flex flex-col justify-center gap-4">
-                  @for (d of dayOfWeek(); track d.day) {
-                    <div class="flex items-center gap-4">
-                      <span class="text-white/60 text-lg font-medium w-14 shrink-0">{{ d.day.slice(0, 3) }}</span>
-                      <div class="flex-1 h-8 bg-white/10 rounded-full overflow-hidden">
-                        <div class="h-full bg-white/40 rounded-full flex items-center justify-end pr-3" [style.width.%]="dayBarWidth(d.plays)">
-                          <span class="text-white/80 text-sm font-semibold">{{ d.plays }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
-
-            @case ('streak') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Streak</h2>
-                <div class="flex-1 flex flex-col justify-center">
-                  @if (streaks().length > 0) {
-                    <div class="text-center mb-8">
-                      <p class="text-8xl font-black text-white">{{ streaks()[0].streak_days }}</p>
-                      <p class="text-white/60 text-lg font-medium mt-2">consecutive days</p>
-                      <p class="text-white/40 text-base mt-1">{{ streaks()[0].streak_start }} — {{ streaks()[0].streak_end }}</p>
-                    </div>
-                    @if (streaks().length > 1) {
-                      <div class="space-y-3">
-                        <p class="text-white/50 text-base font-semibold uppercase tracking-wider">Other streaks</p>
-                        @for (s of streaks().slice(1); track s.streak_start) {
-                          <div class="flex items-center justify-between bg-white/10 rounded-xl px-5 py-3">
-                            <span class="text-white/70 text-lg">{{ s.streak_days }} days</span>
-                            <span class="text-white/40 text-base">{{ s.streak_start }} — {{ s.streak_end }}</span>
+              @case ('top-songs') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Songs</h2>
+                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
+                    @for (song of topSongs(); track song.title; let i = $index) {
+                      @if (i === 0) {
+                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
+                          <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                            @if (coverArtAvailable() && song.album_id) {
+                              <img [src]="coverUrl(song.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
                           </div>
-                        }
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
+                            <p class="text-white font-black text-3xl leading-tight truncate">{{ song.title }}</p>
+                            <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
+                            <p class="text-white/40 text-lg mt-2 font-medium">{{ song.plays }} plays</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="flex items-center gap-4">
+                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
+                          <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                            @if (coverArtAvailable() && song.album_id) {
+                              <img [src]="coverUrl(song.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
+                            <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
+                          </div>
+                          <span class="text-white/40 text-lg font-medium shrink-0">{{ song.plays }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('top-artists') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Artists</h2>
+                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
+                    @for (artist of topArtists(); track artist.artist; let i = $index) {
+                      @if (i === 0) {
+                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
+                          <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                            @if (coverArtAvailable() && artist.artist_id) {
+                              <img [src]="coverUrl(artist.artist_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
+                            <p class="text-white font-black text-3xl leading-tight truncate">{{ artist.artist }}</p>
+                            <p class="text-white/70 text-xl truncate mt-1">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
+                            <p class="text-white/40 text-lg mt-2 font-medium">{{ artist.plays }} plays</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="flex items-center gap-4">
+                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
+                          <div class="w-16 h-16 rounded-full shrink-0 overflow-hidden bg-white/10">
+                            @if (coverArtAvailable() && artist.artist_id) {
+                              <img [src]="coverUrl(artist.artist_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white font-semibold text-xl truncate">{{ artist.artist }}</p>
+                            <p class="text-white/50 text-lg truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
+                          </div>
+                          <span class="text-white/40 text-lg font-medium shrink-0">{{ artist.plays }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('top-albums') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Albums</h2>
+                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
+                    @for (album of topAlbums(); track album.album; let i = $index) {
+                      @if (i === 0) {
+                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
+                          <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                            @if (coverArtAvailable() && album.album_id) {
+                              <img [src]="coverUrl(album.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
+                            <p class="text-white font-black text-3xl leading-tight truncate">{{ album.album }}</p>
+                            <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
+                            <p class="text-white/40 text-lg mt-2 font-medium">{{ album.plays }} plays</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="flex items-center gap-4">
+                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
+                          <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                            @if (coverArtAvailable() && album.album_id) {
+                              <img [src]="coverUrl(album.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
+                            <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
+                          </div>
+                          <span class="text-white/40 text-lg font-medium shrink-0">{{ album.plays }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('top-genres') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Genres</h2>
+                  <div class="flex-1 flex flex-col gap-4">
+                    @for (genre of topGenres(); track genre.genre; let i = $index) {
+                      <div class="bg-white/10 rounded-2xl p-5">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center gap-4">
+                            <span class="text-white/40 text-2xl font-black">{{ i + 1 }}</span>
+                            <p class="text-white font-semibold text-xl">{{ genre.genre }}</p>
+                          </div>
+                          <span class="text-white/50 text-base font-medium">{{ genre.plays }} plays</span>
+                        </div>
+                        <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
+                          <div class="h-full bg-white/40 rounded-full" [style.width.%]="genreBarWidth(genre.plays)"></div>
+                        </div>
                       </div>
                     }
-                  }
-                </div>
-              </app-card-shell>
-            }
+                  </div>
+                </app-card-shell>
+              }
 
-            @case ('late-night') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">Late Night Vibes</h2>
-                <p class="text-white/40 text-base mb-5">Songs you listened to between midnight and 5 AM</p>
-                <div class="flex-1 flex flex-col gap-4">
-                  @for (track of lateNight(); track track.title; let i = $index) {
-                    <div class="flex items-center gap-4">
-                      <span class="text-white/40 text-2xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                      <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && track.album_id) {
-                          <img [src]="coverUrl(track.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+              @case ('listening-clock') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Clock</h2>
+                  <div class="flex-1 flex flex-col justify-center gap-1.5">
+                    @for (hour of listeningClock(); track hour.hour) {
+                      <div class="flex items-center gap-3">
+                        <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0">{{ padHour(hour.hour) }}</span>
+                        <div class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
+                          <div class="h-full bg-white/50 rounded-full transition-all" [style.width.%]="clockBarWidth(hour.plays)"></div>
+                        </div>
+                        <span class="text-white/30 text-sm w-10 text-right shrink-0">{{ hour.plays }}</span>
                       </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-lg truncate">{{ track.title }}</p>
-                        <p class="text-white/60 text-base truncate">{{ track.artist }}</p>
-                      </div>
-                      <span class="text-white/50 text-base font-medium shrink-0">{{ track.late_night_plays }}x</span>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
+                    }
+                  </div>
+                </app-card-shell>
+              }
 
-            @case ('on-repeat') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">On Repeat</h2>
-                <p class="text-white/40 text-base mb-5">Songs you played 3+ times in a single day</p>
-                <div class="flex-1 flex flex-col gap-3 overflow-y-auto">
-                  @for (entry of onRepeat(); track entry.the_date + entry.title; let i = $index) {
-                    <div class="bg-white/10 rounded-xl px-4 py-3">
-                      <div class="flex items-center justify-between">
+              @case ('monthly-trends') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Monthly Trends</h2>
+                  <div class="flex-1 flex flex-col gap-3">
+                    @for (m of monthlyTrends(); track m.month) {
+                      <div class="bg-white/10 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="text-white font-semibold text-lg">{{ formatMonth(m.month) }}</span>
+                          <span class="text-white/50 text-base">{{ m.plays }} plays</span>
+                        </div>
+                        <div class="flex gap-3 text-white/40 text-sm">
+                          <span>{{ m.unique_songs }} songs</span>
+                          <span>{{ m.unique_artists }} artists</span>
+                          <span>{{ m.hours }}h</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('day-of-week') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Day of the Week</h2>
+                  <div class="flex-1 flex flex-col justify-center gap-4">
+                    @for (d of dayOfWeek(); track d.day) {
+                      <div class="flex items-center gap-4">
+                        <span class="text-white/60 text-lg font-medium w-14 shrink-0">{{ d.day.slice(0, 3) }}</span>
+                        <div class="flex-1 h-8 bg-white/10 rounded-full overflow-hidden">
+                          <div class="h-full bg-white/40 rounded-full flex items-center justify-end pr-3" [style.width.%]="dayBarWidth(d.plays)">
+                            <span class="text-white/80 text-sm font-semibold">{{ d.plays }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('streak') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Streak</h2>
+                  <div class="flex-1 flex flex-col justify-center">
+                    @if (streaks().length > 0) {
+                      <div class="text-center mb-8">
+                        <p class="text-8xl font-black text-white">{{ streaks()[0].streak_days }}</p>
+                        <p class="text-white/60 text-lg font-medium mt-2">consecutive days</p>
+                        <p class="text-white/40 text-base mt-1">{{ streaks()[0].streak_start }} — {{ streaks()[0].streak_end }}</p>
+                      </div>
+                      @if (streaks().length > 1) {
+                        <div class="space-y-3">
+                          <p class="text-white/50 text-base font-semibold uppercase tracking-wider">Other streaks</p>
+                          @for (s of streaks().slice(1); track s.streak_start) {
+                            <div class="flex items-center justify-between bg-white/10 rounded-xl px-5 py-3">
+                              <span class="text-white/70 text-lg">{{ s.streak_days }} days</span>
+                              <span class="text-white/40 text-base">{{ s.streak_start }} — {{ s.streak_end }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('late-night') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">Late Night Vibes</h2>
+                  <p class="text-white/40 text-base mb-5">Songs you listened to between midnight and 5 AM</p>
+                  <div class="flex-1 flex flex-col gap-4">
+                    @for (track of lateNight(); track track.title; let i = $index) {
+                      <div class="flex items-center gap-4">
+                        <span class="text-white/40 text-2xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
+                        <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && track.album_id) {
+                            <img [src]="coverUrl(track.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
                         <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
-                          <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
+                          <p class="text-white font-semibold text-lg truncate">{{ track.title }}</p>
+                          <p class="text-white/60 text-base truncate">{{ track.artist }}</p>
                         </div>
-                        <div class="text-right shrink-0 ml-3">
-                          <p class="text-white/80 text-lg font-bold">{{ entry.plays_that_day }}x</p>
-                          <p class="text-white/40 text-sm">{{ entry.the_date }}</p>
+                        <span class="text-white/50 text-base font-medium shrink-0">{{ track.late_night_plays }}x</span>
+                      </div>
+                    }
+                  </div>
+                </app-card-shell>
+              }
+
+              @case ('on-repeat') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">On Repeat</h2>
+                  <p class="text-white/40 text-base mb-5">Songs you played 3+ times in a single day</p>
+                  <div class="flex-1 flex flex-col gap-3 overflow-y-auto">
+                    @for (entry of onRepeat(); track entry.the_date + entry.title; let i = $index) {
+                      <div class="bg-white/10 rounded-xl px-4 py-3">
+                        <div class="flex items-center justify-between">
+                          <div class="min-w-0 flex-1">
+                            <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
+                            <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
+                          </div>
+                          <div class="text-right shrink-0 ml-3">
+                            <p class="text-white/80 text-lg font-bold">{{ entry.plays_that_day }}x</p>
+                            <p class="text-white/40 text-sm">{{ entry.the_date }}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
+                    }
+                  </div>
+                </app-card-shell>
+              }
 
-            @case ('song-of-month') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Song of the Month</h2>
-                <div class="flex-1 flex flex-col gap-3">
-                  @for (s of songOfMonth(); track s.month) {
-                    <div class="flex items-center gap-4 bg-white/10 rounded-xl px-4 py-3">
-                      <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && s.album_id) {
-                          <img [src]="coverUrl(s.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+              @case ('song-of-month') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Song of the Month</h2>
+                  <div class="flex-1 flex flex-col gap-3">
+                    @for (s of songOfMonth(); track s.month) {
+                      <div class="flex items-center gap-4 bg-white/10 rounded-xl px-4 py-3">
+                        <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && s.album_id) {
+                            <img [src]="coverUrl(s.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-white font-semibold text-lg truncate">{{ s.title }}</p>
+                          <p class="text-white/60 text-base truncate">{{ s.artist }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                          <p class="text-white/80 text-base font-bold">{{ formatMonth(s.month) }}</p>
+                          <p class="text-white/40 text-sm">{{ s.plays }} plays</p>
+                        </div>
                       </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-lg truncate">{{ s.title }}</p>
-                        <p class="text-white/60 text-base truncate">{{ s.artist }}</p>
-                      </div>
-                      <div class="text-right shrink-0">
-                        <p class="text-white/80 text-base font-bold">{{ formatMonth(s.month) }}</p>
-                        <p class="text-white/40 text-sm">{{ s.plays }} plays</p>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </app-card-shell>
-            }
+                    }
+                  </div>
+                </app-card-shell>
+              }
 
-            @case ('favorite-decades') {
-              <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
-                <div class="flex-1 flex flex-col gap-4">
-                  @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
-                    <div class="bg-white/10 rounded-2xl p-5">
-                      <div class="flex items-center justify-between">
-                        <p class="text-white font-black text-3xl">{{ dec.decade }}s</p>
-                        <span class="text-white/50 text-base font-medium">{{ dec.total_plays }} plays</span>
+              @case ('favorite-decades') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
+                  <div class="flex-1 flex flex-col gap-4">
+                    @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
+                      <div class="bg-white/10 rounded-2xl p-5">
+                        <div class="flex items-center justify-between">
+                          <p class="text-white font-black text-3xl">{{ dec.decade }}s</p>
+                          <span class="text-white/50 text-base font-medium">{{ dec.total_plays }} plays</span>
+                        </div>
+                        <div class="flex gap-3 text-white/40 text-base mt-1">
+                          <span>{{ dec.unique_artists }} artists</span>
+                          <span>{{ dec.total_hours }}h listened</span>
+                        </div>
+                        <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
+                          <div class="h-full bg-white/40 rounded-full" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
+                        </div>
                       </div>
-                      <div class="flex gap-3 text-white/40 text-base mt-1">
-                        <span>{{ dec.unique_artists }} artists</span>
-                        <span>{{ dec.total_hours }}h listened</span>
-                      </div>
-                      <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
-                        <div class="h-full bg-white/40 rounded-full" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
-                      </div>
-                    </div>
+                    }
+                  </div>
+                </app-card-shell>
+              }
+            }
+          </div>
+
+          <!-- Stories overlay: progress bars + prev/next (not exported) -->
+          @if (storiesMode()) {
+            <!-- Progress bars -->
+            <div
+              class="absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
+              aria-hidden="true"
+            >
+              @for (stat of visibleStats(); track stat.type; let i = $index) {
+                <div class="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
+                  @if (i < storiesIndex()) {
+                    <div class="h-full w-full bg-white rounded-full"></div>
+                  } @else if (i === storiesIndex()) {
+                    <div
+                      class="h-full bg-white rounded-full transition-none"
+                      [style.width.%]="storiesProgress()"
+                    ></div>
                   }
                 </div>
-              </app-card-shell>
-            }
+              }
+            </div>
+
+            <!-- Prev button — left third -->
+            <button
+              type="button"
+              (click)="storiesPrev()"
+              class="absolute left-0 top-0 h-full w-1/3 z-10 flex items-center justify-start pl-3 group"
+              aria-label="Previous card"
+            >
+              <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+              </div>
+            </button>
+
+            <!-- Next button — right third -->
+            <button
+              type="button"
+              (click)="storiesNext()"
+              class="absolute right-0 top-0 h-full w-1/3 z-10 flex items-center justify-end pr-3 group"
+              aria-label="Next card"
+            >
+              <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
           }
         </div>
       </div>
 
-      <!-- Export button — sticky footer -->
-      <div class="sticky bottom-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-center">
+      <!-- Export button — desktop only sticky footer -->
+      <div class="hidden lg:flex sticky bottom-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-t border-slate-100 dark:border-slate-800 px-6 py-4 justify-center">
         <button
           type="button"
           (click)="exportCard()"
           class="cursor-pointer inline-flex items-center gap-2 rounded-full bg-slate-900 dark:bg-white px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors shadow-lg"
         >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
           Export Image

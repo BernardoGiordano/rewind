@@ -343,7 +343,7 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-        AND mf.genre != ''
+        AND mf.genre IS NOT NULL AND TRIM(mf.genre) != ''
       GROUP BY mf.genre ORDER BY plays DESC LIMIT 5
     `, [uid, startTs, endTs]);
   }
@@ -352,7 +352,7 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
-    WHERE s.user_id = ? AND mf.genre != ''
+    WHERE s.user_id = ? AND mf.genre IS NOT NULL AND TRIM(mf.genre) != ''
     GROUP BY mf.genre ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }
@@ -444,7 +444,7 @@ function getOnRepeat(db: Database, uid: string, year: number) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
     GROUP BY the_date, mf.id HAVING COUNT(*) >= 3
-    ORDER BY plays_that_day DESC LIMIT 10
+    ORDER BY plays_that_day DESC LIMIT 8
   `, [uid, startTs, endTs]);
 }
 
@@ -479,7 +479,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY total_plays DESC
+      GROUP BY decade ORDER BY total_plays DESC LIMIT 5
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -489,7 +489,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY total_plays DESC
+    GROUP BY decade ORDER BY total_plays DESC LIMIT 5
   `, [uid]);
 }
 
