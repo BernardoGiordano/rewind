@@ -38,9 +38,8 @@ export class App {
   readonly mobileMenuOpen = signal(false);
   readonly storiesMode = signal(false);
   readonly storiesIndex = signal(0);
-  readonly storiesProgress = signal(0);
 
-  private storiesInterval: ReturnType<typeof setInterval> | null = null;
+  private storiesTimeout: ReturnType<typeof setTimeout> | null = null;
 
   readonly years = signal<string[]>([]);
   readonly selectedYear = signal<string>('all-time');
@@ -170,23 +169,17 @@ export class App {
   }
 
   private clearStoriesTimer(): void {
-    if (this.storiesInterval !== null) {
-      clearInterval(this.storiesInterval);
-      this.storiesInterval = null;
+    if (this.storiesTimeout !== null) {
+      clearTimeout(this.storiesTimeout);
+      this.storiesTimeout = null;
     }
   }
 
   private runStoriesTimer(): void {
     this.clearStoriesTimer();
-    this.storiesProgress.set(0);
-    this.storiesInterval = setInterval(() => {
-      const current = this.storiesProgress();
-      if (current >= 100) {
-        this.advanceStories();
-      } else {
-        this.storiesProgress.set(current + 1);
-      }
-    }, 100);
+    this.storiesTimeout = setTimeout(() => {
+      this.advanceStories();
+    }, 10000);
   }
 
   private advanceStories(): void {
@@ -213,6 +206,15 @@ export class App {
 
   selectStat(type: StatType): void {
     this.selectedStat.set(type);
+    // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
+    if (this.storiesMode()) {
+      const stats = this.visibleStats();
+      const idx = stats.findIndex(s => s.type === type);
+      if (idx >= 0 && idx !== this.storiesIndex()) {
+        this.storiesIndex.set(idx);
+        this.runStoriesTimer();
+      }
+    }
     this.loadData();
   }
 

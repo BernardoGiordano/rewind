@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   },
   template: `
     <div
-      [class]="'w-full h-full rounded-3xl overflow-hidden relative flex flex-col bg-gradient-to-br ' + gradient()"
+      [class]="'w-full h-full overflow-hidden relative flex flex-col bg-gradient-to-br lg:rounded-xl ' + gradient()"
     >
       <div class="px-8 pt-8 flex items-center justify-between shrink-0">
         <span class="text-white/60 text-sm font-semibold tracking-[0.2em] uppercase">Navidrome Rewind</span>

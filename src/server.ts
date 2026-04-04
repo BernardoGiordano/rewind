@@ -338,22 +338,25 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
   if (year) {
     const { startTs, endTs } = yearBounds(year);
     return queryAll(db, `
-      SELECT mf.genre, COUNT(*) AS plays,
+      SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
       FROM scrobbles s
-      JOIN media_file mf ON s.media_file_id = mf.id
+      JOIN media_file mf ON s.media_file_id = mf.id,
+        json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-        AND mf.genre IS NOT NULL AND TRIM(mf.genre) != ''
-      GROUP BY mf.genre ORDER BY plays DESC LIMIT 5
+        AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
+      GROUP BY 1 ORDER BY plays DESC LIMIT 5
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
-    SELECT mf.genre, COUNT(*) AS plays,
+    SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
     FROM scrobbles s
-    JOIN media_file mf ON s.media_file_id = mf.id
-    WHERE s.user_id = ? AND mf.genre IS NOT NULL AND TRIM(mf.genre) != ''
-    GROUP BY mf.genre ORDER BY plays DESC LIMIT 5
+    JOIN media_file mf ON s.media_file_id = mf.id,
+      json_each(json_extract(mf.tags, '$.genre')) AS g
+    WHERE s.user_id = ?
+      AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
+    GROUP BY 1 ORDER BY plays DESC LIMIT 5
   `, [uid]);
 }
 

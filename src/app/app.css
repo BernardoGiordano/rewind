@@ -58,3 +58,13 @@ app-card-shell .rounded-full{ border-radius: 9999px;}
 app-card-shell .h-2 { height: 0.5em; }
 app-card-shell .h-3 { height: 0.75em;}
 app-card-shell .h-6 { height: 1.5em; }
+
+/* Stories progress bar — CSS-driven smooth fill */
+@keyframes stories-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.stories-bar-active {
+  animation: stories-fill 10s linear forwards;
+}
