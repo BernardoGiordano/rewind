@@ -55,7 +55,21 @@
                 ? 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-900 dark:text-white'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'"
             >
-              <span class="text-base" aria-hidden="true">{{ def.icon }}</span>
+              @switch (def.type) {
+                @case ('summary') { <ng-icon name="heroMusicalNote" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('top-songs') { <ng-icon name="heroEllipsisHorizontalCircle" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('top-artists') { <ng-icon name="heroMicrophone" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('top-albums') { <ng-icon name="heroSquare3Stack3d" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('top-genres') { <ng-icon name="heroSparkles" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('listening-clock') { <ng-icon name="heroClock" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('monthly-trends') { <ng-icon name="heroChartBar" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('day-of-week') { <ng-icon name="heroCalendarDays" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('streak') { <ng-icon name="heroFire" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('late-night') { <ng-icon name="heroMoon" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('on-repeat') { <ng-icon name="heroArrowPath" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('song-of-month') { <ng-icon name="heroTrophy" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('favorite-decades') { <ng-icon name="heroRadio" class="w-4 h-4" aria-hidden="true" /> }
+              }
               {{ def.label }}
             </button>
           </li>
@@ -73,14 +87,10 @@
         [attr.aria-label]="storiesMode() ? 'Stop stories autoplay' : 'Start stories autoplay'"
       >
         @if (storiesMode()) {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-          </svg>
+          <ng-icon name="heroPause" class="w-4 h-4" aria-hidden="true" />
           Stop autoplay
         } @else {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-          </svg>
+          <ng-icon name="heroPlay" class="w-4 h-4" aria-hidden="true" />
           Autoplay stories
         }
       </button>
@@ -92,14 +102,10 @@
         [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
       >
         @if (darkMode()) {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-          </svg>
+          <ng-icon name="heroSun" class="w-4 h-4" aria-hidden="true" />
           Light mode
         } @else {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-          </svg>
+          <ng-icon name="heroMoon" class="w-4 h-4" aria-hidden="true" />
           Dark mode
         }
       </button>
@@ -176,14 +182,10 @@
             class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
           >
             @if (storiesMode()) {
-              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-              </svg>
+              <ng-icon name="heroPause" class="w-4 h-4 shrink-0" aria-hidden="true" />
               Stop autoplay
             } @else {
-              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-              </svg>
+              <ng-icon name="heroPlay" class="w-4 h-4 shrink-0" aria-hidden="true" />
               Autoplay stories
             }
           </button>
@@ -195,14 +197,10 @@
             class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
           >
             @if (darkMode()) {
-              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-              </svg>
+              <ng-icon name="heroSun" class="w-4 h-4 shrink-0" aria-hidden="true" />
               Light mode
             } @else {
-              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-              </svg>
+              <ng-icon name="heroMoon" class="w-4 h-4 shrink-0" aria-hidden="true" />
               Dark mode
             }
           </button>
@@ -254,7 +252,7 @@
           <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
 
           <p class="px-4 py-2.5 text-sm text-slate-400 dark:text-slate-500">
-            Made with <span class="text-red-500">❤</span> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
+            Made with <ng-icon name="heroHeart" class="w-4 h-4 inline text-red-500 fill-current" aria-hidden="true" /> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
           </p>
         </div>
       }
@@ -627,12 +625,12 @@
                   <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
                   <div class="flex-1 flex flex-col gap-4">
                     @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
-                      <div class="bg-white/10 rounded-2xl p-5">
+                      <div class="bg-white/10 rounded-2xl p-4">
                         <div class="flex items-center justify-between">
-                          <p class="text-white font-black text-3xl">{{ dec.decade }}s</p>
-                          <span class="text-white/50 text-base font-medium">{{ dec.total_plays }} plays</span>
+                          <p class="text-white font-black text-2xl">{{ dec.decade }}s</p>
+                          <span class="text-white/50 text-sm font-medium">{{ dec.total_plays }} plays</span>
                         </div>
-                        <div class="flex gap-3 text-white/40 text-base mt-1">
+                        <div class="flex gap-3 text-white/40 text-sm mt-1">
                           <span>{{ dec.unique_artists }} artists</span>
                           <span>{{ dec.total_hours }}h listened</span>
                         </div>
@@ -737,7 +735,7 @@
   </main>
 
   <!-- Made with love — desktop only, fixed bottom-right -->
-  <p class="hidden lg:block font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none" aria-hidden="true">
+  <p class="hidden lg:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none" aria-hidden="true">
     Made with <span class="text-red-500">❤</span> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
   </p>
 </div>

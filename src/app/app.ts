@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroMusicalNote, heroEllipsisHorizontalCircle, heroMicrophone, heroSquare3Stack3d, heroSparkles, heroClock, heroChartBar, heroCalendarDays, heroFire, heroMoon, heroArrowPath, heroTrophy, heroRadio, heroPlay, heroPause, heroSun, heroHeart } from '@ng-icons/heroicons/outline';
 import { NavidromeService } from './services/navidrome.service';
 import { CardShellComponent } from './components/card-shell';
 import {
@@ -25,7 +27,28 @@ import {
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardShellComponent],
+  imports: [CardShellComponent, NgIcon],
+  providers: [
+    provideIcons({
+      heroMusicalNote,
+      heroEllipsisHorizontalCircle,
+      heroMicrophone,
+      heroSquare3Stack3d,
+      heroSparkles,
+      heroClock,
+      heroChartBar,
+      heroCalendarDays,
+      heroFire,
+      heroMoon,
+      heroArrowPath,
+      heroTrophy,
+      heroRadio,
+      heroPlay,
+      heroPause,
+      heroSun,
+      heroHeart,
+    }),
+  ],
 })
 export class App {
   private readonly navidrome = inject(NavidromeService);
@@ -36,7 +59,7 @@ export class App {
 
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
-  readonly storiesMode = signal(false);
+  readonly storiesMode = signal(true);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
   readonly exporting = signal(false);
@@ -107,8 +130,12 @@ export class App {
             this.selectedYear.set(years[0]);
           }
           this.loadData();
+          this.startStories();
         },
-        error: () => this.loadData(),
+        error: () => {
+          this.loadData();
+          this.startStories();
+        },
       });
     });
 
@@ -167,7 +194,7 @@ export class App {
     }
   }
 
-  private startStories(): void {
+  startStories(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const stats = this.visibleStats();
     const currentType = this.selectedStat();
@@ -200,11 +227,7 @@ export class App {
 
   private advanceStories(): void {
     const stats = this.visibleStats();
-    const next = this.storiesIndex() + 1;
-    if (next >= stats.length) {
-      this.stopStories();
-      return;
-    }
+    const next = (this.storiesIndex() + 1) % stats.length;
     this.storiesIndex.set(next);
     this.selectStat(stats[next].type);
     this.runStoriesTimer();

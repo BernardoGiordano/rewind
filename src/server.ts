@@ -447,7 +447,7 @@ function getOnRepeat(db: Database, uid: string, year: number) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
     GROUP BY the_date, mf.id HAVING COUNT(*) >= 3
-    ORDER BY plays_that_day DESC LIMIT 8
+    ORDER BY plays_that_day DESC LIMIT 7
   `, [uid, startTs, endTs]);
 }
 
