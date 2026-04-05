@@ -54,7 +54,7 @@ function yearBounds(year: number): { startTs: number; endTs: number } {
   return { startTs, endTs };
 }
 
-const userId = () => process.env['NAVIDROME_USER_ID'] ?? 'faf22e0b-63e8-4216-b35d-7a2c33043f99';
+const userId = () => process.env['NAVIDROME_USER_ID'] ?? '';
 
 // --- Navidrome Subsonic API config ---
 
