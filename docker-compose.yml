@@ -1,0 +1,16 @@
+services:
+  rewind:
+    image: bernardogiordano/rewind:latest
+    container_name: rewind
+    restart: unless-stopped
+    ports:
+      - "42000:4000"
+    environment:
+      - PORT=4000
+      - NAVIDROME_URL=${NAVIDROME_URL}
+      - NAVIDROME_USER=${NAVIDROME_USER}
+      - NAVIDROME_API_KEY=${NAVIDROME_API_KEY}
+      - NAVIDROME_USER_ID=${NAVIDROME_USER_ID}
+      - DB_PATH=/data/navidrome.db
+    volumes:
+      - ${NAVIDROME_BASE_PATH}/navidrome/navidrome.db:/data/navidrome.db:ro
