@@ -1,0 +1,40 @@
+# Dependencies (reinstalled inside the image via npm ci)
+node_modules
+
+# Source files (only dist/ is copied into the image)
+src
+public
+
+# Angular build cache
+.angular
+
+# Environment / secrets (injected at runtime)
+.env
+
+# Database (mounted as a volume at runtime)
+navidrome.db
+
+# Config / tooling files not needed at runtime
+angular.json
+tsconfig*.json
+.postcssrc.json
+.prettierrc
+.editorconfig
+.nvmrc
+
+# Docs and planning
+README.md
+AGENTS.md
+CLAUDE.md
+.planning
+.claude
+.citadel
+
+# VCS and editor
+.git
+.gitignore
+.vscode
+
+# CI / misc
+docker-compose.yml
+*.md
