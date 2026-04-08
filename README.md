@@ -4,6 +4,8 @@ A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.nav
 
 ![Demo](assets/demo.png)
 
+![Collage](assets/collage.png)
+
 ## What you get
 
 Rewind gives you a stories-style slideshow (think Instagram stories) that go through your personal stats: top songs, artists, albums, and genres, a listening clock that shows when you listen most, monthly trends, day-of-week breakdowns, your longest listening streaks, late-night favorites, songs you had on repeat, a "song of the month" for each month, and your favorite decades. Each card can be exported as a shareable image for your social media profiles.
