@@ -17,6 +17,13 @@ body {
   @apply bg-white text-slate-900 min-h-screen dark:bg-slate-950 dark:text-slate-100;
 }
 
+/* Scale the entire card relative to its container size.
+   Uses the smaller of height- and width-based scaling so content
+   never feels oversized on narrow screens (mobile, small laptops). */
+app-card-shell > div {
+  font-size: min(2cqh, 3.6cqw);
+}
+
 /* Re-express Tailwind text-* sizes as em multiples so they ride the base */
 app-card-shell .text-\[10px\]  { font-size: 0.625em; }
 app-card-shell .text-xs        { font-size: 0.75em;  }
@@ -62,3 +69,26 @@ app-card-shell .rounded-full{ border-radius: 9999px;}
 app-card-shell .h-2 { height: 0.5em; }
 app-card-shell .h-3 { height: 0.75em;}
 app-card-shell .h-6 { height: 1.5em; }
+app-card-shell .h-8 { height: 2em;   }
+app-card-shell .h-14 { height: 3.5em; }
+app-card-shell .h-16 { height: 4em;   }
+app-card-shell .h-32 { height: 8em;   }
+app-card-shell .w-7  { width: 1.75em; }
+app-card-shell .w-8  { width: 2em;    }
+app-card-shell .w-14 { width: 3.5em;  }
+app-card-shell .w-16 { width: 4em;    }
+app-card-shell .w-32 { width: 8em;    }
+app-card-shell .text-7xl { font-size: 4.5em;  }
+app-card-shell .text-8xl { font-size: 6em;    }
+app-card-shell .gap-1\.5 { gap: 0.375em; }
+app-card-shell .gap-5 { gap: 1.25em; }
+app-card-shell .p-5  { padding: 1.25em; }
+app-card-shell .px-5 { padding-left: 1.25em; padding-right: 1.25em; }
+app-card-shell .py-1 { padding-top: 0.25em; padding-bottom: 0.25em; }
+app-card-shell .py-3 { padding-top: 0.75em; padding-bottom: 0.75em; }
+app-card-shell .mb-1 { margin-bottom: 0.25em; }
+app-card-shell .mb-3 { margin-bottom: 0.75em; }
+app-card-shell .mb-5 { margin-bottom: 1.25em; }
+app-card-shell .mb-8 { margin-bottom: 2em;    }
+app-card-shell .ml-3 { margin-left: 0.75em;   }
+app-card-shell .mt-3 { margin-top: 0.75em;    }

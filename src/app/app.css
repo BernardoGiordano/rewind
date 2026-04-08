@@ -6,12 +6,6 @@
   display: contents;
 }
 
-/* Scale the entire card relative to its height.
-   At a typical ~800px card height: 2cqh = 16px — a comfortable base.
-   All em/rem inside will scale with this. */
-app-card-shell > div {
-  font-size: 2cqh;
-}
 
 /* Stories progress bar — CSS-driven smooth fill */
 @keyframes stories-fill {
