@@ -77,4 +77,4 @@ The app will be available at `http://localhost:4000` by default.
 | `NAVIDROME_API_KEY` | Navidrome API key (used for token-based Subsonic auth) |
 | `NAVIDROME_USER_ID` | Your Navidrome user ID (used to filter scrobbles) |
 
-Cover art fetching requires `NAVIDROME_URL`, `NAVIDROME_USER`, and `NAVIDROME_API_KEY` to all be set. If any of them is missing, Rewind will still work — you just won't see album artwork on the cards.
+Cover art fetching requires `NAVIDROME_URL`, `NAVIDROME_USER`, and `NAVIDROME_API_KEY` to all be set. If any of them is missing, Rewind will still work; you just won't see album artwork on the cards.
