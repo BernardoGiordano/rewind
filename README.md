@@ -28,6 +28,7 @@ NAVIDROME_USER=your_username
 NAVIDROME_API_KEY=your_password
 NAVIDROME_USER_ID=your_user_id
 NAVIDROME_BASE_PATH=/path/to/your/navidrome/data
+NG_ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
 Then use the following compose file:
@@ -42,6 +43,7 @@ services:
       - "42000:4000"
     environment:
       - PORT=4000
+      - NG_ALLOWED_HOSTS=${NG_ALLOWED_HOSTS:-localhost,127.0.0.1}
       - NAVIDROME_URL=${NAVIDROME_URL}
       - NAVIDROME_USER=${NAVIDROME_USER}
       - NAVIDROME_API_KEY=${NAVIDROME_API_KEY}

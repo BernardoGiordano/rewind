@@ -7,6 +7,7 @@ services:
       - "42000:4000"
     environment:
       - PORT=4000
+      - NG_ALLOWED_HOSTS=${NG_ALLOWED_HOSTS:-localhost,127.0.0.1}
       - NAVIDROME_URL=${NAVIDROME_URL}
       - NAVIDROME_USER=${NAVIDROME_USER}
       - NAVIDROME_API_KEY=${NAVIDROME_API_KEY}
