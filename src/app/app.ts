@@ -19,6 +19,7 @@ import {
   type OnRepeatEntry,
   type SongOfMonth,
   type FavoriteDecade,
+  type RecapData,
   STAT_DEFINITIONS,
 } from './models/stats';
 
@@ -86,6 +87,7 @@ export class App {
   readonly onRepeat = signal<OnRepeatEntry[]>([]);
   readonly songOfMonth = signal<SongOfMonth[]>([]);
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
+  readonly recapData = signal<RecapData | null>(null);
 
   readonly visibleStats = computed(() => {
     const year = this.selectedYear();
@@ -386,6 +388,9 @@ export class App {
         this.maxDecadePlays = Math.max(...decades.map(d => d.total_plays), 1);
         break;
       }
+      case 'recap':
+        this.recapData.set(data as RecapData);
+        break;
     }
   }
 }

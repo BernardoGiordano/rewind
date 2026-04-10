@@ -69,6 +69,7 @@
                 @case ('on-repeat') { <ng-icon name="heroArrowPath" class="w-4 h-4" aria-hidden="true" /> }
                 @case ('song-of-month') { <ng-icon name="heroTrophy" class="w-4 h-4" aria-hidden="true" /> }
                 @case ('favorite-decades') { <ng-icon name="heroRadio" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('recap') { <ng-icon name="heroHeart" class="w-4 h-4" aria-hidden="true" /> }
               }
               {{ def.label }}
             </button>
@@ -640,6 +641,72 @@
                       </div>
                     }
                   </div>
+                </app-card-shell>
+              }
+
+              @case ('recap') {
+                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+                  @if (recapData(); as d) {
+                    <!-- Top artist image -->
+                    @if (d.top_artist) {
+                      <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/10 shrink-0" style="max-height: 36%;">
+                        @if (coverArtAvailable() && d.top_artist.artist_id) {
+                          <img [src]="coverUrl(d.top_artist.artist_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-4">
+                          <p class="text-white/60 text-sm font-bold uppercase tracking-widest">#1 Artist</p>
+                          <p class="text-white font-black text-3xl leading-tight">{{ d.top_artist.artist }}</p>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Two-column lists -->
+                    <div class="flex gap-4 flex-1 mt-4 min-h-0 overflow-hidden">
+                      <!-- Top Artists -->
+                      <div class="flex-1 flex flex-col min-w-0">
+                        <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Artists</p>
+                        <div class="flex flex-col gap-2">
+                          @for (artist of d.top_artists; track artist.artist; let i = $index) {
+                            <div class="flex items-start gap-2 min-w-0">
+                              <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
+                              <div class="min-w-0">
+                                <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
+                                <p class="text-white/40 text-xs truncate">{{ artist.total_hours }}h listened</p>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <!-- Top Songs -->
+                      <div class="flex-1 flex flex-col min-w-0">
+                        <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Songs</p>
+                        <div class="flex flex-col gap-2">
+                          @for (song of d.top_songs; track song.title; let i = $index) {
+                            <div class="flex items-start gap-2 min-w-0">
+                              <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
+                              <div class="min-w-0">
+                                <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
+                                <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Bottom stats: total minutes + top genre -->
+                    <div class="flex gap-4 mt-4">
+                      <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
+                        <p class="text-2xl font-black text-white">{{ formatNum(d.total_minutes) }}</p>
+                        <p class="text-white/60 text-xs font-medium mt-1">minutes listened</p>
+                      </div>
+                      <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
+                        <p class="text-2xl font-black text-white">{{ d.top_genre }}</p>
+                        <p class="text-white/60 text-xs font-medium mt-1">top genre</p>
+                      </div>
+                    </div>
+                  }
                 </app-card-shell>
               }
             }

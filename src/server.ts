@@ -217,6 +217,9 @@ app.get('/api/stats/:type', (req, res) => {
       case 'favorite-decades':
         result = getFavoriteDecades(db, uid, year);
         break;
+      case 'recap':
+        result = getRecap(db, uid, year);
+        break;
       default:
         db.close();
         res.status(404).json({ error: `Unknown stat type: ${statType}` });
@@ -494,6 +497,21 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
     GROUP BY decade ORDER BY total_plays DESC LIMIT 5
   `, [uid]);
+}
+
+function getRecap(db: Database, uid: string, year: number | null) {
+  const topArtists = getTopArtists(db, uid, year) as Array<{ artist: string; plays: number; unique_tracks: number; total_hours: number; artist_id: string }>;
+  const topSongs = getTopSongs(db, uid, year) as Array<{ title: string; artist: string; album: string; plays: number; total_minutes: number; album_id: string; artist_id: string }>;
+  const summary = getSummary(db, uid, year) as { total_hours: number };
+  const topGenres = getTopGenres(db, uid, year) as Array<{ genre: string; plays: number; total_hours: number }>;
+
+  return {
+    top_artist: topArtists[0] ?? null,
+    top_artists: topArtists,
+    top_songs: topSongs,
+    total_minutes: Math.round((summary?.total_hours ?? 0) * 60),
+    top_genre: topGenres[0]?.genre ?? 'Unknown',
+  };
 }
 
 // --- Static files & Angular SSR ---

@@ -97,6 +97,14 @@ export interface FavoriteDecade {
   total_hours: number;
 }
 
+export interface RecapData {
+  top_artist: TopArtist;
+  top_artists: TopArtist[];
+  top_songs: TopSong[];
+  total_minutes: number;
+  top_genre: string;
+}
+
 export type StatType =
   | 'summary'
   | 'top-songs'
@@ -110,7 +118,8 @@ export type StatType =
   | 'late-night'
   | 'on-repeat'
   | 'song-of-month'
-  | 'favorite-decades';
+  | 'favorite-decades'
+  | 'recap';
 
 export interface StatDefinition {
   type: StatType;
@@ -134,4 +143,5 @@ export const STAT_DEFINITIONS: StatDefinition[] = [
   { type: 'on-repeat', label: 'On Repeat', icon: 'heroArrowPath', gradient: 'from-fuchsia-500 to-purple-950', yearOnly: true },
   { type: 'song-of-month', label: 'Song of the Month', icon: 'heroTrophy', gradient: 'from-yellow-500 to-amber-950', yearOnly: true },
   { type: 'favorite-decades', label: 'Favorite Decades', icon: 'heroRadio', gradient: 'from-teal-500 to-emerald-950', yearOnly: false },
+  { type: 'recap', label: 'Your Recap', icon: 'heroHeart', gradient: 'from-pink-500 to-violet-950', yearOnly: false },
 ];
