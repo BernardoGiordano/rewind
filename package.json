@@ -26,7 +26,7 @@
     "express": "^5.1.0",
     "html2canvas-pro": "^2.0.2",
     "rxjs": "~7.8.0",
-    "sql.js": "^1.13.0",
+    "better-sqlite3": "^11.9.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
     "@tailwindcss/postcss": "^4.1.12",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
-    "@types/sql.js": "^1.4.9",
+    "@types/better-sqlite3": "^7.6.12",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",

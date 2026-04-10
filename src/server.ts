@@ -4,9 +4,10 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import initSqlJs, { type Database } from 'sql.js';
+import BetterSqlite3 from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import express from 'express';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { request as httpRequest } from 'node:http';
@@ -24,28 +25,15 @@ function resolveDbPath(): string {
 }
 
 function getDb(): Database {
-  const SQL = (globalThis as Record<string, unknown>)['__sqlJs'] as Awaited<ReturnType<typeof initSqlJs>> | undefined;
-  if (SQL) {
-    const fileBuffer = readFileSync(resolveDbPath());
-    return new SQL.Database(fileBuffer);
-  }
-  throw new Error('sql.js not initialized');
+  return new BetterSqlite3(resolveDbPath(), { readonly: true });
 }
 
 function queryAll<T>(db: Database, sql: string, params: (string | number | null)[] = []): T[] {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const rows: T[] = [];
-  while (stmt.step()) {
-    rows.push(stmt.getAsObject() as T);
-  }
-  stmt.free();
-  return rows;
+  return db.prepare(sql).all(...params) as T[];
 }
 
 function queryOne<T>(db: Database, sql: string, params: (string | number | null)[] = []): T | null {
-  const rows = queryAll<T>(db, sql, params);
-  return rows[0] ?? null;
+  return (db.prepare(sql).get(...params) as T) ?? null;
 }
 
 function yearBounds(year: number): { startTs: number; endTs: number } {
@@ -534,9 +522,6 @@ app.use((req, res, next) => {
 // --- Init & Start ---
 
 async function bootstrap() {
-  const SQL = await initSqlJs();
-  (globalThis as Record<string, unknown>)['__sqlJs'] = SQL;
-
   if (isMainModule(import.meta.url) || process.env['pm_id']) {
     const port = process.env['PORT'] || 4000;
 

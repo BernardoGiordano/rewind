@@ -17,7 +17,7 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "externalDependencies": ["sql.js"],
+            "externalDependencies": ["better-sqlite3"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
