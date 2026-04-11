@@ -25,7 +25,7 @@ function resolveDbPath(): string {
 }
 
 function getDb(): Database {
-  return new BetterSqlite3(resolveDbPath(), { readonly: true });
+  return new BetterSqlite3(resolveDbPath(), { readonly: true, immutable: true });
 }
 
 function queryAll<T>(db: Database, sql: string, params: (string | number | null)[] = []): T[] {
@@ -144,19 +144,21 @@ app.get('/api/cover/:id', (req, res) => {
 
 // --- Available years ---
 app.get('/api/years', (_req, res) => {
+  let db: Database | null = null;
   try {
-    const db = getDb();
+    db = getDb();
     const rows = queryAll<{ year: string }>(db, `
       SELECT DISTINCT strftime('%Y', submission_time, 'unixepoch') AS year
       FROM scrobbles
       WHERE user_id = ?
       ORDER BY year DESC
     `, [userId()]);
-    db.close();
     noCache(res);
     res.json(rows.map(r => r.year));
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  } finally {
+    db?.close();
   }
 });
 
@@ -166,8 +168,9 @@ app.get('/api/stats/:type', (req, res) => {
   const yearParam = req.query['year'] as string | undefined;
   const year = yearParam ? parseInt(yearParam, 10) : null;
 
+  let db: Database | null = null;
   try {
-    const db = getDb();
+    db = getDb();
     const uid = userId();
     let result: unknown;
 
@@ -215,16 +218,16 @@ app.get('/api/stats/:type', (req, res) => {
         result = getRecap(db, uid, year);
         break;
       default:
-        db.close();
         res.status(404).json({ error: `Unknown stat type: ${statType}` });
         return;
     }
 
-    db.close();
     noCache(res);
     res.json(result);
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  } finally {
+    db?.close();
   }
 });
 

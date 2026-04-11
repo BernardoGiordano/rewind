@@ -51,6 +51,8 @@ Thumbs.db
 AGENTS.md
 CLAUDE.md
 navidrome.db
+navidrome.db-shm
+navidrome.db-wal
 
-# Local environment — contains secrets, never commit
+# Local environment
 .env
