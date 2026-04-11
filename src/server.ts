@@ -79,6 +79,10 @@ function isCoverArtAvailable(): boolean {
 
 // --- /api/config ---
 
+function noCache(res: express.Response): void {
+  res.setHeader('Cache-Control', 'no-store');
+}
+
 app.get('/api/config', (_req, res) => {
   const url = getNavidromeUrl();
   const user = getNavidromeUser();
@@ -86,6 +90,7 @@ app.get('/api/config', (_req, res) => {
   console.log('[config] NAVIDROME_URL:', url ?? '(not set)');
   console.log('[config] NAVIDROME_USER:', user ?? '(not set)');
   console.log('[config] NAVIDROME_API_KEY:', apiKey ? '(set)' : '(not set)');
+  noCache(res);
   res.json({ coverArtAvailable: isCoverArtAvailable() });
 });
 
@@ -148,6 +153,7 @@ app.get('/api/years', (_req, res) => {
       ORDER BY year DESC
     `, [userId()]);
     db.close();
+    noCache(res);
     res.json(rows.map(r => r.year));
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -215,6 +221,7 @@ app.get('/api/stats/:type', (req, res) => {
     }
 
     db.close();
+    noCache(res);
     res.json(result);
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
