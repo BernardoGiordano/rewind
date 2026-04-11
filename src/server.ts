@@ -24,9 +24,18 @@ function resolveDbPath(): string {
   return process.env['DB_PATH'] ?? '/data/navidrome.db';
 }
 
+let db: Database | null = null;
+
 function getDb(): Database {
-  return new BetterSqlite3(resolveDbPath(), { readonly: true, immutable: true });
+  if (!db || !db.open) {
+    db = new BetterSqlite3(resolveDbPath(), { readonly: true });
+  }
+  return db;
 }
+
+process.on('exit', () => db?.close());
+process.on('SIGINT', () => { db?.close(); process.exit(0); });
+process.on('SIGTERM', () => { db?.close(); process.exit(0); });
 
 function queryAll<T>(db: Database, sql: string, params: (string | number | null)[] = []): T[] {
   return db.prepare(sql).all(...params) as T[];
@@ -144,9 +153,8 @@ app.get('/api/cover/:id', (req, res) => {
 
 // --- Available years ---
 app.get('/api/years', (_req, res) => {
-  let db: Database | null = null;
   try {
-    db = getDb();
+    const db = getDb();
     const rows = queryAll<{ year: string }>(db, `
       SELECT DISTINCT strftime('%Y', submission_time, 'unixepoch') AS year
       FROM scrobbles
@@ -157,8 +165,6 @@ app.get('/api/years', (_req, res) => {
     res.json(rows.map(r => r.year));
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
-  } finally {
-    db?.close();
   }
 });
 
@@ -168,9 +174,8 @@ app.get('/api/stats/:type', (req, res) => {
   const yearParam = req.query['year'] as string | undefined;
   const year = yearParam ? parseInt(yearParam, 10) : null;
 
-  let db: Database | null = null;
   try {
-    db = getDb();
+    const db = getDb();
     const uid = userId();
     let result: unknown;
 
@@ -226,8 +231,6 @@ app.get('/api/stats/:type', (req, res) => {
     res.json(result);
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
-  } finally {
-    db?.close();
   }
 });
 
