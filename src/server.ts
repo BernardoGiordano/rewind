@@ -294,7 +294,7 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist ORDER BY plays DESC LIMIT 5
+      GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 5
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -304,7 +304,7 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.artist ORDER BY plays DESC LIMIT 5
+    GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 5
   `, [uid]);
 }
 
