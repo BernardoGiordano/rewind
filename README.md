@@ -50,7 +50,7 @@ services:
       - NAVIDROME_USER_ID=${NAVIDROME_USER_ID}
       - DB_PATH=/data/navidrome.db
     volumes:
-      - ${NAVIDROME_BASE_PATH}/navidrome/navidrome.db:/data/navidrome.db:ro
+      - ${NAVIDROME_BASE_PATH}/navidrome:/data:ro
 ```
 
 Start it up with `docker compose up -d` and open `http://localhost:42000` in your browser.
