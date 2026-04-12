@@ -1,34 +1,63 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroMusicalNote, heroEllipsisHorizontalCircle, heroMicrophone, heroSquare3Stack3d, heroSparkles, heroClock, heroChartBar, heroCalendarDays, heroFire, heroMoon, heroArrowPath, heroTrophy, heroRadio, heroPlay, heroPause, heroSun, heroHeart } from '@ng-icons/heroicons/outline';
-import { NavidromeService } from './services/navidrome.service';
-import { CardShellComponent } from './components/card-shell';
 import {
-  type StatType,
-  type TopSong,
-  type TopArtist,
-  type TopAlbum,
-  type TopGenre,
-  type ListeningSummary,
-  type ListeningClock,
-  type MonthlyTrend,
+  heroArrowPath,
+  heroCalendarDays,
+  heroChartBar,
+  heroClock,
+  heroEllipsisHorizontalCircle,
+  heroFire,
+  heroHeart,
+  heroMicrophone,
+  heroMoon,
+  heroMusicalNote,
+  heroPause,
+  heroPlay,
+  heroRadio,
+  heroSparkles,
+  heroSquare3Stack3d,
+  heroSun,
+  heroTrophy,
+} from '@ng-icons/heroicons/outline';
+import { NavidromeService } from './services/navidrome.service';
+import {
   type DayOfWeek,
-  type ListeningStreak,
-  type LateNightTrack,
-  type OnRepeatEntry,
-  type SongOfMonth,
   type FavoriteDecade,
+  type LateNightTrack,
+  type ListeningClock,
+  type ListeningStreak,
+  type ListeningSummary,
+  type MonthlyTrend,
+  type OnRepeatEntry,
   type RecapData,
+  type SongOfMonth,
   STAT_DEFINITIONS,
+  type StatType,
+  type TopAlbum,
+  type TopArtist,
+  type TopGenre,
+  type TopSong,
 } from './models/stats';
+import { CardsPortrait } from './components/cards-portrait/cards-portrait';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardShellComponent, NgIcon],
+  imports: [NgIcon, CardsPortrait],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -73,6 +102,10 @@ export class App {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
+  readonly selectedDef = computed(() =>
+    STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
+  );
+
   // Stat data signals
   readonly summaryData = signal<ListeningSummary | null>(null);
   readonly topSongs = signal<TopSong[]>([]);
@@ -89,33 +122,16 @@ export class App {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
+  // Bar width helpers using max values
+  protected maxGenrePlays = 0;
+  protected maxClockPlays = 0;
+  protected maxDayPlays = 0;
+  protected maxDecadePlays = 0;
+
   readonly visibleStats = computed(() => {
     const year = this.selectedYear();
-    return STAT_DEFINITIONS.filter(d => !d.yearOnly || year !== 'all-time');
+    return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
   });
-
-  readonly selectedDef = computed(() =>
-    STAT_DEFINITIONS.find(d => d.type === this.selectedStat()),
-  );
-
-  readonly currentGradient = computed(() => this.selectedDef()?.gradient ?? '');
-
-  readonly yearLabel = computed(() => {
-    const y = this.selectedYear();
-    return y === 'all-time' ? 'All Time' : y;
-  });
-
-  readonly coverArtAvailable = this.navidrome.coverArtAvailable;
-
-  coverUrl(id: string, size = 150): string {
-    return this.navidrome.coverUrl(id, size);
-  }
-
-  // Bar width helpers using max values
-  private maxGenrePlays = 0;
-  private maxClockPlays = 0;
-  private maxDayPlays = 0;
-  private maxDecadePlays = 0;
 
   constructor() {
     afterNextRender(() => {
@@ -145,7 +161,7 @@ export class App {
   }
 
   toggleMobileMenu(): void {
-    this.mobileMenuOpen.update(v => !v);
+    this.mobileMenuOpen.update((v) => !v);
   }
 
   closeMobileMenu(): void {
@@ -200,7 +216,7 @@ export class App {
     if (!isPlatformBrowser(this.platformId)) return;
     const stats = this.visibleStats();
     const currentType = this.selectedStat();
-    const idx = stats.findIndex(s => s.type === currentType);
+    const idx = stats.findIndex((s) => s.type === currentType);
     this.storiesIndex.set(idx >= 0 ? idx : 0);
     this.storiesMode.set(true);
     this.storiesPaused.set(false);
@@ -238,7 +254,7 @@ export class App {
   selectYear(year: string): void {
     this.selectedYear.set(year);
     const stat = this.selectedStat();
-    const def = STAT_DEFINITIONS.find(d => d.type === stat);
+    const def = STAT_DEFINITIONS.find((d) => d.type === stat);
     if (def?.yearOnly && year === 'all-time') {
       this.selectedStat.set('summary');
     }
@@ -250,7 +266,7 @@ export class App {
     // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
     if (this.storiesMode()) {
       const stats = this.visibleStats();
-      const idx = stats.findIndex(s => s.type === type);
+      const idx = stats.findIndex((s) => s.type === type);
       if (idx >= 0 && idx !== this.storiesIndex()) {
         this.storiesIndex.set(idx);
         this.storiesPaused.set(false);
@@ -286,7 +302,7 @@ export class App {
 
     this.exporting.set(true);
     // Allow Angular to re-render (removes rounded corners via noRound input)
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const { default: html2canvas } = await import('html2canvas-pro');
     const canvas = await html2canvas(el, {
@@ -302,37 +318,6 @@ export class App {
     link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  }
-
-  formatNum(n: number): string {
-    if (n >= 1000) return n.toLocaleString();
-    return String(n);
-  }
-
-  padHour(h: number): string {
-    return String(h).padStart(2, '0');
-  }
-
-  formatMonth(month: string): string {
-    const [y, m] = month.split('-');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[parseInt(m, 10) - 1] ?? month;
-  }
-
-  genreBarWidth(plays: number): number {
-    return this.maxGenrePlays > 0 ? (plays / this.maxGenrePlays) * 100 : 0;
-  }
-
-  clockBarWidth(plays: number): number {
-    return this.maxClockPlays > 0 ? (plays / this.maxClockPlays) * 100 : 0;
-  }
-
-  dayBarWidth(plays: number): number {
-    return this.maxDayPlays > 0 ? (plays / this.maxDayPlays) * 100 : 0;
-  }
-
-  decadeBarWidth(plays: number): number {
-    return this.maxDecadePlays > 0 ? (plays / this.maxDecadePlays) * 100 : 0;
   }
 
   private setStatData(type: StatType, data: unknown): void {
@@ -352,13 +337,13 @@ export class App {
       case 'top-genres': {
         const genres = data as TopGenre[];
         this.topGenres.set(genres);
-        this.maxGenrePlays = Math.max(...genres.map(g => g.plays), 1);
+        this.maxGenrePlays = Math.max(...genres.map((g) => g.plays), 1);
         break;
       }
       case 'listening-clock': {
         const clock = data as ListeningClock[];
         this.listeningClock.set(clock);
-        this.maxClockPlays = Math.max(...clock.map(c => c.plays), 1);
+        this.maxClockPlays = Math.max(...clock.map((c) => c.plays), 1);
         break;
       }
       case 'monthly-trends':
@@ -367,7 +352,7 @@ export class App {
       case 'day-of-week': {
         const days = data as DayOfWeek[];
         this.dayOfWeek.set(days);
-        this.maxDayPlays = Math.max(...days.map(d => d.plays), 1);
+        this.maxDayPlays = Math.max(...days.map((d) => d.plays), 1);
         break;
       }
       case 'streak':
@@ -385,7 +370,7 @@ export class App {
       case 'favorite-decades': {
         const decades = data as FavoriteDecade[];
         this.favoriteDecades.set(decades);
-        this.maxDecadePlays = Math.max(...decades.map(d => d.total_plays), 1);
+        this.maxDecadePlays = Math.max(...decades.map((d) => d.total_plays), 1);
         break;
       }
       case 'recap':

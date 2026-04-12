@@ -2,19 +2,24 @@
 <div class="flex min-h-screen bg-white dark:bg-slate-950">
 
   <!-- LEFT BAR — vertical rotated branding + stat label -->
-  <div class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-    <span class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
+  <div
+    class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+    <span
+      class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
     @if (selectedDef(); as def) {
-      <span class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
+      <span
+        class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
     }
   </div>
 
   <!-- RIGHT SIDEBAR — year chips + stat list -->
-  <aside class="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 px-5 py-10 overflow-y-auto">
+  <aside
+    class="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 px-5 py-10 overflow-y-auto">
 
     <!-- Year selector -->
     <div>
-      <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Year</span>
+      <span
+        class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Year</span>
       <div class="flex flex-wrap gap-2">
         <button
           type="button"
@@ -56,20 +61,48 @@
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'"
             >
               @switch (def.type) {
-                @case ('summary') { <ng-icon name="heroMusicalNote" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('top-songs') { <ng-icon name="heroEllipsisHorizontalCircle" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('top-artists') { <ng-icon name="heroMicrophone" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('top-albums') { <ng-icon name="heroSquare3Stack3d" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('top-genres') { <ng-icon name="heroSparkles" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('listening-clock') { <ng-icon name="heroClock" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('monthly-trends') { <ng-icon name="heroChartBar" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('day-of-week') { <ng-icon name="heroCalendarDays" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('streak') { <ng-icon name="heroFire" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('late-night') { <ng-icon name="heroMoon" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('on-repeat') { <ng-icon name="heroArrowPath" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('song-of-month') { <ng-icon name="heroTrophy" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('favorite-decades') { <ng-icon name="heroRadio" class="w-4 h-4" aria-hidden="true" /> }
-                @case ('recap') { <ng-icon name="heroHeart" class="w-4 h-4" aria-hidden="true" /> }
+                @case ('summary') {
+                  <ng-icon name="heroMusicalNote" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('top-songs') {
+                  <ng-icon name="heroEllipsisHorizontalCircle" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('top-artists') {
+                  <ng-icon name="heroMicrophone" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('top-albums') {
+                  <ng-icon name="heroSquare3Stack3d" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('top-genres') {
+                  <ng-icon name="heroSparkles" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('listening-clock') {
+                  <ng-icon name="heroClock" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('monthly-trends') {
+                  <ng-icon name="heroChartBar" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('day-of-week') {
+                  <ng-icon name="heroCalendarDays" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('streak') {
+                  <ng-icon name="heroFire" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('late-night') {
+                  <ng-icon name="heroMoon" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('on-repeat') {
+                  <ng-icon name="heroArrowPath" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('song-of-month') {
+                  <ng-icon name="heroTrophy" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('favorite-decades') {
+                  <ng-icon name="heroRadio" class="w-4 h-4" aria-hidden="true" />
+                }
+                @case ('recap') {
+                  <ng-icon name="heroHeart" class="w-4 h-4" aria-hidden="true" />
+                }
               }
               {{ def.label }}
             </button>
@@ -120,7 +153,8 @@
         class="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
       >
         <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z" />
+          <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z" />
         </svg>
         GitHub
       </a>
@@ -131,8 +165,10 @@
         rel="noopener noreferrer"
         class="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
       >
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+             aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
         </svg>
         Donate
       </a>
@@ -140,7 +176,8 @@
   </aside>
 
   <!-- MOBILE HEADER -->
-  <div class="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+  <div
+    class="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
     <h1 class="text-base font-mono font-bold text-slate-900 dark:text-white">Navidrome Rewind</h1>
 
     <!-- Menu trigger -->
@@ -156,7 +193,8 @@
         class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+          <path
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
         </svg>
       </button>
 
@@ -214,8 +252,10 @@
             (click)="exportCard(); closeMobileMenu()"
             class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
           >
-            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                 aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             Export image
           </button>
@@ -231,7 +271,8 @@
             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
             <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z" />
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z" />
             </svg>
             GitHub
           </a>
@@ -244,8 +285,10 @@
             (click)="closeMobileMenu()"
             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
-            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                 aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
             </svg>
             Donate
           </a>
@@ -253,7 +296,9 @@
           <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
 
           <p class="px-4 py-2.5 text-sm text-slate-400 dark:text-slate-500">
-            Made with <ng-icon name="heroHeart" class="w-4 h-4 inline text-red-500 fill-current" aria-hidden="true" /> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
+            Made with
+            <ng-icon name="heroHeart" class="w-4 h-4 inline text-red-500 fill-current" aria-hidden="true" />
+            by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
           </p>
         </div>
       }
@@ -261,11 +306,13 @@
   </div>
 
   <!-- MAIN CONTENT — card + sticky export -->
-  <main class="flex-1 lg:ml-[22rem] xl:ml-[24rem] flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen">
+  <main
+    class="flex-1 lg:ml-[22rem] xl:ml-[24rem] flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen">
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center">
-          <div class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
+          <div
+            class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
           <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading stats…</p>
         </div>
       </div>
@@ -277,7 +324,8 @@
             type="button"
             (click)="loadData()"
             class="cursor-pointer mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white underline"
-          >Retry</button>
+          >Retry
+          </button>
         </div>
       </div>
     } @else {
@@ -288,429 +336,29 @@
         <div class="relative w-full h-[calc(100dvh-56px)] lg:h-auto lg:w-auto lg:max-w-full">
 
           <!-- The exported card element -->
-          <div
-            #cardElement
-            class="w-full h-full lg:w-auto lg:h-[calc(100vh-68px-4rem)] lg:aspect-[9/16] min-w-0"
-          >
-            @switch (selectedStat()) {
-              @case ('summary') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  @if (summaryData(); as d) {
-                    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Your Year in Music</h2>
-                    <div class="flex-1 flex flex-col justify-center gap-6">
-                      <div class="text-center">
-                        <p class="text-7xl font-black text-white">{{ formatNum(d.total_hours) }}</p>
-                        <p class="text-white/60 text-lg font-medium mt-1">hours listened</p>
-                      </div>
-                      <div class="grid grid-cols-2 gap-5">
-                        <div class="bg-white/10 rounded-2xl p-5 text-center">
-                          <p class="text-3xl font-bold text-white">{{ formatNum(d.total_plays) }}</p>
-                          <p class="text-white/60 text-base mt-1">songs played</p>
-                        </div>
-                        <div class="bg-white/10 rounded-2xl p-5 text-center">
-                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_artists) }}</p>
-                          <p class="text-white/60 text-base mt-1">artists</p>
-                        </div>
-                        <div class="bg-white/10 rounded-2xl p-5 text-center">
-                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_albums) }}</p>
-                          <p class="text-white/60 text-base mt-1">albums</p>
-                        </div>
-                        <div class="bg-white/10 rounded-2xl p-5 text-center">
-                          <p class="text-3xl font-bold text-white">{{ formatNum(d.unique_songs) }}</p>
-                          <p class="text-white/60 text-base mt-1">unique songs</p>
-                        </div>
-                      </div>
-                      <div class="text-center">
-                        <p class="text-2xl font-semibold text-white/80">That's {{ formatNum(d.total_days) }} days of music!</p>
-                      </div>
-                    </div>
-                  }
-                </app-card-shell>
-              }
-
-              @case ('top-songs') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Songs</h2>
-                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                    @for (song of topSongs(); track song.title; let i = $index) {
-                      @if (i === 0) {
-                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                          <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                            @if (coverArtAvailable() && song.album_id) {
-                              <img [src]="coverUrl(song.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
-                            <p class="text-white font-black text-3xl leading-tight truncate">{{ song.title }}</p>
-                            <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
-                            <p class="text-white/40 text-lg mt-2 font-medium">{{ song.plays }} plays</p>
-                          </div>
-                        </div>
-                      } @else {
-                        <div class="flex items-center gap-4">
-                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                          <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                            @if (coverArtAvailable() && song.album_id) {
-                              <img [src]="coverUrl(song.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
-                            <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
-                          </div>
-                          <span class="text-white/40 text-lg font-medium shrink-0">{{ song.plays }}</span>
-                        </div>
-                      }
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('top-artists') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Artists</h2>
-                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                    @for (artist of topArtists(); track artist.artist; let i = $index) {
-                      @if (i === 0) {
-                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                          <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                            @if (coverArtAvailable() && artist.artist_id) {
-                              <img [src]="coverUrl(artist.artist_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
-                            <p class="text-white font-black text-3xl leading-tight truncate">{{ artist.artist }}</p>
-                            <p class="text-white/70 text-xl truncate mt-1">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                            <p class="text-white/40 text-lg mt-2 font-medium">{{ artist.plays }} plays</p>
-                          </div>
-                        </div>
-                      } @else {
-                        <div class="flex items-center gap-4">
-                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                          <div class="w-16 h-16 rounded-full shrink-0 overflow-hidden bg-white/10">
-                            @if (coverArtAvailable() && artist.artist_id) {
-                              <img [src]="coverUrl(artist.artist_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white font-semibold text-xl truncate">{{ artist.artist }}</p>
-                            <p class="text-white/50 text-lg truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                          </div>
-                          <span class="text-white/40 text-lg font-medium shrink-0">{{ artist.plays }}</span>
-                        </div>
-                      }
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('top-albums') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Albums</h2>
-                  <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-                    @for (album of topAlbums(); track album.album; let i = $index) {
-                      @if (i === 0) {
-                        <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                          <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                            @if (coverArtAvailable() && album.album_id) {
-                              <img [src]="coverUrl(album.album_id, 300)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
-                            <p class="text-white font-black text-3xl leading-tight truncate">{{ album.album }}</p>
-                            <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
-                            <p class="text-white/40 text-lg mt-2 font-medium">{{ album.plays }} plays</p>
-                          </div>
-                        </div>
-                      } @else {
-                        <div class="flex items-center gap-4">
-                          <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                          <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                            @if (coverArtAvailable() && album.album_id) {
-                              <img [src]="coverUrl(album.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                            }
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
-                            <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
-                          </div>
-                          <span class="text-white/40 text-lg font-medium shrink-0">{{ album.plays }}</span>
-                        </div>
-                      }
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('top-genres') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Genres</h2>
-                  <div class="flex-1 flex flex-col gap-4">
-                    @for (genre of topGenres(); track genre.genre; let i = $index) {
-                      <div class="bg-white/10 rounded-2xl p-5">
-                        <div class="flex items-center justify-between">
-                          <div class="flex items-center gap-4">
-                            <span class="text-white/40 text-2xl font-black">{{ i + 1 }}</span>
-                            <p class="text-white font-semibold text-xl">{{ genre.genre }}</p>
-                          </div>
-                          <span class="text-white/50 text-base font-medium">{{ genre.plays }} plays</span>
-                        </div>
-                        <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
-                          <div class="h-full bg-white/40 rounded-full" [style.width.%]="genreBarWidth(genre.plays)"></div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('listening-clock') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Clock</h2>
-                  <div class="flex-1 flex flex-col justify-center gap-1.5">
-                    @for (hour of listeningClock(); track hour.hour) {
-                      <div class="flex items-center gap-3">
-                        <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0">{{ padHour(hour.hour) }}</span>
-                        <div class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
-                          <div class="h-full bg-white/50 rounded-full transition-all" [style.width.%]="clockBarWidth(hour.plays)"></div>
-                        </div>
-                        <span class="text-white/30 text-sm w-10 text-right shrink-0">{{ hour.plays }}</span>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('monthly-trends') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Monthly Trends</h2>
-                  <div class="flex-1 flex flex-col gap-3">
-                    @for (m of monthlyTrends(); track m.month) {
-                      <div class="bg-white/10 rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-1">
-                          <span class="text-white font-semibold text-lg">{{ formatMonth(m.month) }}</span>
-                          <span class="text-white/50 text-base">{{ m.plays }} plays</span>
-                        </div>
-                        <div class="flex gap-3 text-white/40 text-sm">
-                          <span>{{ m.unique_songs }} songs</span>
-                          <span>{{ m.unique_artists }} artists</span>
-                          <span>{{ m.hours }}h</span>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('day-of-week') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Day of the Week</h2>
-                  <div class="flex-1 flex flex-col justify-center gap-4">
-                    @for (d of dayOfWeek(); track d.day) {
-                      <div class="flex items-center gap-4">
-                        <span class="text-white/60 text-lg font-medium w-14 shrink-0">{{ d.day.slice(0, 3) }}</span>
-                        <div class="flex-1 h-8 bg-white/10 rounded-full overflow-hidden">
-                          <div class="h-full bg-white/40 rounded-full flex items-center justify-end pr-3" [style.width.%]="dayBarWidth(d.plays)">
-                            <span class="text-white/80 text-sm font-semibold">{{ d.plays }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('streak') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Streak</h2>
-                  <div class="flex-1 flex flex-col justify-center">
-                    @if (streaks().length > 0) {
-                      <div class="text-center mb-8">
-                        <p class="text-8xl font-black text-white">{{ streaks()[0].streak_days }}</p>
-                        <p class="text-white/60 text-lg font-medium mt-2">consecutive days</p>
-                        <p class="text-white/40 text-base mt-1">{{ streaks()[0].streak_start }} — {{ streaks()[0].streak_end }}</p>
-                      </div>
-                      @if (streaks().length > 1) {
-                        <div class="space-y-3">
-                          <p class="text-white/50 text-base font-semibold uppercase tracking-wider">Other streaks</p>
-                          @for (s of streaks().slice(1); track s.streak_start) {
-                            <div class="flex items-center justify-between bg-white/10 rounded-xl px-5 py-3">
-                              <span class="text-white/70 text-lg">{{ s.streak_days }} days</span>
-                              <span class="text-white/40 text-base">{{ s.streak_start }} — {{ s.streak_end }}</span>
-                            </div>
-                          }
-                        </div>
-                      }
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('late-night') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">Late Night Vibes</h2>
-                  <p class="text-white/40 text-base mb-5">Songs you listened to between midnight and 5 AM</p>
-                  <div class="flex-1 flex flex-col gap-4">
-                    @for (track of lateNight(); track track.title; let i = $index) {
-                      <div class="flex items-center gap-4">
-                        <span class="text-white/40 text-2xl font-black w-8 text-right shrink-0">{{ i + 1 }}</span>
-                        <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                          @if (coverArtAvailable() && track.album_id) {
-                            <img [src]="coverUrl(track.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-lg truncate">{{ track.title }}</p>
-                          <p class="text-white/60 text-base truncate">{{ track.artist }}</p>
-                        </div>
-                        <span class="text-white/50 text-base font-medium shrink-0">{{ track.late_night_plays }}x</span>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('on-repeat') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">On Repeat</h2>
-                  <p class="text-white/40 text-base mb-5">Songs you played 3+ times in a single day</p>
-                  <div class="flex-1 flex flex-col gap-3 overflow-y-auto">
-                    @for (entry of onRepeat(); track entry.the_date + entry.title; let i = $index) {
-                      <div class="bg-white/10 rounded-xl px-4 py-3">
-                        <div class="flex items-center justify-between">
-                          <div class="min-w-0 flex-1">
-                            <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
-                            <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
-                          </div>
-                          <div class="text-right shrink-0 ml-3">
-                            <p class="text-white/80 text-lg font-bold">{{ entry.plays_that_day }}x</p>
-                            <p class="text-white/40 text-sm">{{ entry.the_date }}</p>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('song-of-month') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Song of the Month</h2>
-                  <div class="flex-1 flex flex-col gap-3">
-                    @for (s of songOfMonth(); track s.month) {
-                      <div class="flex items-center gap-4 bg-white/10 rounded-xl px-4 py-3">
-                        <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                          @if (coverArtAvailable() && s.album_id) {
-                            <img [src]="coverUrl(s.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-white font-semibold text-lg truncate">{{ s.title }}</p>
-                          <p class="text-white/60 text-base truncate">{{ s.artist }}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                          <p class="text-white/80 text-base font-bold">{{ formatMonth(s.month) }}</p>
-                          <p class="text-white/40 text-sm">{{ s.plays }} plays</p>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('favorite-decades') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
-                  <div class="flex-1 flex flex-col gap-4">
-                    @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
-                      <div class="bg-white/10 rounded-2xl p-4">
-                        <div class="flex items-center justify-between">
-                          <p class="text-white font-black text-2xl">{{ dec.decade }}s</p>
-                          <span class="text-white/50 text-sm font-medium">{{ dec.total_plays }} plays</span>
-                        </div>
-                        <div class="flex gap-3 text-white/40 text-sm mt-1">
-                          <span>{{ dec.unique_artists }} artists</span>
-                          <span>{{ dec.total_hours }}h listened</span>
-                        </div>
-                        <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
-                          <div class="h-full bg-white/40 rounded-full" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </app-card-shell>
-              }
-
-              @case ('recap') {
-                <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-                  @if (recapData(); as d) {
-                    <!-- Top artist image -->
-                    @if (d.top_artist) {
-                      <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/10 shrink-0" style="max-height: 36%;">
-                        @if (coverArtAvailable() && d.top_artist.artist_id) {
-                          <img [src]="coverUrl(d.top_artist.artist_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 p-4">
-                          <p class="text-white/60 text-sm font-bold uppercase tracking-widest">#1 Artist</p>
-                          <p class="text-white font-black text-3xl leading-tight">{{ d.top_artist.artist }}</p>
-                        </div>
-                      </div>
-                    }
-
-                    <!-- Two-column lists -->
-                    <div class="flex gap-4 flex-1 mt-4 min-h-0 overflow-hidden">
-                      <!-- Top Artists -->
-                      <div class="flex-1 flex flex-col min-w-0">
-                        <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Artists</p>
-                        <div class="flex flex-col gap-2">
-                          @for (artist of d.top_artists; track artist.artist; let i = $index) {
-                            <div class="flex items-start gap-2 min-w-0">
-                              <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
-                              <div class="min-w-0">
-                                <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
-                                <p class="text-white/40 text-xs truncate">{{ artist.total_hours }}h listened</p>
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                      <!-- Top Songs -->
-                      <div class="flex-1 flex flex-col min-w-0">
-                        <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Songs</p>
-                        <div class="flex flex-col gap-2">
-                          @for (song of d.top_songs; track song.title; let i = $index) {
-                            <div class="flex items-start gap-2 min-w-0">
-                              <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
-                              <div class="min-w-0">
-                                <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
-                                <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Bottom stats: total minutes + top genre -->
-                    <div class="flex gap-4 mt-4">
-                      <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
-                        <p class="text-2xl font-black text-white">{{ formatNum(d.total_minutes) }}</p>
-                        <p class="text-white/60 text-xs font-medium mt-1">minutes listened</p>
-                      </div>
-                      <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
-                        <p class="text-2xl font-black text-white">{{ d.top_genre }}</p>
-                        <p class="text-white/60 text-xs font-medium mt-1">top genre</p>
-                      </div>
-                    </div>
-                  }
-                </app-card-shell>
-              }
-            }
-          </div>
+          <app-cards-portrait
+            [maxGenrePlays]="maxGenrePlays"
+            [maxClockPlays]="maxClockPlays"
+            [maxDayPlays]="maxDayPlays"
+            [maxDecadePlays]="maxDecadePlays"
+            [selectedYear]="selectedYear()"
+            [selectedStat]="selectedStat()"
+            [selectedDef]="selectedDef()"
+            [summaryData]="summaryData()"
+            [topSongs]="topSongs()"
+            [topArtists]="topArtists()"
+            [topAlbums]="topAlbums()"
+            [topGenres]="topGenres()"
+            [listeningClock]="listeningClock()"
+            [monthlyTrends]="monthlyTrends()"
+            [dayOfWeek]="dayOfWeek()"
+            [streaks]="streaks()"
+            [lateNight]="lateNight()"
+            [onRepeat]="onRepeat()"
+            [songOfMonth]="songOfMonth()"
+            [favoriteDecades]="favoriteDecades()"
+            [recapData]="recapData()"
+          ></app-cards-portrait>
 
           <!-- Stories overlay: progress bars + prev/next (not exported) -->
           @if (storiesMode()) {
@@ -741,8 +389,10 @@
               class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 flex items-center justify-start pl-3 group"
               aria-label="Previous card"
             >
-              <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+              <div
+                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+                     aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                 </svg>
               </div>
@@ -755,8 +405,10 @@
               class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 flex items-center justify-end pr-3 group"
               aria-label="Next card"
             >
-              <div class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+              <div
+                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+                     aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                 </svg>
               </div>
@@ -774,11 +426,14 @@
               >
                 @if (storiesPaused()) {
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                    <path
+                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
                   </svg>
                 } @else {
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                          d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z"
+                          clip-rule="evenodd" />
                   </svg>
                 }
               </button>
@@ -791,8 +446,10 @@
               aria-label="Export image"
               title="Export image"
             >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                   aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
             </button>
           </div>
@@ -802,7 +459,9 @@
   </main>
 
   <!-- Made with love — desktop only, fixed bottom-right -->
-  <p class="hidden lg:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none" aria-hidden="true">
+  <p
+    class="hidden lg:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none"
+    aria-hidden="true">
     Made with <span class="text-red-500">❤</span> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
   </p>
 </div>
