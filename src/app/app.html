@@ -1,15 +1,58 @@
 <!-- Two-column sidebar layout -->
 <div class="flex min-h-screen bg-white dark:bg-slate-950">
 
-  <!-- LEFT BAR — vertical rotated branding + stat label -->
+  <!-- LEFT BAR — vertical rotated branding + stat label + card mode toggle -->
   <div
     class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
     <span
       class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
-    @if (selectedDef(); as def) {
-      <span
-        class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
-    }
+
+    <div class="flex-1 flex items-center">
+      @if (selectedDef(); as def) {
+        <span
+          class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>
+      }
+    </div>
+
+    <!-- Card aspect toggle -->
+    <div
+      class="flex flex-col items-center gap-1 p-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+      role="group"
+      aria-label="Card aspect ratio"
+    >
+      <button
+        type="button"
+        (click)="selectCardMode('portrait')"
+        [attr.aria-pressed]="cardMode() === 'portrait'"
+        aria-label="Portrait view"
+        title="Portrait"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-lg transition-colors"
+        [class]="cardMode() === 'portrait'
+          ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="7" y="3" width="10" height="18" rx="1.5" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="selectCardMode('square')"
+        [attr.aria-pressed]="cardMode() === 'square'"
+        aria-label="Square view"
+        title="Square"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-lg transition-colors"
+        [class]="cardMode() === 'square'
+          ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="14" rx="1.5" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <!-- RIGHT SIDEBAR — year chips + stat list -->
@@ -336,29 +379,58 @@
         <div class="relative w-full h-[calc(100dvh-56px)] lg:h-auto lg:w-auto lg:max-w-full">
 
           <!-- The exported card element -->
-          <app-cards-portrait
-            [maxGenrePlays]="maxGenrePlays"
-            [maxClockPlays]="maxClockPlays"
-            [maxDayPlays]="maxDayPlays"
-            [maxDecadePlays]="maxDecadePlays"
-            [selectedYear]="selectedYear()"
-            [selectedStat]="selectedStat()"
-            [selectedDef]="selectedDef()"
-            [summaryData]="summaryData()"
-            [topSongs]="topSongs()"
-            [topArtists]="topArtists()"
-            [topAlbums]="topAlbums()"
-            [topGenres]="topGenres()"
-            [listeningClock]="listeningClock()"
-            [monthlyTrends]="monthlyTrends()"
-            [dayOfWeek]="dayOfWeek()"
-            [streaks]="streaks()"
-            [lateNight]="lateNight()"
-            [onRepeat]="onRepeat()"
-            [songOfMonth]="songOfMonth()"
-            [favoriteDecades]="favoriteDecades()"
-            [recapData]="recapData()"
-          ></app-cards-portrait>
+          @switch (cardMode()) {
+            @case ('square') {
+              <app-cards-square
+                [maxGenrePlays]="maxGenrePlays"
+                [maxClockPlays]="maxClockPlays"
+                [maxDayPlays]="maxDayPlays"
+                [maxDecadePlays]="maxDecadePlays"
+                [selectedYear]="selectedYear()"
+                [selectedStat]="selectedStat()"
+                [selectedDef]="selectedDef()"
+                [summaryData]="summaryData()"
+                [topSongs]="topSongs()"
+                [topArtists]="topArtists()"
+                [topAlbums]="topAlbums()"
+                [topGenres]="topGenres()"
+                [listeningClock]="listeningClock()"
+                [monthlyTrends]="monthlyTrends()"
+                [dayOfWeek]="dayOfWeek()"
+                [streaks]="streaks()"
+                [lateNight]="lateNight()"
+                [onRepeat]="onRepeat()"
+                [songOfMonth]="songOfMonth()"
+                [favoriteDecades]="favoriteDecades()"
+                [recapData]="recapData()"
+              ></app-cards-square>
+            }
+            @default {
+              <app-cards-portrait
+                [maxGenrePlays]="maxGenrePlays"
+                [maxClockPlays]="maxClockPlays"
+                [maxDayPlays]="maxDayPlays"
+                [maxDecadePlays]="maxDecadePlays"
+                [selectedYear]="selectedYear()"
+                [selectedStat]="selectedStat()"
+                [selectedDef]="selectedDef()"
+                [summaryData]="summaryData()"
+                [topSongs]="topSongs()"
+                [topArtists]="topArtists()"
+                [topAlbums]="topAlbums()"
+                [topGenres]="topGenres()"
+                [listeningClock]="listeningClock()"
+                [monthlyTrends]="monthlyTrends()"
+                [dayOfWeek]="dayOfWeek()"
+                [streaks]="streaks()"
+                [lateNight]="lateNight()"
+                [onRepeat]="onRepeat()"
+                [songOfMonth]="songOfMonth()"
+                [favoriteDecades]="favoriteDecades()"
+                [recapData]="recapData()"
+              ></app-cards-portrait>
+            }
+          }
 
           <!-- Stories overlay: progress bars + prev/next (not exported) -->
           @if (storiesMode()) {

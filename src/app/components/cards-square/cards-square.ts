@@ -22,11 +22,11 @@ import { NavidromeService } from '../../services/navidrome.service';
 import { SlicePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-cards-portrait',
+  selector: 'app-cards-square',
   imports: [CardShellComponent, SlicePipe],
-  templateUrl: './cards-portrait.html',
+  templateUrl: './cards-square.html',
 })
-export class CardsPortrait {
+export class CardsSquare {
   private readonly navidrome = inject(NavidromeService);
 
   readonly maxGenrePlays = input.required<number>();

@@ -42,7 +42,7 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Songs</h2>
         <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (song of topSongs(); track song.title; let i = $index) {
+          @for (song of topSongs() | slice: 0:5; track song.title; let i = $index) {
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
@@ -81,7 +81,7 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Artists</h2>
         <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (artist of topArtists(); track artist.artist; let i = $index) {
+          @for (artist of topArtists() | slice: 0:5; track artist.artist; let i = $index) {
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
@@ -120,7 +120,7 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Albums</h2>
         <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (album of topAlbums(); track album.album; let i = $index) {
+          @for (album of topAlbums() | slice: 0:5; track album.album; let i = $index) {
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
@@ -159,7 +159,7 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Genres</h2>
         <div class="flex-1 flex flex-col gap-4">
-          @for (genre of topGenres(); track genre.genre; let i = $index) {
+          @for (genre of topGenres() | slice: 0:5; track genre.genre; let i = $index) {
             <div class="bg-white/10 rounded-2xl p-5">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -288,7 +288,7 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">On Repeat</h2>
         <p class="text-white/40 text-base mb-5">Songs you played 3+ times in a single day</p>
         <div class="flex-1 flex flex-col gap-3 overflow-y-auto">
-          @for (entry of onRepeat(); track entry.the_date + entry.title; let i = $index) {
+          @for (entry of onRepeat() | slice: 0:6; track entry.the_date + entry.title; let i = $index) {
             <div class="bg-white/10 rounded-xl px-4 py-3">
               <div class="flex items-center justify-between">
                 <div class="min-w-0 flex-1">
@@ -335,7 +335,7 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
         <div class="flex-1 flex flex-col gap-4">
-          @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
+          @for (dec of favoriteDecades() | slice: 0:5; track dec.decade; let i = $index) {
             <div class="bg-white/10 rounded-2xl p-4">
               <div class="flex items-center justify-between">
                 <p class="text-white font-black text-2xl">{{ dec.decade }}s</p>
@@ -377,7 +377,7 @@
             <div class="flex-1 flex flex-col min-w-0">
               <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Artists</p>
               <div class="flex flex-col gap-2">
-                @for (artist of d.top_artists; track artist.artist; let i = $index) {
+                @for (artist of d.top_artists | slice: 0:5; track artist.artist; let i = $index) {
                   <div class="flex items-start gap-2 min-w-0">
                     <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
                     <div class="min-w-0">
@@ -392,7 +392,7 @@
             <div class="flex-1 flex flex-col min-w-0">
               <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">Top Songs</p>
               <div class="flex flex-col gap-2">
-                @for (song of d.top_songs; track song.title; let i = $index) {
+                @for (song of d.top_songs | slice: 0:5; track song.title; let i = $index) {
                   <div class="flex items-start gap-2 min-w-0">
                     <span class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]">{{ i + 1 }}</span>
                     <div class="min-w-0">

@@ -51,13 +51,14 @@ import {
   type TopSong,
 } from './models/stats';
 import { CardsPortrait } from './components/cards-portrait/cards-portrait';
+import { CardsSquare } from './components/cards-square/cards-square';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait],
+  imports: [NgIcon, CardsPortrait, CardsSquare],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -89,6 +90,7 @@ export class App {
 
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
+  readonly cardMode = signal<'portrait' | 'square'>('portrait');
   readonly storiesMode = signal(true);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
@@ -166,6 +168,10 @@ export class App {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  selectCardMode(mode: 'portrait' | 'square'): void {
+    this.cardMode.set(mode);
   }
 
   toggleDarkMode(): void {
