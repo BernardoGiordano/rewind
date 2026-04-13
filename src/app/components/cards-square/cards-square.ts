@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, ElementRef, inject, input } from '@angular/core';
 import { CardShellComponent } from '../card-shell';
 import {
   type DayOfWeek,
@@ -27,6 +27,7 @@ import { SlicePipe } from '@angular/common';
   templateUrl: './cards-square.html',
 })
 export class CardsSquare {
+  readonly el = inject(ElementRef<HTMLElement>);
   private readonly navidrome = inject(NavidromeService);
 
   readonly maxGenrePlays = input.required<number>();

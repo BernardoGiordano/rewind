@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  ElementRef,
   inject,
   PLATFORM_ID,
   signal,
@@ -86,7 +85,8 @@ export class App {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly cardElement = viewChild<ElementRef<HTMLElement>>('cardElement');
+  readonly squareCard = viewChild(CardsSquare);
+  readonly portraitCard = viewChild(CardsPortrait);
 
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
@@ -303,7 +303,8 @@ export class App {
   }
 
   async exportCard(): Promise<void> {
-    const el = this.cardElement()?.nativeElement;
+    const card = this.squareCard() ?? this.portraitCard();
+    const el = card?.el.nativeElement;
     if (!el) return;
 
     this.exporting.set(true);
