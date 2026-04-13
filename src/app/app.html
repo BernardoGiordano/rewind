@@ -3,11 +3,11 @@
 
   <!-- LEFT BAR — vertical rotated branding + stat label + card mode toggle -->
   <div
-    class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:py-12 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+    class="hidden lg:flex lg:w-16 lg:flex-none lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:items-center lg:justify-between lg:pt-12 lg:pb-2 lg:whitespace-nowrap bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
     <span
       class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm">Navidrome Rewind</span>
 
-    <div class="flex-1 flex items-center">
+    <div class="flex-1 flex items-end mb-4">
       @if (selectedDef(); as def) {
         <span
           class="[writing-mode:vertical-rl] rotate-180 font-mono text-slate-500 dark:text-slate-400 tracking-widest text-xs">{{ def.label }}</span>

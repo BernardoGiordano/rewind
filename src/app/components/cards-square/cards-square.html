@@ -59,7 +59,7 @@
               </div>
             }
           }
-          <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden content-start">
+          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
             @for (song of topSongs() | slice: 0:11; track song.title; let i = $index) {
               @if (i > 0) {
                 <div class="flex items-center gap-3 min-w-0">
@@ -103,7 +103,7 @@
               </div>
             }
           }
-          <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden content-start">
+          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
             @for (artist of topArtists() | slice: 0:11; track artist.artist; let i = $index) {
               @if (i > 0) {
                 <div class="flex items-center gap-3 min-w-0">
@@ -147,7 +147,7 @@
               </div>
             }
           }
-          <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden content-start">
+          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
             @for (album of topAlbums() | slice: 0:11; track album.album; let i = $index) {
               @if (i > 0) {
                 <div class="flex items-center gap-3 min-w-0">
