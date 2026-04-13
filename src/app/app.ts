@@ -51,13 +51,14 @@ import {
 } from './models/stats';
 import { CardsPortrait } from './components/cards-portrait/cards-portrait';
 import { CardsSquare } from './components/cards-square/cards-square';
+import { CardsLandscape } from './components/cards-landscape/cards-landscape';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -87,10 +88,12 @@ export class App {
 
   readonly squareCard = viewChild(CardsSquare);
   readonly portraitCard = viewChild(CardsPortrait);
+  readonly landscapeCard = viewChild(CardsLandscape);
 
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
-  readonly cardMode = signal<'portrait' | 'square'>('portrait');
+  readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
+  readonly isSmallScreen = signal(false);
   readonly storiesMode = signal(true);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
@@ -106,6 +109,10 @@ export class App {
 
   readonly selectedDef = computed(() =>
     STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
+  );
+
+  readonly effectiveCardMode = computed(() =>
+    this.isSmallScreen() ? 'portrait' : this.cardMode(),
   );
 
   // Stat data signals
@@ -141,6 +148,10 @@ export class App {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.darkMode.set(prefersDark);
         document.documentElement.classList.toggle('dark', prefersDark);
+
+        const smallScreen = window.matchMedia('(max-width: 1023px)');
+        this.isSmallScreen.set(smallScreen.matches);
+        smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
       this.navidrome.loadConfig();
       this.navidrome.getYears().subscribe({
@@ -170,7 +181,7 @@ export class App {
     this.mobileMenuOpen.set(false);
   }
 
-  selectCardMode(mode: 'portrait' | 'square'): void {
+  selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
     this.cardMode.set(mode);
   }
 
@@ -303,7 +314,7 @@ export class App {
   }
 
   async exportCard(): Promise<void> {
-    const card = this.squareCard() ?? this.portraitCard();
+    const card = this.landscapeCard() ?? this.squareCard() ?? this.portraitCard();
     const el = card?.el.nativeElement;
     if (!el) return;
 
