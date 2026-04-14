@@ -145,15 +145,37 @@ export class App {
   constructor() {
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const storedTheme = localStorage.getItem('rewind.theme');
+        const prefersDark = storedTheme
+          ? storedTheme === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.darkMode.set(prefersDark);
         document.documentElement.classList.toggle('dark', prefersDark);
+
+        const storedCardMode = localStorage.getItem('rewind.cardMode');
+        if (
+          storedCardMode === 'portrait' ||
+          storedCardMode === 'square' ||
+          storedCardMode === 'landscape'
+        ) {
+          this.cardMode.set(storedCardMode);
+        }
+
+        const storedStories = localStorage.getItem('rewind.storiesMode');
+        if (storedStories !== null) {
+          this.storiesMode.set(storedStories === 'true');
+        }
 
         const smallScreen = window.matchMedia('(max-width: 1023px)');
         this.isSmallScreen.set(smallScreen.matches);
         smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
       this.navidrome.loadConfig();
+      const maybeStartStories = () => {
+        if (this.storiesMode()) {
+          this.startStories();
+        }
+      };
       this.navidrome.getYears().subscribe({
         next: (years) => {
           this.years.set(years);
@@ -161,11 +183,11 @@ export class App {
             this.selectedYear.set(years[0]);
           }
           this.loadData();
-          this.startStories();
+          maybeStartStories();
         },
         error: () => {
           this.loadData();
-          this.startStories();
+          maybeStartStories();
         },
       });
     });
@@ -183,6 +205,9 @@ export class App {
 
   selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
     this.cardMode.set(mode);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.cardMode', mode);
+    }
   }
 
   toggleDarkMode(): void {
@@ -190,6 +215,7 @@ export class App {
     this.darkMode.set(next);
     if (isPlatformBrowser(this.platformId)) {
       document.documentElement.classList.toggle('dark', next);
+      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
     }
   }
 
@@ -199,6 +225,9 @@ export class App {
       this.stopStories();
     } else {
       this.startStories();
+    }
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.storiesMode', String(this.storiesMode()));
     }
   }
 
