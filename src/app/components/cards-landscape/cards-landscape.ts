@@ -94,6 +94,16 @@ export class CardsLandscape {
     return months[parseInt(m, 10) - 1] ?? month;
   }
 
+  readonly maxMonthPlays = computed(() =>
+    Math.max(...this.monthlyTrends().map((m) => m.plays), 1),
+  );
+
+  readonly peakHour = computed(() => {
+    const clock = this.listeningClock();
+    if (clock.length === 0) return null;
+    return clock.reduce((max, h) => (h.plays > max.plays ? h : max), clock[0]);
+  });
+
   genreBarWidth(plays: number): number {
     return this.maxGenrePlays() > 0 ? (plays / this.maxGenrePlays()) * 100 : 0;
   }
@@ -108,5 +118,9 @@ export class CardsLandscape {
 
   decadeBarWidth(plays: number): number {
     return this.maxDecadePlays() > 0 ? (plays / this.maxDecadePlays()) * 100 : 0;
+  }
+
+  monthBarWidth(plays: number): number {
+    return this.maxMonthPlays() > 0 ? (plays / this.maxMonthPlays()) * 100 : 0;
   }
 }
