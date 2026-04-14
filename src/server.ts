@@ -276,7 +276,7 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.id ORDER BY plays DESC LIMIT 20
+      GROUP BY mf.id ORDER BY plays DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -286,7 +286,7 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.id ORDER BY plays DESC LIMIT 20
+    GROUP BY mf.id ORDER BY plays DESC LIMIT 100
   `, [uid]);
 }
 
@@ -300,7 +300,7 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 20
+      GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -310,7 +310,7 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 20
+    GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 100
   `, [uid]);
 }
 
@@ -324,7 +324,7 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.album_id ORDER BY plays DESC LIMIT 20
+      GROUP BY mf.album_id ORDER BY plays DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -334,7 +334,7 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.album_id ORDER BY plays DESC LIMIT 20
+    GROUP BY mf.album_id ORDER BY plays DESC LIMIT 100
   `, [uid]);
 }
 
@@ -349,7 +349,7 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY plays DESC LIMIT 20
+      GROUP BY 1 ORDER BY plays DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -360,7 +360,7 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
       json_each(json_extract(mf.tags, '$.genre')) AS g
     WHERE s.user_id = ?
       AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY plays DESC LIMIT 20
+    GROUP BY 1 ORDER BY plays DESC LIMIT 100
   `, [uid]);
 }
 
@@ -425,7 +425,7 @@ function getStreak(db: Database, uid: string, year: number) {
     )
     SELECT MIN(play_date) AS streak_start, MAX(play_date) AS streak_end,
       COUNT(*) AS streak_days
-    FROM numbered GROUP BY streak_group ORDER BY streak_days DESC LIMIT 20
+    FROM numbered GROUP BY streak_group ORDER BY streak_days DESC LIMIT 100
   `, [uid, startTs, endTs]);
 }
 
@@ -438,7 +438,7 @@ function getLateNight(db: Database, uid: string, year: number) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       AND CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER) BETWEEN 0 AND 4
-    GROUP BY mf.id ORDER BY late_night_plays DESC LIMIT 20
+    GROUP BY mf.id ORDER BY late_night_plays DESC LIMIT 100
   `, [uid, startTs, endTs]);
 }
 
@@ -451,7 +451,7 @@ function getOnRepeat(db: Database, uid: string, year: number) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
     GROUP BY the_date, mf.id HAVING COUNT(*) >= 3
-    ORDER BY plays_that_day DESC LIMIT 20
+    ORDER BY plays_that_day DESC LIMIT 100
   `, [uid, startTs, endTs]);
 }
 
@@ -486,7 +486,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY total_plays DESC LIMIT 20
+      GROUP BY decade ORDER BY total_plays DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -496,7 +496,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY total_plays DESC LIMIT 20
+    GROUP BY decade ORDER BY total_plays DESC LIMIT 100
   `, [uid]);
 }
 
