@@ -62,8 +62,8 @@
             </div>
           }
           <!-- Right: scrollable table -->
-          <div class="flex-1 overflow-y-auto min-h-0 min-w-0">
-            <table class="w-full table-fixed border-collapse">
+          <div class="flex-1 flex flex-col min-h-0 min-w-0">
+            <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
                 <col class="w-10" />
@@ -73,34 +73,45 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="sticky top-0 z-10 pb-2 pr-3 border-b border-white/10"></th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Track</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-5 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Track</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
                 </tr>
               </thead>
-              <tbody>
-                @for (song of topSongs() | slice: 1; track song.title; let i = $index) {
-                  <tr>
-                    <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                    <td class="pr-3 py-1.5">
-                      <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && song.album_id) {
-                          <img [src]="coverUrl(song.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
-                      </div>
-                    </td>
-                    <td class="max-w-0 pr-3 py-1.5">
-                      <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
-                      <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
-                    </td>
-                    <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ song.plays }}</td>
-                    <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ song.total_minutes }}m</td>
-                  </tr>
-                }
-              </tbody>
             </table>
+            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+              <table class="w-full table-fixed border-collapse">
+                <colgroup>
+                  <col class="w-6" />
+                  <col class="w-10" />
+                  <col />
+                  <col class="w-14" />
+                  <col class="w-12" />
+                </colgroup>
+                <tbody>
+                  @for (song of topSongs() | slice: 1; track song.title; let i = $index) {
+                    <tr>
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-5 py-1.5">
+                        <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && song.album_id) {
+                            <img [src]="coverUrl(song.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                      </td>
+                      <td class="max-w-0 pr-3 py-1.5">
+                        <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
+                        <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
+                      </td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ song.plays }}</td>
+                      <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ song.total_minutes }}m</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </app-card-shell>
@@ -131,8 +142,8 @@
             </div>
           }
           <!-- Right: scrollable table -->
-          <div class="flex-1 overflow-y-auto min-h-0 min-w-0">
-            <table class="w-full table-fixed border-collapse">
+          <div class="flex-1 flex flex-col min-h-0 min-w-0">
+            <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
                 <col class="w-10" />
@@ -142,34 +153,45 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="sticky top-0 z-10 pb-2 pr-3 border-b border-white/10"></th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Artist</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-5 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Artist</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
                 </tr>
               </thead>
-              <tbody>
-                @for (artist of topArtists() | slice: 1; track artist.artist; let i = $index) {
-                  <tr>
-                    <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                    <td class="pr-3 py-1.5">
-                      <div class="w-10 h-10 rounded-full overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && artist.artist_id) {
-                          <img [src]="coverUrl(artist.artist_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
-                      </div>
-                    </td>
-                    <td class="max-w-0 pr-3 py-1.5">
-                      <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
-                      <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks</p>
-                    </td>
-                    <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ artist.plays }}</td>
-                    <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours }}h</td>
-                  </tr>
-                }
-              </tbody>
             </table>
+            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+              <table class="w-full table-fixed border-collapse">
+                <colgroup>
+                  <col class="w-6" />
+                  <col class="w-10" />
+                  <col />
+                  <col class="w-14" />
+                  <col class="w-12" />
+                </colgroup>
+                <tbody>
+                  @for (artist of topArtists() | slice: 1; track artist.artist; let i = $index) {
+                    <tr>
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-5 py-1.5">
+                        <div class="w-10 h-10 rounded-full overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && artist.artist_id) {
+                            <img [src]="coverUrl(artist.artist_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                      </td>
+                      <td class="max-w-0 pr-3 py-1.5">
+                        <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
+                        <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks</p>
+                      </td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ artist.plays }}</td>
+                      <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours }}h</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </app-card-shell>
@@ -199,8 +221,8 @@
             </div>
           }
           <!-- Right: scrollable table -->
-          <div class="flex-1 overflow-y-auto min-h-0 min-w-0">
-            <table class="w-full table-fixed border-collapse">
+          <div class="flex-1 flex flex-col min-h-0 min-w-0">
+            <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
                 <col class="w-10" />
@@ -210,34 +232,45 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="sticky top-0 z-10 pb-2 pr-3 border-b border-white/10"></th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Album</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
-                  <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-5 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Album</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
                 </tr>
               </thead>
-              <tbody>
-                @for (album of topAlbums() | slice: 1; track album.album; let i = $index) {
-                  <tr>
-                    <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                    <td class="pr-3 py-1.5">
-                      <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
-                        @if (coverArtAvailable() && album.album_id) {
-                          <img [src]="coverUrl(album.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
-                      </div>
-                    </td>
-                    <td class="max-w-0 pr-3 py-1.5">
-                      <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
-                      <p class="text-white/50 text-xs truncate">{{ album.album_artist }}</p>
-                    </td>
-                    <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ album.plays }}</td>
-                    <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ album.total_minutes }}m</td>
-                  </tr>
-                }
-              </tbody>
             </table>
+            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+              <table class="w-full table-fixed border-collapse">
+                <colgroup>
+                  <col class="w-6" />
+                  <col class="w-10" />
+                  <col />
+                  <col class="w-14" />
+                  <col class="w-12" />
+                </colgroup>
+                <tbody>
+                  @for (album of topAlbums() | slice: 1; track album.album; let i = $index) {
+                    <tr>
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-5 py-1.5">
+                        <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
+                          @if (coverArtAvailable() && album.album_id) {
+                            <img [src]="coverUrl(album.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                          }
+                        </div>
+                      </td>
+                      <td class="max-w-0 pr-3 py-1.5">
+                        <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
+                        <p class="text-white/50 text-xs truncate">{{ album.album_artist }}</p>
+                      </td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ album.plays }}</td>
+                      <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ album.total_minutes }}m</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </app-card-shell>
@@ -246,8 +279,8 @@
     @case ('top-genres') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Genres</h2>
-        <div class="flex-1 min-h-0 overflow-y-auto">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-7" />
               <col class="w-44" />
@@ -257,31 +290,42 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10">#</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10">Genre</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10">#</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10">Genre</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
               </tr>
             </thead>
-            <tbody>
-              @for (genre of topGenres(); track genre.genre; let i = $index) {
-                <tr>
-                  <td class="text-white/30 text-sm font-black tabular-nums text-right pr-6 py-1.5">{{ i + 1 }}</td>
-                  <td class="max-w-0 pr-6 py-1.5">
-                    <p class="text-white font-semibold text-base truncate">{{ genre.genre }}</p>
-                  </td>
-                  <td class="pr-6 py-1.5">
-                    <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
-                      <div class="h-full bg-white/35 rounded-lg transition-all" [style.width.%]="genreBarWidth(genre.plays)"></div>
-                    </div>
-                  </td>
-                  <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-6 py-1.5">{{ genre.plays }}</td>
-                  <td class="text-white/40 text-sm tabular-nums text-right py-1.5">{{ genre.total_hours }}h</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col class="w-7" />
+                <col class="w-44" />
+                <col />
+                <col class="w-20" />
+                <col class="w-20" />
+              </colgroup>
+              <tbody>
+                @for (genre of topGenres(); track genre.genre; let i = $index) {
+                  <tr>
+                    <td class="text-white/30 text-sm font-black tabular-nums text-right pr-6 py-1.5">{{ i + 1 }}</td>
+                    <td class="max-w-0 pr-6 py-1.5">
+                      <p class="text-white font-semibold text-base truncate">{{ genre.genre }}</p>
+                    </td>
+                    <td class="pr-6 py-1.5">
+                      <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
+                        <div class="h-full bg-white/35 rounded-lg transition-all" [style.width.%]="genreBarWidth(genre.plays)"></div>
+                      </div>
+                    </td>
+                    <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-6 py-1.5">{{ genre.plays }}</td>
+                    <td class="text-white/40 text-sm tabular-nums text-right py-1.5">{{ genre.total_hours }}h</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -325,8 +369,8 @@
     @case ('monthly-trends') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Monthly Trends</h2>
-        <div class="flex-1 overflow-y-auto min-h-0">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-16" />
               <col />
@@ -337,31 +381,43 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Month</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Hours</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Songs</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Artists</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Month</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Hours</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Songs</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Artists</th>
               </tr>
             </thead>
-            <tbody>
-              @for (m of monthlyTrends(); track m.month) {
-                <tr>
-                  <td class="text-white/70 text-base font-bold pr-4 py-2">{{ formatMonth(m.month) }}</td>
-                  <td class="pr-4 py-2">
-                    <div class="h-8 bg-white/10 rounded-lg overflow-hidden">
-                      <div class="h-full bg-white/30 rounded-lg transition-all" [style.width.%]="monthBarWidth(m.plays)"></div>
-                    </div>
-                  </td>
-                  <td class="text-white font-black text-base tabular-nums text-right pr-4 py-2">{{ m.plays }}</td>
-                  <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ m.hours }}h</td>
-                  <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ m.unique_songs }}</td>
-                  <td class="text-white/50 text-sm tabular-nums text-right py-2">{{ m.unique_artists }}</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col class="w-16" />
+                <col />
+                <col class="w-16" />
+                <col class="w-16" />
+                <col class="w-16" />
+                <col class="w-20" />
+              </colgroup>
+              <tbody>
+                @for (m of monthlyTrends(); track m.month) {
+                  <tr>
+                    <td class="text-white/70 text-base font-bold pr-4 py-2">{{ formatMonth(m.month) }}</td>
+                    <td class="pr-4 py-2">
+                      <div class="h-8 bg-white/10 rounded-lg overflow-hidden">
+                        <div class="h-full bg-white/30 rounded-lg transition-all" [style.width.%]="monthBarWidth(m.plays)"></div>
+                      </div>
+                    </td>
+                    <td class="text-white font-black text-base tabular-nums text-right pr-4 py-2">{{ m.plays }}</td>
+                    <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ m.hours }}h</td>
+                    <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ m.unique_songs }}</td>
+                    <td class="text-white/50 text-sm tabular-nums text-right py-2">{{ m.unique_artists }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -399,8 +455,8 @@
             </div>
             <!-- Streaks table -->
             @if (streaks().length > 1) {
-              <div class="flex-1 overflow-y-auto min-h-0 min-w-0">
-                <table class="w-full table-fixed border-collapse">
+              <div class="flex-1 flex flex-col min-h-0 min-w-0">
+                <table class="w-full table-fixed border-collapse shrink-0">
                   <colgroup>
                     <col class="w-6" />
                     <col class="w-24" />
@@ -408,23 +464,32 @@
                   </colgroup>
                   <thead>
                     <tr>
-                      <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
-                      <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Days</th>
-                      <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10">Period</th>
+                      <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
+                      <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Days</th>
+                      <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10">Period</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    @for (s of streaks() | slice: 1; track s.streak_start; let i = $index) {
-                      <tr>
-                        <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-2">{{ i + 2 }}</td>
-                        <td class="text-white font-bold text-lg tabular-nums pr-4 py-2">{{ s.streak_days }} days</td>
-                        <td class="max-w-0 py-2">
-                          <span class="text-white/50 text-sm font-mono truncate block">{{ s.streak_start }} — {{ s.streak_end }}</span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
                 </table>
+                <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                  <table class="w-full table-fixed border-collapse">
+                    <colgroup>
+                      <col class="w-6" />
+                      <col class="w-24" />
+                      <col />
+                    </colgroup>
+                    <tbody>
+                      @for (s of streaks() | slice: 1; track s.streak_start; let i = $index) {
+                        <tr>
+                          <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-2">{{ i + 2 }}</td>
+                          <td class="text-white font-bold text-lg tabular-nums pr-4 py-2">{{ s.streak_days }} days</td>
+                          <td class="max-w-0 py-2">
+                            <span class="text-white/50 text-sm font-mono truncate block">{{ s.streak_start }} — {{ s.streak_end }}</span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               </div>
             }
           </div>
@@ -436,8 +501,8 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">Late Night Vibes</h2>
         <p class="text-white/40 text-sm mb-4 shrink-0">Songs you listened to between midnight and 5 AM</p>
-        <div class="flex-1 overflow-y-auto min-h-0">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-6" />
               <col class="w-10" />
@@ -446,32 +511,42 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
-                <th class="sticky top-0 z-10 pb-2 pr-4 border-b border-white/10"></th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Late Night</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
+                <th class="pb-2 pr-5 border-b border-white/10"></th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Late Night</th>
               </tr>
             </thead>
-            <tbody>
-              @for (track of lateNight(); track track.title; let i = $index) {
-                <tr>
-                  <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 1 }}</td>
-                  <td class="pr-4 py-1.5">
-                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10">
-                      @if (coverArtAvailable() && track.album_id) {
-                        <img [src]="coverUrl(track.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                      }
-                    </div>
-                  </td>
-                  <td class="max-w-0 pr-4 py-1.5">
-                    <p class="text-white font-semibold text-sm truncate">{{ track.title }}</p>
-                    <p class="text-white/60 text-xs truncate">{{ track.artist }}</p>
-                  </td>
-                  <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">{{ track.late_night_plays }}x</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col class="w-6" />
+                <col class="w-10" />
+                <col />
+                <col class="w-24" />
+              </colgroup>
+              <tbody>
+                @for (track of lateNight(); track track.title; let i = $index) {
+                  <tr>
+                    <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 1 }}</td>
+                    <td class="pr-5 py-1.5">
+                      <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10">
+                        @if (coverArtAvailable() && track.album_id) {
+                          <img [src]="coverUrl(track.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                    </td>
+                    <td class="max-w-0 pr-4 py-1.5">
+                      <p class="text-white font-semibold text-sm truncate">{{ track.title }}</p>
+                      <p class="text-white/60 text-xs truncate">{{ track.artist }}</p>
+                    </td>
+                    <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">{{ track.late_night_plays }}x</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -480,8 +555,8 @@
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">On Repeat</h2>
         <p class="text-white/40 text-sm mb-4 shrink-0">Songs you played 3+ times in a single day</p>
-        <div class="flex-1 overflow-y-auto min-h-0">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col />
               <col class="w-20" />
@@ -489,24 +564,33 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Date</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Date</th>
               </tr>
             </thead>
-            <tbody>
-              @for (entry of onRepeat(); track entry.the_date + entry.title) {
-                <tr>
-                  <td class="max-w-0 pr-4 py-1.5">
-                    <p class="text-white font-semibold text-sm truncate">{{ entry.title }}</p>
-                    <p class="text-white/50 text-xs truncate">{{ entry.artist }}</p>
-                  </td>
-                  <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ entry.plays_that_day }}x</td>
-                  <td class="text-white/40 text-xs font-mono tabular-nums text-right py-1.5">{{ entry.the_date }}</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col />
+                <col class="w-20" />
+                <col class="w-28" />
+              </colgroup>
+              <tbody>
+                @for (entry of onRepeat(); track entry.the_date + entry.title) {
+                  <tr>
+                    <td class="max-w-0 pr-4 py-1.5">
+                      <p class="text-white font-semibold text-sm truncate">{{ entry.title }}</p>
+                      <p class="text-white/50 text-xs truncate">{{ entry.artist }}</p>
+                    </td>
+                    <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ entry.plays_that_day }}x</td>
+                    <td class="text-white/40 text-xs font-mono tabular-nums text-right py-1.5">{{ entry.the_date }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -514,8 +598,8 @@
     @case ('song-of-month') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Song of the Month</h2>
-        <div class="flex-1 overflow-y-auto min-h-0">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-14" />
               <col class="w-12" />
@@ -524,32 +608,42 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Month</th>
-                <th class="sticky top-0 z-10 pb-2 pr-4 border-b border-white/10"></th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Month</th>
+                <th class="pb-2 pr-5 border-b border-white/10"></th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Plays</th>
               </tr>
             </thead>
-            <tbody>
-              @for (s of songOfMonth(); track s.month) {
-                <tr>
-                  <td class="text-white/60 text-sm font-black uppercase tracking-wider pr-4 py-2">{{ formatMonth(s.month) }}</td>
-                  <td class="pr-4 py-2">
-                    <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg">
-                      @if (coverArtAvailable() && s.album_id) {
-                        <img [src]="coverUrl(s.album_id, 150)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                      }
-                    </div>
-                  </td>
-                  <td class="max-w-0 pr-4 py-2">
-                    <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
-                    <p class="text-white/50 text-sm truncate">{{ s.artist }}</p>
-                  </td>
-                  <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">{{ s.plays }}</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col class="w-14" />
+                <col class="w-12" />
+                <col />
+                <col class="w-16" />
+              </colgroup>
+              <tbody>
+                @for (s of songOfMonth(); track s.month) {
+                  <tr>
+                    <td class="text-white/60 text-sm font-black uppercase tracking-wider pr-4 py-2">{{ formatMonth(s.month) }}</td>
+                    <td class="pr-5 py-2">
+                      <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg">
+                        @if (coverArtAvailable() && s.album_id) {
+                          <img [src]="coverUrl(s.album_id, 150)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                    </td>
+                    <td class="max-w-0 pr-4 py-2">
+                      <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
+                      <p class="text-white/50 text-sm truncate">{{ s.artist }}</p>
+                    </td>
+                    <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">{{ s.plays }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -557,8 +651,8 @@
     @case ('favorite-decades') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Favorite Decades</h2>
-        <div class="flex-1 overflow-y-auto min-h-0">
-          <table class="w-full table-fixed border-collapse">
+        <div class="flex-1 flex flex-col min-h-0">
+          <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-20" />
               <col />
@@ -568,31 +662,42 @@
             </colgroup>
             <thead>
               <tr>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Decade</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Hours</th>
-                <th class="sticky top-0 z-10 text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Artists</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Decade</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Hours</th>
+                <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Artists</th>
               </tr>
             </thead>
-            <tbody>
-              @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
-                <tr>
-                  <td class="pr-4 py-2">
-                    <p class="text-white font-black text-2xl tabular-nums">{{ dec.decade }}s</p>
-                  </td>
-                  <td class="pr-4 py-2">
-                    <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
-                      <div class="h-full bg-white/35 rounded-lg transition-all" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
-                    </div>
-                  </td>
-                  <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-2">{{ dec.total_plays }}</td>
-                  <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ dec.total_hours }}h</td>
-                  <td class="text-white/50 text-sm tabular-nums text-right py-2">{{ dec.unique_artists }} artists</td>
-                </tr>
-              }
-            </tbody>
           </table>
+          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <table class="w-full table-fixed border-collapse">
+              <colgroup>
+                <col class="w-20" />
+                <col />
+                <col class="w-20" />
+                <col class="w-20" />
+                <col class="w-24" />
+              </colgroup>
+              <tbody>
+                @for (dec of favoriteDecades(); track dec.decade; let i = $index) {
+                  <tr>
+                    <td class="pr-4 py-2">
+                      <p class="text-white font-black text-2xl tabular-nums">{{ dec.decade }}s</p>
+                    </td>
+                    <td class="pr-4 py-2">
+                      <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
+                        <div class="h-full bg-white/35 rounded-lg transition-all" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
+                      </div>
+                    </td>
+                    <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-2">{{ dec.total_plays }}</td>
+                    <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">{{ dec.total_hours }}h</td>
+                    <td class="text-white/50 text-sm tabular-nums text-right py-2">{{ dec.unique_artists }} artists</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </app-card-shell>
     }
@@ -631,67 +736,86 @@
               <!-- Top Artists -->
               <div class="flex-1 flex flex-col min-w-0 bg-white/5 rounded-2xl p-5 min-h-0">
                 <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">Top Artists</p>
-                <div class="flex-1 overflow-y-auto min-h-0">
-                  <table class="w-full table-fixed border-collapse">
+                <div class="flex-1 flex flex-col min-h-0">
+                  <table class="w-full table-fixed border-collapse shrink-0">
                     <colgroup>
-                      <col class="w-5" />
+                      <col class="w-8" />
                       <col />
                       <col class="w-14" />
                       <col class="w-12" />
                     </colgroup>
                     <thead>
                       <tr>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">#</th>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10">Artist</th>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">Plays</th>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">#</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10">Artist</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">Plays</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      @for (artist of d.top_artists; track artist.artist; let i = $index) {
-                        <tr>
-                          <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
-                          <td class="max-w-0 pr-2 py-1.5">
-                            <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
-                          </td>
-                          <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">{{ artist.plays }}</td>
-                          <td class="text-white/40 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours }}h</td>
-                        </tr>
-                      }
-                    </tbody>
                   </table>
+                  <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                    <table class="w-full table-fixed border-collapse">
+                      <colgroup>
+                        <col class="w-8" />
+                        <col />
+                        <col class="w-14" />
+                        <col class="w-12" />
+                      </colgroup>
+                      <tbody>
+                        @for (artist of d.top_artists; track artist.artist; let i = $index) {
+                          <tr>
+                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
+                            <td class="max-w-0 pr-2 py-1.5">
+                              <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
+                            </td>
+                            <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">{{ artist.plays }}</td>
+                            <td class="text-white/40 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours }}h</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
               <!-- Top Songs -->
               <div class="flex-1 flex flex-col min-w-0 bg-white/5 rounded-2xl p-5 min-h-0">
                 <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">Top Songs</p>
-                <div class="flex-1 overflow-y-auto min-h-0">
-                  <table class="w-full table-fixed border-collapse">
+                <div class="flex-1 flex flex-col min-h-0">
+                  <table class="w-full table-fixed border-collapse shrink-0">
                     <colgroup>
-                      <col class="w-5" />
+                      <col class="w-8" />
                       <col />
                       <col class="w-14" />
                     </colgroup>
                     <thead>
                       <tr>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">#</th>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10">Track</th>
-                        <th class="sticky top-0 z-10 text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10">Plays</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10">#</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10">Track</th>
+                        <th class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10">Plays</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      @for (song of d.top_songs; track song.title; let i = $index) {
-                        <tr>
-                          <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
-                          <td class="max-w-0 pr-2 py-1.5">
-                            <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
-                            <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
-                          </td>
-                          <td class="text-white/50 text-xs tabular-nums text-right py-1.5">{{ song.plays }}</td>
-                        </tr>
-                      }
-                    </tbody>
                   </table>
+                  <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                    <table class="w-full table-fixed border-collapse">
+                      <colgroup>
+                        <col class="w-8" />
+                        <col />
+                        <col class="w-14" />
+                      </colgroup>
+                      <tbody>
+                        @for (song of d.top_songs; track song.title; let i = $index) {
+                          <tr class="align-top">
+                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
+                            <td class="max-w-0 pr-2 py-1.5">
+                              <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
+                              <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
+                            </td>
+                            <td class="text-white/50 text-xs tabular-nums text-right py-1.5">{{ song.plays }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
