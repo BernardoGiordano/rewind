@@ -66,26 +66,26 @@
             <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
-                <col class="w-10" />
+                <col class="w-16" />
                 <col />
                 <col class="w-14" />
                 <col class="w-12" />
               </colgroup>
               <thead>
                 <tr>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="pb-2 pr-5 border-b border-white/10"></th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Track</th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-6 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
                   <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
                 </tr>
               </thead>
             </table>
-            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-6" />
-                  <col class="w-10" />
+                  <col class="w-16" />
                   <col />
                   <col class="w-14" />
                   <col class="w-12" />
@@ -93,19 +93,19 @@
                 <tbody>
                   @for (song of topSongs() | slice: 1; track song.title; let i = $index) {
                     <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                      <td class="pr-5 py-1.5">
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-6 py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
                           @if (coverArtAvailable() && song.album_id) {
                             <img [src]="coverUrl(song.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
                           }
                         </div>
                       </td>
-                      <td class="max-w-0 pr-3 py-1.5">
+                      <td class="max-w-0 pr-4 py-1.5">
                         <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
                         <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                       </td>
-                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ song.plays }}</td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ song.plays }}</td>
                       <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ song.total_minutes }}m</td>
                     </tr>
                   }
@@ -146,26 +146,26 @@
             <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
-                <col class="w-10" />
+                <col class="w-16" />
                 <col />
                 <col class="w-14" />
                 <col class="w-12" />
               </colgroup>
               <thead>
                 <tr>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="pb-2 pr-5 border-b border-white/10"></th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Artist</th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-6 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Artist</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
                   <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Hours</th>
                 </tr>
               </thead>
             </table>
-            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-6" />
-                  <col class="w-10" />
+                  <col class="w-16" />
                   <col />
                   <col class="w-14" />
                   <col class="w-12" />
@@ -173,19 +173,19 @@
                 <tbody>
                   @for (artist of topArtists() | slice: 1; track artist.artist; let i = $index) {
                     <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                      <td class="pr-5 py-1.5">
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-6 py-1.5">
                         <div class="w-10 h-10 rounded-full overflow-hidden bg-white/10">
                           @if (coverArtAvailable() && artist.artist_id) {
                             <img [src]="coverUrl(artist.artist_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
                           }
                         </div>
                       </td>
-                      <td class="max-w-0 pr-3 py-1.5">
+                      <td class="max-w-0 pr-4 py-1.5">
                         <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
                         <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks</p>
                       </td>
-                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ artist.plays }}</td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ artist.plays }}</td>
                       <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours }}h</td>
                     </tr>
                   }
@@ -225,26 +225,26 @@
             <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
                 <col class="w-6" />
-                <col class="w-10" />
+                <col class="w-16" />
                 <col />
                 <col class="w-14" />
                 <col class="w-12" />
               </colgroup>
               <thead>
                 <tr>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">#</th>
-                  <th class="pb-2 pr-5 border-b border-white/10"></th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-3 border-b border-white/10">Album</th>
-                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-3 border-b border-white/10">Plays</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
+                  <th class="pb-2 pr-6 border-b border-white/10"></th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Album</th>
+                  <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">Plays</th>
                   <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Min</th>
                 </tr>
               </thead>
             </table>
-            <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+            <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-6" />
-                  <col class="w-10" />
+                  <col class="w-16" />
                   <col />
                   <col class="w-14" />
                   <col class="w-12" />
@@ -252,19 +252,19 @@
                 <tbody>
                   @for (album of topAlbums() | slice: 1; track album.album; let i = $index) {
                     <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-3 py-1.5">{{ i + 2 }}</td>
-                      <td class="pr-5 py-1.5">
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 2 }}</td>
+                      <td class="pr-6 py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10">
                           @if (coverArtAvailable() && album.album_id) {
                             <img [src]="coverUrl(album.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
                           }
                         </div>
                       </td>
-                      <td class="max-w-0 pr-3 py-1.5">
+                      <td class="max-w-0 pr-4 py-1.5">
                         <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
                         <p class="text-white/50 text-xs truncate">{{ album.album_artist }}</p>
                       </td>
-                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-3 py-1.5">{{ album.plays }}</td>
+                      <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ album.plays }}</td>
                       <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ album.total_minutes }}m</td>
                     </tr>
                   }
@@ -298,7 +298,7 @@
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-7" />
@@ -390,7 +390,7 @@
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-16" />
@@ -470,7 +470,7 @@
                     </tr>
                   </thead>
                 </table>
-                <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
                   <table class="w-full table-fixed border-collapse">
                     <colgroup>
                       <col class="w-6" />
@@ -505,24 +505,24 @@
           <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-6" />
-              <col class="w-10" />
+              <col class="w-16" />
               <col />
               <col class="w-24" />
             </colgroup>
             <thead>
               <tr>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10">#</th>
-                <th class="pb-2 pr-5 border-b border-white/10"></th>
+                <th class="pb-2 pr-6 border-b border-white/10"></th>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Late Night</th>
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-6" />
-                <col class="w-10" />
+                <col class="w-16" />
                 <col />
                 <col class="w-24" />
               </colgroup>
@@ -530,7 +530,7 @@
                 @for (track of lateNight(); track track.title; let i = $index) {
                   <tr>
                     <td class="text-white/30 text-sm font-black tabular-nums text-right pr-4 py-1.5">{{ i + 1 }}</td>
-                    <td class="pr-5 py-1.5">
+                    <td class="pr-6 py-1.5">
                       <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10">
                         @if (coverArtAvailable() && track.album_id) {
                           <img [src]="coverUrl(track.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
@@ -570,7 +570,7 @@
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col />
@@ -602,24 +602,24 @@
           <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
               <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-20" />
               <col />
               <col class="w-16" />
             </colgroup>
             <thead>
               <tr>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Month</th>
-                <th class="pb-2 pr-5 border-b border-white/10"></th>
+                <th class="pb-2 pr-6 border-b border-white/10"></th>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10">Track</th>
                 <th class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10">Plays</th>
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-14" />
-                <col class="w-12" />
+                <col class="w-20" />
                 <col />
                 <col class="w-16" />
               </colgroup>
@@ -627,7 +627,7 @@
                 @for (s of songOfMonth(); track s.month) {
                   <tr>
                     <td class="text-white/60 text-sm font-black uppercase tracking-wider pr-4 py-2">{{ formatMonth(s.month) }}</td>
-                    <td class="pr-5 py-2">
+                    <td class="pr-6 py-2">
                       <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg">
                         @if (coverArtAvailable() && s.album_id) {
                           <img [src]="coverUrl(s.album_id, 150)" alt="" class="w-full h-full object-cover" loading="lazy" />
@@ -670,7 +670,7 @@
               </tr>
             </thead>
           </table>
-          <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+          <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-20" />
@@ -753,7 +753,7 @@
                       </tr>
                     </thead>
                   </table>
-                  <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                  <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
                     <table class="w-full table-fixed border-collapse">
                       <colgroup>
                         <col class="w-8" />
@@ -795,7 +795,7 @@
                       </tr>
                     </thead>
                   </table>
-                  <div class="flex-1 overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
+                  <div class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px)]">
                     <table class="w-full table-fixed border-collapse">
                       <colgroup>
                         <col class="w-8" />
