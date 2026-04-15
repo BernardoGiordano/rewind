@@ -2,6 +2,10 @@
 
 A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.navidrome.org/) users. Rewind reads from your Navidrome data directly and turns your scrobble history into a rich, visual recap of your listening habits, broken down by year or across all time.
 
+![Demo2](assets/demo2.png)
+
+![Demo3](assets/demo3.png)
+
 ![Demo](assets/demo.png)
 
 ![Collage](assets/collage.png)
