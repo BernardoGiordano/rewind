@@ -71,9 +71,29 @@
     </div>
   </div>
 
+  <!-- Sidebar collapse toggle — half on right sidebar, half on main content -->
+  <button
+    type="button"
+    (click)="toggleSidebar()"
+    [attr.aria-expanded]="!sidebarCollapsed()"
+    [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+    title="Toggle sidebar"
+    class="hidden lg:flex fixed top-4 -translate-x-1/2 z-30 items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
+    [class]="sidebarCollapsed() ? 'left-16' : 'left-[22rem] xl:left-[24rem]'"
+  >
+    <ng-icon
+      [name]="sidebarCollapsed() ? 'heroChevronRight' : 'heroChevronLeft'"
+      class="w-4 h-4"
+      aria-hidden="true"
+    />
+  </button>
+
   <!-- RIGHT SIDEBAR — year chips + stat list -->
   <aside
-    class="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 px-5 py-10 overflow-y-auto">
+    class="hidden lg:flex lg:flex-col lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 overflow-y-auto transition-[width,filter] duration-200"
+    [class]="sidebarCollapsed()
+      ? 'lg:w-0 lg:border-r-0 lg:px-0 lg:py-0 lg:overflow-hidden blur-sm'
+      : 'lg:w-72 xl:w-80 border-r border-slate-200 dark:border-slate-800 px-5 py-10'">
 
     <!-- Year selector -->
     <div>
@@ -366,7 +386,8 @@
 
   <!-- MAIN CONTENT — card + sticky export -->
   <main
-    class="flex-1 lg:ml-[22rem] xl:ml-[24rem] flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen">
+    class="flex-1 flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen transition-[margin] duration-200"
+    [class]="sidebarCollapsed() ? 'lg:ml-16' : 'lg:ml-[22rem] xl:ml-[24rem]'">
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center">

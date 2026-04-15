@@ -15,6 +15,8 @@ import {
   heroArrowPath,
   heroCalendarDays,
   heroChartBar,
+  heroChevronLeft,
+  heroChevronRight,
   heroClock,
   heroEllipsisHorizontalCircle,
   heroFire,
@@ -78,6 +80,8 @@ import { CardsLandscape } from './components/cards-landscape/cards-landscape';
       heroPause,
       heroSun,
       heroHeart,
+      heroChevronLeft,
+      heroChevronRight,
     }),
   ],
 })
@@ -95,6 +99,7 @@ export class App {
   readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
   readonly isSmallScreen = signal(false);
   readonly storiesMode = signal(true);
+  readonly sidebarCollapsed = signal(false);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
   readonly exporting = signal(false);
@@ -166,6 +171,11 @@ export class App {
           this.storiesMode.set(storedStories === 'true');
         }
 
+        const storedSidebar = localStorage.getItem('rewind.sidebarCollapsed');
+        if (storedSidebar !== null) {
+          this.sidebarCollapsed.set(storedSidebar === 'true');
+        }
+
         const smallScreen = window.matchMedia('(max-width: 1023px)');
         this.isSmallScreen.set(smallScreen.matches);
         smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
@@ -207,6 +217,14 @@ export class App {
     this.cardMode.set(mode);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.cardMode', mode);
+    }
+  }
+
+  toggleSidebar(): void {
+    const next = !this.sidebarCollapsed();
+    this.sidebarCollapsed.set(next);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.sidebarCollapsed', String(next));
     }
   }
 
