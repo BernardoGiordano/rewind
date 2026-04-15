@@ -19,11 +19,11 @@ import {
   type TopSong,
 } from '../../models/stats';
 import { NavidromeService } from '../../services/navidrome.service';
-import { SlicePipe } from '@angular/common';
+import { DecimalPipe, SlicePipe } from '@angular/common';
 
 @Component({
   selector: 'app-cards-landscape',
-  imports: [CardShellComponent, SlicePipe],
+  imports: [CardShellComponent, SlicePipe, DecimalPipe],
   templateUrl: './cards-landscape.html',
 })
 export class CardsLandscape {
@@ -94,9 +94,7 @@ export class CardsLandscape {
     return months[parseInt(m, 10) - 1] ?? month;
   }
 
-  readonly maxMonthPlays = computed(() =>
-    Math.max(...this.monthlyTrends().map((m) => m.plays), 1),
-  );
+  readonly maxMonthPlays = computed(() => Math.max(...this.monthlyTrends().map((m) => m.plays), 1));
 
   readonly peakHour = computed(() => {
     const clock = this.listeningClock();
