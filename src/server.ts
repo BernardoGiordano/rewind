@@ -276,18 +276,22 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.id ORDER BY plays DESC LIMIT 100
+      GROUP BY mf.id ORDER BY total_minutes DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
-  return queryAll(db, `
+  return queryAll(
+    db,
+    `
     SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
       ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.id ORDER BY plays DESC LIMIT 100
-  `, [uid]);
+    GROUP BY mf.id ORDER BY total_minutes DESC LIMIT 100
+  `,
+    [uid],
+  );
 }
 
 function getTopArtists(db: Database, uid: string, year: number | null) {
@@ -324,24 +328,30 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.album_id ORDER BY plays DESC LIMIT 100
+      GROUP BY mf.album_id ORDER BY total_minutes DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
-  return queryAll(db, `
+  return queryAll(
+    db,
+    `
     SELECT mf.album, mf.album_artist, COUNT(*) AS plays,
       ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.album_id ORDER BY plays DESC LIMIT 100
-  `, [uid]);
+    GROUP BY mf.album_id ORDER BY total_minutes DESC LIMIT 100
+  `,
+    [uid],
+  );
 }
 
 function getTopGenres(db: Database, uid: string, year: number | null) {
   if (year) {
     const { startTs, endTs } = yearBounds(year);
-    return queryAll(db, `
+    return queryAll(
+      db,
+      `
       SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
       FROM scrobbles s
@@ -349,10 +359,14 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY plays DESC LIMIT 100
-    `, [uid, startTs, endTs]);
+      GROUP BY 1 ORDER BY total_hours DESC LIMIT 100
+    `,
+      [uid, startTs, endTs],
+    );
   }
-  return queryAll(db, `
+  return queryAll(
+    db,
+    `
     SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
     FROM scrobbles s
@@ -360,8 +374,10 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
       json_each(json_extract(mf.tags, '$.genre')) AS g
     WHERE s.user_id = ?
       AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY plays DESC LIMIT 100
-  `, [uid]);
+    GROUP BY 1 ORDER BY total_hours DESC LIMIT 100
+  `,
+    [uid],
+  );
 }
 
 function getListeningClock(db: Database, uid: string, year: number) {
@@ -406,7 +422,8 @@ function getDayOfWeek(db: Database, uid: string, year: number) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-    GROUP BY strftime('%w', s.submission_time, 'unixepoch') ORDER BY plays DESC
+    GROUP BY strftime('%w', s.submission_time, 'unixepoch')
+    ORDER BY ((CAST(strftime('%w', s.submission_time, 'unixepoch') AS INTEGER) + 6) % 7) ASC
   `, [uid, startTs, endTs]);
 }
 
@@ -486,7 +503,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY total_plays DESC LIMIT 100
+      GROUP BY decade ORDER BY total_hours DESC LIMIT 100
     `, [uid, startTs, endTs]);
   }
   return queryAll(db, `
@@ -496,7 +513,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY total_plays DESC LIMIT 100
+    GROUP BY decade ORDER BY total_hours DESC LIMIT 100
   `, [uid]);
 }
 
