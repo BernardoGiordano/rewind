@@ -1,34 +1,66 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild, PLATFORM_ID } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroMusicalNote, heroEllipsisHorizontalCircle, heroMicrophone, heroSquare3Stack3d, heroSparkles, heroClock, heroChartBar, heroCalendarDays, heroFire, heroMoon, heroArrowPath, heroTrophy, heroRadio, heroPlay, heroPause, heroSun, heroHeart } from '@ng-icons/heroicons/outline';
-import { NavidromeService } from './services/navidrome.service';
-import { CardShellComponent } from './components/card-shell';
 import {
-  type StatType,
-  type TopSong,
-  type TopArtist,
-  type TopAlbum,
-  type TopGenre,
-  type ListeningSummary,
-  type ListeningClock,
-  type MonthlyTrend,
+  heroArrowPath,
+  heroCalendarDays,
+  heroChartBar,
+  heroChevronLeft,
+  heroChevronRight,
+  heroClock,
+  heroEllipsisHorizontalCircle,
+  heroFire,
+  heroHeart,
+  heroMicrophone,
+  heroMoon,
+  heroMusicalNote,
+  heroPause,
+  heroPlay,
+  heroRadio,
+  heroSparkles,
+  heroSquare3Stack3d,
+  heroSun,
+  heroTrophy,
+} from '@ng-icons/heroicons/outline';
+import { NavidromeService } from './services/navidrome.service';
+import {
   type DayOfWeek,
-  type ListeningStreak,
-  type LateNightTrack,
-  type OnRepeatEntry,
-  type SongOfMonth,
   type FavoriteDecade,
+  type LateNightTrack,
+  type ListeningClock,
+  type ListeningStreak,
+  type ListeningSummary,
+  type MonthlyTrend,
+  type OnRepeatEntry,
   type RecapData,
+  type SongOfMonth,
   STAT_DEFINITIONS,
+  type StatType,
+  type TopAlbum,
+  type TopArtist,
+  type TopGenre,
+  type TopSong,
 } from './models/stats';
+import { CardsPortrait } from './components/cards-portrait/cards-portrait';
+import { CardsSquare } from './components/cards-square/cards-square';
+import { CardsLandscape } from './components/cards-landscape/cards-landscape';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardShellComponent, NgIcon],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -48,6 +80,8 @@ import {
       heroPause,
       heroSun,
       heroHeart,
+      heroChevronLeft,
+      heroChevronRight,
     }),
   ],
 })
@@ -56,11 +90,16 @@ export class App {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly cardElement = viewChild<ElementRef<HTMLElement>>('cardElement');
+  readonly squareCard = viewChild(CardsSquare);
+  readonly portraitCard = viewChild(CardsPortrait);
+  readonly landscapeCard = viewChild(CardsLandscape);
 
   readonly darkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
+  readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
+  readonly isSmallScreen = signal(false);
   readonly storiesMode = signal(true);
+  readonly sidebarCollapsed = signal(false);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
   readonly exporting = signal(false);
@@ -72,6 +111,14 @@ export class App {
   readonly selectedStat = signal<StatType>('summary');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  readonly selectedDef = computed(() =>
+    STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
+  );
+
+  readonly effectiveCardMode = computed(() =>
+    this.isSmallScreen() ? 'portrait' : this.cardMode(),
+  );
 
   // Stat data signals
   readonly summaryData = signal<ListeningSummary | null>(null);
@@ -89,42 +136,56 @@ export class App {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
+  // Bar width helpers using max values
+  protected maxGenrePlays = 0;
+  protected maxClockPlays = 0;
+  protected maxDayPlays = 0;
+  protected maxDecadePlays = 0;
+
   readonly visibleStats = computed(() => {
     const year = this.selectedYear();
-    return STAT_DEFINITIONS.filter(d => !d.yearOnly || year !== 'all-time');
+    return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
   });
-
-  readonly selectedDef = computed(() =>
-    STAT_DEFINITIONS.find(d => d.type === this.selectedStat()),
-  );
-
-  readonly currentGradient = computed(() => this.selectedDef()?.gradient ?? '');
-
-  readonly yearLabel = computed(() => {
-    const y = this.selectedYear();
-    return y === 'all-time' ? 'All Time' : y;
-  });
-
-  readonly coverArtAvailable = this.navidrome.coverArtAvailable;
-
-  coverUrl(id: string, size = 150): string {
-    return this.navidrome.coverUrl(id, size);
-  }
-
-  // Bar width helpers using max values
-  private maxGenrePlays = 0;
-  private maxClockPlays = 0;
-  private maxDayPlays = 0;
-  private maxDecadePlays = 0;
 
   constructor() {
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const storedTheme = localStorage.getItem('rewind.theme');
+        const prefersDark = storedTheme
+          ? storedTheme === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.darkMode.set(prefersDark);
         document.documentElement.classList.toggle('dark', prefersDark);
+
+        const storedCardMode = localStorage.getItem('rewind.cardMode');
+        if (
+          storedCardMode === 'portrait' ||
+          storedCardMode === 'square' ||
+          storedCardMode === 'landscape'
+        ) {
+          this.cardMode.set(storedCardMode);
+        }
+
+        const storedStories = localStorage.getItem('rewind.storiesMode');
+        if (storedStories !== null) {
+          this.storiesMode.set(storedStories === 'true');
+        }
+
+        const storedSidebar = localStorage.getItem('rewind.sidebarCollapsed');
+        if (storedSidebar !== null) {
+          this.sidebarCollapsed.set(storedSidebar === 'true');
+        }
+
+        const smallScreen = window.matchMedia('(max-width: 1023px)');
+        this.isSmallScreen.set(smallScreen.matches);
+        smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
       this.navidrome.loadConfig();
+      const maybeStartStories = () => {
+        if (this.storiesMode()) {
+          this.startStories();
+        }
+      };
       this.navidrome.getYears().subscribe({
         next: (years) => {
           this.years.set(years);
@@ -132,11 +193,11 @@ export class App {
             this.selectedYear.set(years[0]);
           }
           this.loadData();
-          this.startStories();
+          maybeStartStories();
         },
         error: () => {
           this.loadData();
-          this.startStories();
+          maybeStartStories();
         },
       });
     });
@@ -145,11 +206,26 @@ export class App {
   }
 
   toggleMobileMenu(): void {
-    this.mobileMenuOpen.update(v => !v);
+    this.mobileMenuOpen.update((v) => !v);
   }
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
+    this.cardMode.set(mode);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.cardMode', mode);
+    }
+  }
+
+  toggleSidebar(): void {
+    const next = !this.sidebarCollapsed();
+    this.sidebarCollapsed.set(next);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.sidebarCollapsed', String(next));
+    }
   }
 
   toggleDarkMode(): void {
@@ -157,6 +233,7 @@ export class App {
     this.darkMode.set(next);
     if (isPlatformBrowser(this.platformId)) {
       document.documentElement.classList.toggle('dark', next);
+      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
     }
   }
 
@@ -166,6 +243,9 @@ export class App {
       this.stopStories();
     } else {
       this.startStories();
+    }
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.storiesMode', String(this.storiesMode()));
     }
   }
 
@@ -200,7 +280,7 @@ export class App {
     if (!isPlatformBrowser(this.platformId)) return;
     const stats = this.visibleStats();
     const currentType = this.selectedStat();
-    const idx = stats.findIndex(s => s.type === currentType);
+    const idx = stats.findIndex((s) => s.type === currentType);
     this.storiesIndex.set(idx >= 0 ? idx : 0);
     this.storiesMode.set(true);
     this.storiesPaused.set(false);
@@ -238,7 +318,7 @@ export class App {
   selectYear(year: string): void {
     this.selectedYear.set(year);
     const stat = this.selectedStat();
-    const def = STAT_DEFINITIONS.find(d => d.type === stat);
+    const def = STAT_DEFINITIONS.find((d) => d.type === stat);
     if (def?.yearOnly && year === 'all-time') {
       this.selectedStat.set('summary');
     }
@@ -250,7 +330,7 @@ export class App {
     // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
     if (this.storiesMode()) {
       const stats = this.visibleStats();
-      const idx = stats.findIndex(s => s.type === type);
+      const idx = stats.findIndex((s) => s.type === type);
       if (idx >= 0 && idx !== this.storiesIndex()) {
         this.storiesIndex.set(idx);
         this.storiesPaused.set(false);
@@ -281,12 +361,13 @@ export class App {
   }
 
   async exportCard(): Promise<void> {
-    const el = this.cardElement()?.nativeElement;
+    const card = this.landscapeCard() ?? this.squareCard() ?? this.portraitCard();
+    const el = card?.el.nativeElement;
     if (!el) return;
 
     this.exporting.set(true);
     // Allow Angular to re-render (removes rounded corners via noRound input)
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const { default: html2canvas } = await import('html2canvas-pro');
     const canvas = await html2canvas(el, {
@@ -302,37 +383,6 @@ export class App {
     link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  }
-
-  formatNum(n: number): string {
-    if (n >= 1000) return n.toLocaleString();
-    return String(n);
-  }
-
-  padHour(h: number): string {
-    return String(h).padStart(2, '0');
-  }
-
-  formatMonth(month: string): string {
-    const [y, m] = month.split('-');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[parseInt(m, 10) - 1] ?? month;
-  }
-
-  genreBarWidth(plays: number): number {
-    return this.maxGenrePlays > 0 ? (plays / this.maxGenrePlays) * 100 : 0;
-  }
-
-  clockBarWidth(plays: number): number {
-    return this.maxClockPlays > 0 ? (plays / this.maxClockPlays) * 100 : 0;
-  }
-
-  dayBarWidth(plays: number): number {
-    return this.maxDayPlays > 0 ? (plays / this.maxDayPlays) * 100 : 0;
-  }
-
-  decadeBarWidth(plays: number): number {
-    return this.maxDecadePlays > 0 ? (plays / this.maxDecadePlays) * 100 : 0;
   }
 
   private setStatData(type: StatType, data: unknown): void {
@@ -352,13 +402,13 @@ export class App {
       case 'top-genres': {
         const genres = data as TopGenre[];
         this.topGenres.set(genres);
-        this.maxGenrePlays = Math.max(...genres.map(g => g.plays), 1);
+        this.maxGenrePlays = Math.max(...genres.map((g) => g.plays), 1);
         break;
       }
       case 'listening-clock': {
         const clock = data as ListeningClock[];
         this.listeningClock.set(clock);
-        this.maxClockPlays = Math.max(...clock.map(c => c.plays), 1);
+        this.maxClockPlays = Math.max(...clock.map((c) => c.plays), 1);
         break;
       }
       case 'monthly-trends':
@@ -367,7 +417,7 @@ export class App {
       case 'day-of-week': {
         const days = data as DayOfWeek[];
         this.dayOfWeek.set(days);
-        this.maxDayPlays = Math.max(...days.map(d => d.plays), 1);
+        this.maxDayPlays = Math.max(...days.map((d) => d.plays), 1);
         break;
       }
       case 'streak':
@@ -385,7 +435,7 @@ export class App {
       case 'favorite-decades': {
         const decades = data as FavoriteDecade[];
         this.favoriteDecades.set(decades);
-        this.maxDecadePlays = Math.max(...decades.map(d => d.total_plays), 1);
+        this.maxDecadePlays = Math.max(...decades.map((d) => d.total_plays), 1);
         break;
       }
       case 'recap':
