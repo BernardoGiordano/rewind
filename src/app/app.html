@@ -1,5 +1,5 @@
 <!-- Two-column sidebar layout -->
-<div class="flex min-h-screen bg-white dark:bg-slate-950">
+<div class="flex h-dvh bg-white dark:bg-slate-950">
 
   <!-- LEFT BAR — vertical rotated branding + stat label + card mode toggle -->
   <div
@@ -90,7 +90,7 @@
 
   <!-- RIGHT SIDEBAR — year chips + stat list -->
   <aside
-    class="hidden lg:flex lg:flex-col lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 overflow-y-auto transition-[width,filter] duration-200"
+    class="hidden lg:flex lg:flex-col lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 overflow-y-auto overflow-x-hidden transition-[width,filter] duration-200"
     [class]="sidebarCollapsed()
       ? 'lg:w-0 lg:border-r-0 lg:px-0 lg:py-0 lg:overflow-hidden blur-sm'
       : 'lg:w-72 xl:w-80 border-r border-slate-200 dark:border-slate-800 px-5 py-10'">
@@ -141,25 +141,6 @@
             }
           </button>
 
-          @if (customPickerOpen() && !isSmallScreen()) {
-            <div
-              class="fixed inset-0 z-30"
-              (click)="closeCustomPicker()"
-              aria-hidden="true"
-            ></div>
-            <div
-              class="absolute left-0 top-full mt-2 z-40 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700"
-              role="dialog"
-              aria-label="Pick a custom date range"
-            >
-              <app-date-range-picker
-                [initialFrom]="customRange()?.from ?? null"
-                [initialTo]="customRange()?.to ?? null"
-                (rangeSelected)="onCustomRangeSelected($event)"
-                (cleared)="onCustomRangeCleared()"
-              />
-            </div>
-          }
         </div>
       </div>
     </div>
@@ -464,8 +445,8 @@
     </div>
   </div>
 
-  <!-- Mobile custom date picker overlay -->
-  @if (customPickerOpen() && isSmallScreen()) {
+  <!-- Custom date picker overlay (mobile + desktop) -->
+  @if (customPickerOpen()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="fixed inset-0 bg-black/40" (click)="closeCustomPicker()" aria-hidden="true"></div>
       <div
@@ -485,7 +466,7 @@
 
   <!-- MAIN CONTENT — card + sticky export -->
   <main
-    class="flex-1 flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 lg:min-h-screen transition-[margin] duration-200"
+    class="flex-1 flex flex-col bg-white dark:bg-slate-950 pt-14 lg:pt-0 transition-[margin] duration-200 overflow-y-auto"
     [class]="sidebarCollapsed() ? 'lg:ml-16' : 'lg:ml-[22rem] xl:ml-[24rem]'">
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
