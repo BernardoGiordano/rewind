@@ -32,7 +32,8 @@ import {
   heroSun,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
-import { NavidromeService } from './services/navidrome.service';
+import { NavidromeService, type StatRange } from './services/navidrome.service';
+import { DateRangePicker } from './components/date-range-picker/date-range-picker';
 import {
   type DayOfWeek,
   type FavoriteDecade,
@@ -60,7 +61,7 @@ import { CardsLandscape } from './components/cards-landscape/cards-landscape';
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -108,9 +109,21 @@ export class App {
 
   readonly years = signal<string[]>([]);
   readonly selectedYear = signal<string>('all-time');
+  readonly customRange = signal<{ from: string; to: string } | null>(null);
+  readonly customPickerOpen = signal(false);
   readonly selectedStat = signal<StatType>('summary');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  readonly rangeLabel = computed(() => {
+    const y = this.selectedYear();
+    if (y === 'all-time') return 'All Time';
+    if (y === 'custom') {
+      const r = this.customRange();
+      return r ? formatRangeLabel(r.from, r.to) : 'Custom';
+    }
+    return y;
+  });
 
   readonly selectedDef = computed(() =>
     STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
@@ -147,6 +160,16 @@ export class App {
     return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
   });
 
+  private currentRange(): StatRange {
+    const y = this.selectedYear();
+    if (y === 'all-time') return { kind: 'all-time' };
+    if (y === 'custom') {
+      const r = this.customRange();
+      return r ? { kind: 'custom', from: r.from, to: r.to } : { kind: 'all-time' };
+    }
+    return { kind: 'year', year: y };
+  }
+
   constructor() {
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
@@ -176,6 +199,19 @@ export class App {
           this.sidebarCollapsed.set(storedSidebar === 'true');
         }
 
+        const storedRange = localStorage.getItem('rewind.customRange');
+        if (storedRange) {
+          try {
+            const parsed = JSON.parse(storedRange) as { from: string; to: string };
+            if (parsed?.from && parsed?.to) {
+              this.customRange.set(parsed);
+              this.selectedYear.set('custom');
+            }
+          } catch {
+            // ignore corrupt entry
+          }
+        }
+
         const smallScreen = window.matchMedia('(max-width: 1023px)');
         this.isSmallScreen.set(smallScreen.matches);
         smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
@@ -189,7 +225,7 @@ export class App {
       this.navidrome.getYears().subscribe({
         next: (years) => {
           this.years.set(years);
-          if (years.length > 0) {
+          if (years.length > 0 && this.selectedYear() === 'all-time') {
             this.selectedYear.set(years[0]);
           }
           this.loadData();
@@ -325,6 +361,36 @@ export class App {
     this.loadData();
   }
 
+  toggleCustomPicker(): void {
+    this.customPickerOpen.update((v) => !v);
+  }
+
+  closeCustomPicker(): void {
+    this.customPickerOpen.set(false);
+  }
+
+  onCustomRangeSelected(range: { from: string; to: string }): void {
+    this.customRange.set(range);
+    this.selectedYear.set('custom');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.customRange', JSON.stringify(range));
+    }
+    this.customPickerOpen.set(false);
+    this.loadData();
+  }
+
+  onCustomRangeCleared(): void {
+    this.customRange.set(null);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('rewind.customRange');
+    }
+    if (this.selectedYear() === 'custom') {
+      const years = this.years();
+      this.selectedYear.set(years.length > 0 ? years[0] : 'all-time');
+      this.loadData();
+    }
+  }
+
   selectStat(type: StatType): void {
     this.selectedStat.set(type);
     // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
@@ -341,14 +407,13 @@ export class App {
   }
 
   loadData(): void {
-    const year = this.selectedYear();
     const type = this.selectedStat();
-    const yearParam = year === 'all-time' ? null : year;
+    const range = this.currentRange();
 
     this.loading.set(true);
     this.error.set(null);
 
-    this.navidrome.getStat(type, yearParam).subscribe({
+    this.navidrome.getStat(type, range).subscribe({
       next: (data) => {
         this.setStatData(type, data);
         this.loading.set(false);
@@ -443,4 +508,78 @@ export class App {
         break;
     }
   }
+}
+
+const MONTH_FULL = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const MONTH_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+function parseLocalIso(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function sameDate(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear()
+    && a.getMonth() === b.getMonth()
+    && a.getDate() === b.getDate();
+}
+
+export function formatRangeLabel(fromIso: string, toIso: string): string {
+  const from = parseLocalIso(fromIso);
+  const to = parseLocalIso(toIso);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const currentYear = today.getFullYear();
+
+  // Last week: rolling 7-day window ending today or yesterday
+  const sevenAgo = new Date(today);
+  sevenAgo.setDate(today.getDate() - 7);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const eightAgo = new Date(today);
+  eightAgo.setDate(today.getDate() - 8);
+  if (
+    (sameDate(from, sevenAgo) && sameDate(to, today)) ||
+    (sameDate(from, eightAgo) && sameDate(to, yesterday))
+  ) {
+    return 'Last Week';
+  }
+
+  // Last month (entire previous calendar month)
+  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+  if (sameDate(from, lastMonthStart) && sameDate(to, lastMonthEnd)) return 'Last Month';
+
+  // Any full calendar month
+  if (
+    from.getDate() === 1 &&
+    from.getFullYear() === to.getFullYear() &&
+    from.getMonth() === to.getMonth()
+  ) {
+    const monthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+    if (sameDate(to, monthEnd)) {
+      const year = from.getFullYear();
+      return year === currentYear
+        ? MONTH_FULL[from.getMonth()]
+        : `${MONTH_FULL[from.getMonth()]} ${year}`;
+    }
+  }
+
+  const sameYear = from.getFullYear() === to.getFullYear();
+  const short = (d: Date) => `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  const withYear = (d: Date) => `${short(d)}, ${d.getFullYear()}`;
+
+  if (sameYear) {
+    const year = from.getFullYear();
+    if (year === currentYear) return `${short(from)} – ${short(to)}`;
+    return `${short(from)} – ${short(to)}, ${year}`;
+  }
+  return `${withYear(from)} – ${withYear(to)}`;
 }

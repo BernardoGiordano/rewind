@@ -51,6 +51,38 @@ function yearBounds(year: number): { startTs: number; endTs: number } {
   return { startTs, endTs };
 }
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function customBounds(from: string, to: string): { startTs: number; endTs: number } {
+  if (!ISO_DATE_RE.test(from) || !ISO_DATE_RE.test(to)) {
+    throw new Error('Invalid date format; expected YYYY-MM-DD');
+  }
+  const startTs = Math.floor(new Date(`${from}T00:00:00Z`).getTime() / 1000);
+  const toDate = new Date(`${to}T00:00:00Z`);
+  toDate.setUTCDate(toDate.getUTCDate() + 1);
+  const endTs = Math.floor(toDate.getTime() / 1000);
+  if (!Number.isFinite(startTs) || !Number.isFinite(endTs) || endTs <= startTs) {
+    throw new Error('Invalid date range');
+  }
+  return { startTs, endTs };
+}
+
+type Range = { startTs: number; endTs: number } | null;
+
+function resolveRange(
+  yearParam: string | undefined,
+  fromParam: string | undefined,
+  toParam: string | undefined,
+): Range {
+  if (fromParam && toParam) return customBounds(fromParam, toParam);
+  if (yearParam) {
+    const y = parseInt(yearParam, 10);
+    if (!Number.isFinite(y)) throw new Error('Invalid year');
+    return yearBounds(y);
+  }
+  return null;
+}
+
 const userId = () => process.env['NAVIDROME_USER_ID'] ?? '';
 
 // --- Navidrome Subsonic API config ---
@@ -172,55 +204,57 @@ app.get('/api/years', (_req, res) => {
 app.get('/api/stats/:type', (req, res) => {
   const statType = req.params['type'];
   const yearParam = req.query['year'] as string | undefined;
-  const year = yearParam ? parseInt(yearParam, 10) : null;
+  const fromParam = req.query['from'] as string | undefined;
+  const toParam = req.query['to'] as string | undefined;
 
   try {
+    const range = resolveRange(yearParam, fromParam, toParam);
     const db = getDb();
     const uid = userId();
     let result: unknown;
 
     switch (statType) {
       case 'summary':
-        result = getSummary(db, uid, year);
+        result = getSummary(db, uid, range);
         break;
       case 'top-songs':
-        result = getTopSongs(db, uid, year);
+        result = getTopSongs(db, uid, range);
         break;
       case 'top-artists':
-        result = getTopArtists(db, uid, year);
+        result = getTopArtists(db, uid, range);
         break;
       case 'top-albums':
-        result = getTopAlbums(db, uid, year);
+        result = getTopAlbums(db, uid, range);
         break;
       case 'top-genres':
-        result = getTopGenres(db, uid, year);
+        result = getTopGenres(db, uid, range);
         break;
       case 'listening-clock':
-        result = year ? getListeningClock(db, uid, year) : [];
+        result = range ? getListeningClock(db, uid, range) : [];
         break;
       case 'monthly-trends':
-        result = year ? getMonthlyTrends(db, uid, year) : [];
+        result = range ? getMonthlyTrends(db, uid, range) : [];
         break;
       case 'day-of-week':
-        result = year ? getDayOfWeek(db, uid, year) : [];
+        result = range ? getDayOfWeek(db, uid, range) : [];
         break;
       case 'streak':
-        result = year ? getStreak(db, uid, year) : [];
+        result = range ? getStreak(db, uid, range) : [];
         break;
       case 'late-night':
-        result = year ? getLateNight(db, uid, year) : [];
+        result = range ? getLateNight(db, uid, range) : [];
         break;
       case 'on-repeat':
-        result = year ? getOnRepeat(db, uid, year) : [];
+        result = range ? getOnRepeat(db, uid, range) : [];
         break;
       case 'song-of-month':
-        result = year ? getSongOfMonth(db, uid, year) : [];
+        result = range ? getSongOfMonth(db, uid, range) : [];
         break;
       case 'favorite-decades':
-        result = getFavoriteDecades(db, uid, year);
+        result = getFavoriteDecades(db, uid, range);
         break;
       case 'recap':
-        result = getRecap(db, uid, year);
+        result = getRecap(db, uid, range);
         break;
       default:
         res.status(404).json({ error: `Unknown stat type: ${statType}` });
@@ -230,15 +264,14 @@ app.get('/api/stats/:type', (req, res) => {
     noCache(res);
     res.json(result);
   } catch (err: unknown) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
 // --- Query functions ---
 
-function getSummary(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getSummary(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryOne(db, `
       SELECT
         COUNT(*) AS total_plays,
@@ -250,7 +283,7 @@ function getSummary(db: Database, uid: string, year: number | null) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-    `, [uid, startTs, endTs]);
+    `, [uid, range.startTs, range.endTs]);
   }
   return queryOne(db, `
     SELECT
@@ -266,9 +299,8 @@ function getSummary(db: Database, uid: string, year: number | null) {
   `, [uid]);
 }
 
-function getTopSongs(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getTopSongs(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryAll(db, `
       SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
         ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
@@ -277,7 +309,7 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY mf.id ORDER BY total_minutes DESC LIMIT 100
-    `, [uid, startTs, endTs]);
+    `, [uid, range.startTs, range.endTs]);
   }
   return queryAll(
     db,
@@ -294,9 +326,8 @@ function getTopSongs(db: Database, uid: string, year: number | null) {
   );
 }
 
-function getTopArtists(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getTopArtists(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryAll(db, `
       SELECT mf.artist, COUNT(*) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
@@ -305,7 +336,7 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 100
-    `, [uid, startTs, endTs]);
+    `, [uid, range.startTs, range.endTs]);
   }
   return queryAll(db, `
     SELECT mf.artist, COUNT(*) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
@@ -318,9 +349,8 @@ function getTopArtists(db: Database, uid: string, year: number | null) {
   `, [uid]);
 }
 
-function getTopAlbums(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getTopAlbums(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryAll(db, `
       SELECT mf.album, mf.album_artist, COUNT(*) AS plays,
         ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes,
@@ -329,7 +359,7 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY mf.album_id ORDER BY total_minutes DESC LIMIT 100
-    `, [uid, startTs, endTs]);
+    `, [uid, range.startTs, range.endTs]);
   }
   return queryAll(
     db,
@@ -346,9 +376,8 @@ function getTopAlbums(db: Database, uid: string, year: number | null) {
   );
 }
 
-function getTopGenres(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getTopGenres(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryAll(
       db,
       `
@@ -361,7 +390,7 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
       GROUP BY 1 ORDER BY total_hours DESC LIMIT 100
     `,
-      [uid, startTs, endTs],
+      [uid, range.startTs, range.endTs],
     );
   }
   return queryAll(
@@ -380,8 +409,8 @@ function getTopGenres(db: Database, uid: string, year: number | null) {
   );
 }
 
-function getListeningClock(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getListeningClock(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     SELECT CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER) AS hour,
       COUNT(*) AS plays,
@@ -393,8 +422,8 @@ function getListeningClock(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getMonthlyTrends(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getMonthlyTrends(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
       COUNT(*) AS plays,
@@ -408,8 +437,8 @@ function getMonthlyTrends(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getDayOfWeek(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getDayOfWeek(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     SELECT
       CASE CAST(strftime('%w', s.submission_time, 'unixepoch') AS INTEGER)
@@ -427,8 +456,8 @@ function getDayOfWeek(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getStreak(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getStreak(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     WITH daily_plays AS (
       SELECT DISTINCT date(s.submission_time, 'unixepoch') AS play_date
@@ -446,8 +475,8 @@ function getStreak(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getLateNight(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getLateNight(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     SELECT mf.title, mf.artist, COUNT(*) AS late_night_plays,
       mf.album_id, mf.artist_id
@@ -459,8 +488,8 @@ function getLateNight(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getOnRepeat(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     SELECT date(s.submission_time, 'unixepoch') AS the_date,
       mf.title, mf.artist, COUNT(*) AS plays_that_day
@@ -472,8 +501,8 @@ function getOnRepeat(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getSongOfMonth(db: Database, uid: string, year: number) {
-  const { startTs, endTs } = yearBounds(year);
+function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
+  const { startTs, endTs } = range;
   return queryAll(db, `
     WITH monthly_counts AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
@@ -492,9 +521,8 @@ function getSongOfMonth(db: Database, uid: string, year: number) {
   `, [uid, startTs, endTs]);
 }
 
-function getFavoriteDecades(db: Database, uid: string, year: number | null) {
-  if (year) {
-    const { startTs, endTs } = yearBounds(year);
+function getFavoriteDecades(db: Database, uid: string, range: Range) {
+  if (range) {
     return queryAll(db, `
       SELECT (mf.year / 10) * 10 AS decade, COUNT(*) AS total_plays,
         COUNT(DISTINCT mf.artist) AS unique_artists,
@@ -504,7 +532,7 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
       GROUP BY decade ORDER BY total_hours DESC LIMIT 100
-    `, [uid, startTs, endTs]);
+    `, [uid, range.startTs, range.endTs]);
   }
   return queryAll(db, `
     SELECT (mf.year / 10) * 10 AS decade, SUM(a.play_count) AS total_plays,
@@ -517,11 +545,11 @@ function getFavoriteDecades(db: Database, uid: string, year: number | null) {
   `, [uid]);
 }
 
-function getRecap(db: Database, uid: string, year: number | null) {
-  const topArtists = getTopArtists(db, uid, year) as Array<{ artist: string; plays: number; unique_tracks: number; total_hours: number; artist_id: string }>;
-  const topSongs = getTopSongs(db, uid, year) as Array<{ title: string; artist: string; album: string; plays: number; total_minutes: number; album_id: string; artist_id: string }>;
-  const summary = getSummary(db, uid, year) as { total_hours: number };
-  const topGenres = getTopGenres(db, uid, year) as Array<{ genre: string; plays: number; total_hours: number }>;
+function getRecap(db: Database, uid: string, range: Range) {
+  const topArtists = getTopArtists(db, uid, range) as Array<{ artist: string; plays: number; unique_tracks: number; total_hours: number; artist_id: string }>;
+  const topSongs = getTopSongs(db, uid, range) as Array<{ title: string; artist: string; album: string; plays: number; total_minutes: number; album_id: string; artist_id: string }>;
+  const summary = getSummary(db, uid, range) as { total_hours: number };
+  const topGenres = getTopGenres(db, uid, range) as Array<{ genre: string; plays: number; total_hours: number }>;
 
   return {
     top_artist: topArtists[0] ?? null,

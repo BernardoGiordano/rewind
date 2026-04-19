@@ -36,7 +36,7 @@ export class CardsLandscape {
   readonly maxDecadePlays = input.required<number>();
 
   readonly selectedDef = input.required<StatDefinition | undefined>();
-  readonly selectedYear = input.required<string>();
+  readonly rangeLabel = input.required<string>();
   readonly selectedStat = input.required<StatType>();
   readonly summaryData = input.required<ListeningSummary | null>();
   readonly topSongs = input.required<TopSong[]>();
@@ -59,10 +59,7 @@ export class CardsLandscape {
 
   readonly currentGradient = computed(() => this.selectedDef()?.gradient ?? '');
 
-  readonly yearLabel = computed(() => {
-    const y = this.selectedYear();
-    return y === 'all-time' ? 'All Time' : y;
-  });
+  readonly yearLabel = computed(() => this.rangeLabel());
 
   readonly coverArtAvailable = this.navidrome.coverArtAvailable;
 
