@@ -10,6 +10,7 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
   template: `
     <div
       [class]="containerClass()"
+      [style.background-image]="gradientStyle() || null"
     >
       <div class="px-8 pt-8 flex items-center justify-between shrink-0">
         <span class="text-white/60 text-sm font-mono tracking-[0.2em] uppercase">Navidrome Rewind</span>
@@ -33,12 +34,15 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
 })
 export class CardShellComponent {
   gradient = input.required<string>();
+  gradientStyle = input<string | null>(null);
   yearLabel = input.required<string>();
   noRound = input<boolean>(false);
 
-  containerClass = computed(() =>
-    'w-full h-full overflow-hidden relative flex flex-col bg-gradient-to-br ' +
-    (this.noRound() ? '' : 'lg:rounded-xl ') +
-    this.gradient()
-  );
+  containerClass = computed(() => {
+    const base =
+      'w-full h-full overflow-hidden relative flex flex-col ' +
+      (this.noRound() ? '' : 'lg:rounded-xl ');
+    if (this.gradientStyle()) return base;
+    return base + 'bg-gradient-to-br ' + this.gradient();
+  });
 }

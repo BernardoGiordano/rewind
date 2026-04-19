@@ -39,7 +39,7 @@
     }
 
     @case ('top-songs') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Songs</h2>
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
@@ -118,7 +118,7 @@
     }
 
     @case ('top-artists') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Artists</h2>
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
@@ -198,7 +198,7 @@
     }
 
     @case ('top-albums') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Albums</h2>
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
@@ -498,7 +498,7 @@
     }
 
     @case ('late-night') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()" [noRound]="true">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">Late Night Vibes</h2>
         <p class="text-white/40 text-sm mb-4 shrink-0">Songs you listened to between midnight and 5 AM</p>
         <div class="flex-1 flex flex-col min-h-0">
@@ -703,7 +703,7 @@
     }
 
     @case ('recap') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()" [noRound]="true">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()" [noRound]="true">
         @if (recapData(); as d) {
           <div class="flex-1 flex flex-col min-h-0 gap-4">
             <!-- Top stats -->

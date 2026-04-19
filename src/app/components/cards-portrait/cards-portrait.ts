@@ -1,4 +1,5 @@
-import { Component, computed, ElementRef, inject, input } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, input, signal } from '@angular/core';
+import { DominantColorService } from '../../services/dominant-color.service';
 import { CardShellComponent } from '../card-shell';
 import {
   type DayOfWeek,
@@ -29,6 +30,36 @@ import { SlicePipe } from '@angular/common';
 export class CardsPortrait {
   readonly el = inject(ElementRef<HTMLElement>);
   private readonly navidrome = inject(NavidromeService);
+  private readonly dominantColor = inject(DominantColorService);
+
+  readonly dynamicGradientStyle = signal<string | null>(null);
+
+  readonly heroCoverId = computed<string | undefined>(() => {
+    switch (this.selectedStat()) {
+      case 'top-songs': return this.topSongs()[0]?.album_id;
+      case 'top-artists': return this.topArtists()[0]?.artist_id;
+      case 'top-albums': return this.topAlbums()[0]?.album_id;
+      case 'late-night': return this.lateNight()[0]?.album_id;
+      case 'recap': return this.recapData()?.top_artist?.artist_id;
+      default: return undefined;
+    }
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.heroCoverId();
+      if (!id || !this.coverArtAvailable()) {
+        this.dynamicGradientStyle.set(null);
+        return;
+      }
+      const url = this.coverUrl(id, 200);
+      this.dominantColor.gradientFor(url).then((g) => {
+        if (this.heroCoverId() === id) {
+          this.dynamicGradientStyle.set(g);
+        }
+      });
+    });
+  }
 
   readonly maxGenrePlays = input.required<number>();
   readonly maxClockPlays = input.required<number>();

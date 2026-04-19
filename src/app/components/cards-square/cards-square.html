@@ -39,7 +39,7 @@
     }
 
     @case ('top-songs') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Songs</h2>
         <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
           @for (song of topSongs() | slice: 0:11; track song.title; let i = $index) {
@@ -83,7 +83,7 @@
     }
 
     @case ('top-artists') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Artists</h2>
         <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
           @for (artist of topArtists() | slice: 0:11; track artist.artist; let i = $index) {
@@ -127,7 +127,7 @@
     }
 
     @case ('top-albums') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Albums</h2>
         <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
           @for (album of topAlbums() | slice: 0:11; track album.album; let i = $index) {
@@ -280,7 +280,7 @@
     }
 
     @case ('late-night') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">Late Night Vibes</h2>
         <p class="text-white/40 text-base mb-6">Songs you listened to between midnight and 5 AM</p>
         <div class="flex-1 grid grid-cols-2 gap-x-6 gap-y-4 content-start">
@@ -373,7 +373,7 @@
     }
 
     @case ('recap') {
-      <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
+      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
         @if (recapData(); as d) {
           <div class="flex-1 flex gap-5 min-h-0">
             <!-- Left: top artist hero -->
