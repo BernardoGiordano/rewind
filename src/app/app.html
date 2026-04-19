@@ -141,7 +141,7 @@
             }
           </button>
 
-          @if (customPickerOpen()) {
+          @if (customPickerOpen() && !isSmallScreen()) {
             <div
               class="fixed inset-0 z-30"
               (click)="closeCustomPicker()"
@@ -330,8 +330,49 @@
           role="menu"
           aria-labelledby="mobile-menu-trigger"
           aria-orientation="vertical"
-          class="absolute right-0 top-full mt-2 w-52 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-20 py-1 focus:outline-none"
+          class="absolute right-0 top-full mt-2 w-64 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-20 py-1 focus:outline-none"
         >
+          <!-- Interval selector -->
+          <div class="px-4 py-3">
+            <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Interval</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                (click)="selectYear('all-time'); closeMobileMenu()"
+                class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                [class]="selectedYear() === 'all-time'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'"
+              >All Time</button>
+              @for (y of years(); track y) {
+                <button
+                  type="button"
+                  (click)="selectYear(y); closeMobileMenu()"
+                  class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                  [class]="selectedYear() === y
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'"
+                >{{ y }}</button>
+              }
+              <button
+                type="button"
+                (click)="closeMobileMenu(); toggleCustomPicker()"
+                class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                [class]="selectedYear() === 'custom'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'"
+              >
+                @if (selectedYear() === 'custom' && customRange()) {
+                  {{ rangeLabel() }}
+                } @else {
+                  Custom…
+                }
+              </button>
+            </div>
+          </div>
+
+          <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+
           <button
             type="button"
             role="menuitem"
@@ -422,6 +463,25 @@
       }
     </div>
   </div>
+
+  <!-- Mobile custom date picker overlay -->
+  @if (customPickerOpen() && isSmallScreen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-black/40" (click)="closeCustomPicker()" aria-hidden="true"></div>
+      <div
+        class="relative z-10 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700"
+        role="dialog"
+        aria-label="Pick a custom date range"
+      >
+        <app-date-range-picker
+          [initialFrom]="customRange()?.from ?? null"
+          [initialTo]="customRange()?.to ?? null"
+          (rangeSelected)="onCustomRangeSelected($event)"
+          (cleared)="onCustomRangeCleared()"
+        />
+      </div>
+    </div>
+  }
 
   <!-- MAIN CONTENT — card + sticky export -->
   <main
