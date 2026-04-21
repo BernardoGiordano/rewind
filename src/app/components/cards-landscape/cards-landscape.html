@@ -44,7 +44,13 @@
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
           @if (topSongs()[0]; as song) {
-            <div class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0">
+            <div
+              class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0 cursor-pointer transition ring-1 ring-transparent hover:ring-2 hover:ring-white/60 hover:bg-white/15"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(song.artist_id, $event)"
+              (keydown.enter)="openArtist(song.artist_id, $event)"
+            >
               <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
                 @if (coverArtAvailable() && song.album_id) {
                   <img [src]="coverUrl(song.album_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
@@ -92,8 +98,11 @@
                 </colgroup>
                 <tbody>
                   @for (song of topSongs() | slice: 1; track song.title; let i = $index) {
-                    <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5">{{ i + 2 }}</td>
+                    <tr
+                      class="cursor-pointer transition-colors hover:bg-white/10 group"
+                      (click)="openArtist(song.artist_id, $event)"
+                    >
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10 mx-auto">
                           @if (coverArtAvailable() && song.album_id) {
@@ -102,7 +111,7 @@
                         </div>
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
-                        <p class="text-white font-semibold text-sm truncate">{{ song.title }}</p>
+                        <p class="text-white font-semibold text-sm truncate group-hover:underline decoration-white/50 underline-offset-2">{{ song.title }}</p>
                         <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                       </td>
                       <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ song.plays }}</td>
@@ -123,7 +132,13 @@
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
           @if (topArtists()[0]; as artist) {
-            <div class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0">
+            <div
+              class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0 cursor-pointer transition ring-1 ring-transparent hover:ring-2 hover:ring-white/60 hover:bg-white/15"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(artist.artist_id, $event)"
+              (keydown.enter)="openArtist(artist.artist_id, $event)"
+            >
               <div class="flex-1 flex items-center justify-center min-h-0">
                 <div class="aspect-square h-full max-h-full rounded-full overflow-hidden bg-white/10 shadow-2xl">
                   @if (coverArtAvailable() && artist.artist_id) {
@@ -172,8 +187,11 @@
                 </colgroup>
                 <tbody>
                   @for (artist of topArtists() | slice: 1; track artist.artist; let i = $index) {
-                    <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5">{{ i + 2 }}</td>
+                    <tr
+                      class="cursor-pointer transition-colors hover:bg-white/10 group"
+                      (click)="openArtist(artist.artist_id, $event)"
+                    >
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-full overflow-hidden bg-white/10 mx-auto">
                           @if (coverArtAvailable() && artist.artist_id) {
@@ -182,7 +200,7 @@
                         </div>
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
-                        <p class="text-white font-semibold text-sm truncate">{{ artist.artist }}</p>
+                        <p class="text-white font-semibold text-sm truncate group-hover:underline decoration-white/50 underline-offset-2">{{ artist.artist }}</p>
                         <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks</p>
                       </td>
                       <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ artist.plays }}</td>
@@ -203,7 +221,13 @@
         <div class="flex-1 flex gap-8 min-h-0">
           <!-- Left: hero #1 -->
           @if (topAlbums()[0]; as album) {
-            <div class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0">
+            <div
+              class="w-2/5 shrink-0 flex flex-col bg-white/10 rounded-3xl p-5 min-h-0 cursor-pointer transition ring-1 ring-transparent hover:ring-2 hover:ring-white/60 hover:bg-white/15"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(album.artist_id, $event)"
+              (keydown.enter)="openArtist(album.artist_id, $event)"
+            >
               <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
                 @if (coverArtAvailable() && album.album_id) {
                   <img [src]="coverUrl(album.album_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
@@ -251,8 +275,11 @@
                 </colgroup>
                 <tbody>
                   @for (album of topAlbums() | slice: 1; track album.album; let i = $index) {
-                    <tr>
-                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5">{{ i + 2 }}</td>
+                    <tr
+                      class="cursor-pointer transition-colors hover:bg-white/10 group"
+                      (click)="openArtist(album.artist_id, $event)"
+                    >
+                      <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10 mx-auto">
                           @if (coverArtAvailable() && album.album_id) {
@@ -262,7 +289,7 @@
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
                         <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
-                        <p class="text-white/50 text-xs truncate">{{ album.album_artist }}</p>
+                        <p class="text-white/50 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2">{{ album.album_artist }}</p>
                       </td>
                       <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">{{ album.plays }}</td>
                       <td class="text-white/30 text-xs tabular-nums text-right py-1.5">{{ album.total_minutes | number: '1.1-1' }}m</td>
@@ -528,8 +555,11 @@
               </colgroup>
               <tbody>
                 @for (track of lateNight(); track track.title; let i = $index) {
-                  <tr>
-                    <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5">{{ i + 1 }}</td>
+                  <tr
+                    class="cursor-pointer transition-colors hover:bg-white/10 group"
+                    (click)="openArtist(track.artist_id, $event)"
+                  >
+                    <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 1 }}</td>
                     <td class="py-1.5">
                       <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10 mx-auto">
                         @if (coverArtAvailable() && track.album_id) {
@@ -539,7 +569,7 @@
                     </td>
                     <td class="max-w-0 pr-4 py-1.5">
                       <p class="text-white font-semibold text-sm truncate">{{ track.title }}</p>
-                      <p class="text-white/60 text-xs truncate">{{ track.artist }}</p>
+                      <p class="text-white/60 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2">{{ track.artist }}</p>
                     </td>
                     <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">{{ track.late_night_plays }}x</td>
                   </tr>
@@ -625,7 +655,10 @@
               </colgroup>
               <tbody>
                 @for (s of songOfMonth(); track s.month) {
-                  <tr>
+                  <tr
+                    class="cursor-pointer transition-colors hover:bg-white/10 group"
+                    (click)="openArtist(s.artist_id, $event)"
+                  >
                     <td class="text-white/60 text-sm font-black uppercase tracking-wider py-2">{{ formatMonth(s.month) }}</td>
                     <td class="py-2">
                       <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg mx-auto">
@@ -636,7 +669,7 @@
                     </td>
                     <td class="max-w-0 pr-4 py-2">
                       <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
-                      <p class="text-white/50 text-sm truncate">{{ s.artist }}</p>
+                      <p class="text-white/50 text-sm truncate group-hover:underline decoration-white/50 underline-offset-2">{{ s.artist }}</p>
                     </td>
                     <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">{{ s.plays }}</td>
                   </tr>
@@ -721,7 +754,13 @@
             <div class="flex-1 flex gap-5 min-h-0">
               <!-- Hero artist -->
               @if (d.top_artist) {
-                <div class="relative w-1/3 rounded-2xl overflow-hidden bg-white/10 shrink-0">
+                <div
+                  class="relative w-1/3 rounded-2xl overflow-hidden bg-white/10 shrink-0 cursor-pointer transition ring-1 ring-transparent hover:ring-2 hover:ring-white/60"
+                  role="button"
+                  tabindex="0"
+                  (click)="openArtist(d.top_artist.artist_id, $event)"
+                  (keydown.enter)="openArtist(d.top_artist.artist_id, $event)"
+                >
                   @if (coverArtAvailable() && d.top_artist.artist_id) {
                     <img [src]="coverUrl(d.top_artist.artist_id, 800)" alt="" class="w-full h-full object-cover" loading="lazy" />
                   }
@@ -763,10 +802,13 @@
                       </colgroup>
                       <tbody>
                         @for (artist of d.top_artists; track artist.artist; let i = $index) {
-                          <tr>
-                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
+                          <tr
+                            class="cursor-pointer transition-colors hover:bg-white/10 group"
+                            (click)="openArtist(artist.artist_id, $event)"
+                          >
+                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5 group-hover:text-white/60">{{ i + 1 }}</td>
                             <td class="max-w-0 pr-2 py-1.5">
-                              <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
+                              <p class="text-white text-sm font-semibold truncate group-hover:underline decoration-white/50 underline-offset-2">{{ artist.artist }}</p>
                             </td>
                             <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">{{ artist.plays }}</td>
                             <td class="text-white/40 text-xs tabular-nums text-right py-1.5">{{ artist.total_hours | number: '1.1-1' }}h</td>
@@ -807,11 +849,14 @@
                       </colgroup>
                       <tbody>
                         @for (song of d.top_songs; track song.title; let i = $index) {
-                          <tr class="align-top">
-                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5">{{ i + 1 }}</td>
+                          <tr
+                            class="align-top cursor-pointer transition-colors hover:bg-white/10 group"
+                            (click)="openArtist(song.artist_id, $event)"
+                          >
+                            <td class="text-white/30 text-sm font-black tabular-nums text-right pr-2 py-1.5 group-hover:text-white/60">{{ i + 1 }}</td>
                             <td class="max-w-0 pr-2 py-1.5">
                               <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
-                              <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
+                              <p class="text-white/40 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2">{{ song.artist }}</p>
                             </td>
                             <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">{{ song.plays }}</td>
                             <td class="text-white/50 text-xs tabular-nums text-right py-1.5">{{ (song.total_minutes / 60) | number: '1.1-1' }}h</td>

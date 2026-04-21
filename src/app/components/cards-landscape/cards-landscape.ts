@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, input, output, signal } from '@angular/core';
 import { DominantColorService } from '../../services/dominant-color.service';
 import { CardShellComponent } from '../card-shell';
 import {
@@ -83,6 +83,14 @@ export class CardsLandscape {
   readonly songOfMonth = input.required<SongOfMonth[]>();
   readonly favoriteDecades = input.required<FavoriteDecade[]>();
   readonly recapData = input.required<RecapData | null>();
+
+  readonly artistClick = output<string>();
+
+  openArtist(artistId: string | null | undefined, event?: Event): void {
+    if (!artistId) return;
+    event?.stopPropagation();
+    this.artistClick.emit(artistId);
+  }
 
   coverUrl(id: string, size = 150): string {
     return this.navidrome.coverUrl(id, size);

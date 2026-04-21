@@ -121,6 +121,83 @@ export type StatType =
   | 'favorite-decades'
   | 'recap';
 
+export interface ArtistHeatmapDay {
+  day: string;
+  plays: number;
+}
+
+export interface ArtistTopTrack {
+  id: string;
+  title: string;
+  album: string;
+  album_id: string;
+  plays: number;
+  total_minutes: number;
+}
+
+export interface ArtistTopAlbum {
+  album: string;
+  album_id: string;
+  plays: number;
+  unique_tracks: number;
+  total_minutes: number;
+}
+
+export interface ArtistClockHour {
+  hour: number;
+  plays: number;
+}
+
+export interface ArtistDayOfWeek {
+  day: string;
+  plays: number;
+}
+
+export interface ArtistRankPoint {
+  month: string;
+  plays: number;
+  rnk: number;
+}
+
+export interface ArtistSongOfMonth {
+  month: string;
+  title: string;
+  album_id: string;
+  plays: number;
+}
+
+export interface ArtistRecentScrobble {
+  title: string;
+  album: string;
+  album_id: string;
+  played_at: number;
+}
+
+export interface ArtistDetail {
+  artist_id: string;
+  artist: string | null;
+  plays: number;
+  unique_tracks: number;
+  total_hours: number;
+  rank: number | null;
+  total_artists: number | null;
+  share_pct: number;
+  first_scrobble: number | null;
+  last_scrobble: number | null;
+  lifetime_plays: number;
+  lifetime_unique_tracks: number;
+  played_tracks: number;
+  library_tracks: number;
+  heatmap: ArtistHeatmapDay[];
+  top_tracks: ArtistTopTrack[];
+  top_albums: ArtistTopAlbum[];
+  listening_clock: ArtistClockHour[];
+  day_of_week: ArtistDayOfWeek[];
+  rank_trajectory: ArtistRankPoint[];
+  song_of_month: ArtistSongOfMonth[];
+  recent_scrobbles: ArtistRecentScrobble[];
+}
+
 export interface StatDefinition {
   type: StatType;
   label: string;

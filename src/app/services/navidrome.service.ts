@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import type { StatType } from '../models/stats';
+import type { ArtistDetail, StatType } from '../models/stats';
 
 @Injectable({ providedIn: 'root' })
 export class NavidromeService {
@@ -31,6 +31,16 @@ export class NavidromeService {
       params = `?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`;
     }
     return this.http.get(`/api/stats/${type}${params}`);
+  }
+
+  getArtist(artistId: string, range: StatRange): Observable<ArtistDetail> {
+    let params = '';
+    if (range.kind === 'year') {
+      params = `?year=${encodeURIComponent(range.year)}`;
+    } else if (range.kind === 'custom') {
+      params = `?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`;
+    }
+    return this.http.get<ArtistDetail>(`/api/artist/${encodeURIComponent(artistId)}${params}`);
   }
 }
 

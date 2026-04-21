@@ -1,0 +1,397 @@
+@if (loading() && !data()) {
+  <div class="h-dvh overflow-y-auto flex items-center justify-center bg-white dark:bg-slate-950">
+    <div class="text-center">
+      <div class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
+      <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading artist…</p>
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="min-h-dvh flex items-center justify-center bg-white dark:bg-slate-950 px-6">
+    <div class="text-center">
+      <p class="text-red-500 font-medium">{{ error() }}</p>
+      <a routerLink="/" class="mt-4 inline-block text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline">Back to dashboard</a>
+    </div>
+  </div>
+} @else if (data(); as d) {
+  <div class="h-dvh overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+
+    <!-- Top nav -->
+    <div class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+        <a
+          routerLink="/"
+          [queryParams]="dashboardQueryParams()"
+          class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+        >
+          <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
+          <span class="hidden sm:inline">Back to dashboard</span>
+          <span class="sm:hidden">Back</span>
+        </a>
+        <div class="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400">
+          <span class="uppercase tracking-widest">{{ rangeLabel() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+      <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
+        <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden bg-gradient-to-br from-rose-500 to-pink-900 shrink-0 shadow-xl">
+          @if (coverArtAvailable() && d.artist_id) {
+            <img [src]="coverUrl(d.artist_id, 400)" alt="" class="w-full h-full object-cover" loading="eager" />
+          }
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold uppercase tracking-widest text-rose-500">Artist</p>
+          <h1 class="mt-1 text-4xl sm:text-6xl font-black leading-none truncate">{{ d.artist ?? 'Unknown' }}</h1>
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            @if (d.first_scrobble) {
+              First heard {{ formatDate(d.first_scrobble) }} · listening for {{ daysListening() }} days
+            } @else {
+              No plays yet
+            }
+          </p>
+        </div>
+      </div>
+
+      <!-- Key metrics -->
+      <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Plays</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">{{ d.plays.toLocaleString() }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Hours</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">{{ d.total_hours | number: '1.1-1' }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unique tracks</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">{{ d.unique_tracks }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rank</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">
+            @if (d.rank !== null) {
+              #{{ d.rank }}<span class="text-sm text-slate-400 font-medium">/{{ d.total_artists }}</span>
+            } @else { — }
+          </p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Share</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">{{ d.share_pct | number: '1.1-2' }}%</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Library depth</p>
+          <p class="mt-1 text-2xl font-black tabular-nums">{{ libraryDepthPct() }}%</p>
+          <p class="text-xs text-slate-400 tabular-nums mt-0.5">{{ d.played_tracks }}/{{ d.library_tracks }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="sticky top-[49px] z-10 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex gap-6" role="tablist">
+          @for (t of [
+            { key: 'overview', label: 'Overview' },
+            { key: 'patterns', label: 'Patterns' },
+            { key: 'activity', label: 'Activity' }
+          ]; track t.key) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="activeTab() === t.key"
+              (click)="selectTab($any(t.key))"
+              class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+              [class]="activeTab() === t.key
+                ? 'border-rose-500 text-slate-900 dark:text-white'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+            >
+              {{ t.label }}
+            </button>
+          }
+        </nav>
+      </div>
+    </div>
+
+    <!-- Tab content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      @if (activeTab() === 'overview') {
+        <!-- Heatmap -->
+        @if (heatmapCells(); as cells) {
+          <section class="mb-10">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Activity heatmap</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 overflow-x-auto">
+              <div class="grid grid-rows-7 grid-flow-col gap-[3px]" style="grid-auto-columns: 12px;">
+                @for (cell of cells; track cell.date) {
+                  <div
+                    [class]="'w-3 h-3 rounded-sm ' + heatmapColor(cell)"
+                    [title]="cell.date + ': ' + cell.plays + ' plays'"
+                  ></div>
+                }
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- Top tracks + Top albums -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Top tracks</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+              @if (d.top_tracks.length === 0) {
+                <p class="p-6 text-sm text-slate-400">No tracks in this range.</p>
+              } @else {
+                <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+                  @for (t of d.top_tracks; track t.id; let i = $index) {
+                    <li class="flex items-center gap-3 p-3">
+                      <span class="text-sm font-black tabular-nums text-slate-400 w-6 text-right">{{ i + 1 }}</span>
+                      <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
+                        @if (coverArtAvailable() && t.album_id) {
+                          <img [src]="coverUrl(t.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold truncate">{{ t.title }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ t.album }}</p>
+                        <div class="mt-1 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div class="h-full bg-rose-500 rounded-full" [style.width.%]="trackBarPct(t.plays)"></div>
+                        </div>
+                      </div>
+                      <div class="text-right shrink-0">
+                        <p class="text-sm font-bold tabular-nums">{{ t.plays }}</p>
+                        <p class="text-xs text-slate-400 tabular-nums">{{ t.total_minutes | number: '1.0-0' }}m</p>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Top albums</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+              @if (d.top_albums.length === 0) {
+                <p class="p-6 text-sm text-slate-400">No albums in this range.</p>
+              } @else {
+                <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+                  @for (a of d.top_albums; track a.album_id; let i = $index) {
+                    <li class="flex items-center gap-3 p-3">
+                      <span class="text-sm font-black tabular-nums text-slate-400 w-6 text-right">{{ i + 1 }}</span>
+                      <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
+                        @if (coverArtAvailable() && a.album_id) {
+                          <img [src]="coverUrl(a.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold truncate">{{ a.album }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ a.unique_tracks }} tracks</p>
+                        <div class="mt-1 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div class="h-full bg-rose-500 rounded-full" [style.width.%]="albumBarPct(a.plays)"></div>
+                        </div>
+                      </div>
+                      <div class="text-right shrink-0">
+                        <p class="text-sm font-bold tabular-nums">{{ a.plays }}</p>
+                        <p class="text-xs text-slate-400 tabular-nums">{{ a.total_minutes | number: '1.0-0' }}m</p>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (activeTab() === 'patterns') {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+          <!-- Listening clock -->
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Listening clock</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-5">
+              @if (d.listening_clock.length === 0) {
+                <p class="text-sm text-slate-400">No data in this range.</p>
+              } @else {
+                <div class="flex items-end gap-1 h-40">
+                  @for (c of d.listening_clock; track c.hour) {
+                    <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+                      <div class="flex-1 w-full flex items-end">
+                        <div
+                          class="w-full rounded-t-sm bg-rose-500"
+                          [style.height.%]="clockBarPct(c.plays)"
+                          [style.min-height.px]="c.plays > 0 ? 2 : 0"
+                          [title]="padHour(c.hour) + ':00 — ' + c.plays + ' plays'"
+                        ></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="flex gap-1 mt-2 text-[10px] font-mono text-slate-400">
+                  @for (c of d.listening_clock; track c.hour) {
+                    <span class="flex-1 text-center tabular-nums">{{ c.hour % 3 === 0 ? padHour(c.hour) : '' }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Day of week -->
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Day of week</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-5">
+              @if (d.day_of_week.length === 0) {
+                <p class="text-sm text-slate-400">No data in this range.</p>
+              } @else {
+                <div class="space-y-2">
+                  @for (day of d.day_of_week; track day.day) {
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-medium w-24 shrink-0">{{ day.day }}</span>
+                      <div class="flex-1 h-6 bg-slate-200 dark:bg-slate-800 rounded-md overflow-hidden">
+                        <div class="h-full bg-rose-500" [style.width.%]="dayBarPct(day.plays)"></div>
+                      </div>
+                      <span class="text-sm font-bold tabular-nums w-12 text-right">{{ day.plays }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Rank trajectory -->
+          <section class="lg:col-span-2">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Rank trajectory</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-5">
+              @if (d.rank_trajectory.length < 2) {
+                <p class="text-sm text-slate-400">Need at least 2 months of data to show a trajectory.</p>
+              } @else {
+                <div class="relative h-40">
+                  <svg
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    class="w-full h-full overflow-visible"
+                  >
+                    <path
+                      [attr.d]="rankPath()"
+                      fill="none"
+                      stroke="rgb(244 63 94)"
+                      stroke-width="0.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      vector-effect="non-scaling-stroke"
+                    />
+                    @for (p of d.rank_trajectory; track p.month; let i = $index) {
+                      <circle
+                        [attr.cx]="d.rank_trajectory.length > 1 ? (i / (d.rank_trajectory.length - 1)) * 100 : 50"
+                        [attr.cy]="(rankMax() - rankMin()) > 0 ? ((p.rnk - rankMin()) / (rankMax() - rankMin())) * 100 : 50"
+                        r="0.8"
+                        fill="rgb(244 63 94)"
+                        vector-effect="non-scaling-stroke"
+                      />
+                    }
+                  </svg>
+                  <span class="absolute top-0 left-0 text-xs font-mono text-slate-400">#{{ rankMin() }}</span>
+                  <span class="absolute bottom-0 left-0 text-xs font-mono text-slate-400">#{{ rankMax() }}</span>
+                </div>
+                <div class="flex justify-between mt-2 text-xs font-mono text-slate-400">
+                  <span>{{ formatMonth(d.rank_trajectory[0].month) }}</span>
+                  <span>{{ formatMonth(d.rank_trajectory[d.rank_trajectory.length - 1].month) }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Song of month -->
+          <section class="lg:col-span-2">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Song of the month</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+              @if (d.song_of_month.length === 0) {
+                <p class="p-6 text-sm text-slate-400">No data in this range.</p>
+              } @else {
+                <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+                  @for (s of d.song_of_month; track s.month) {
+                    <li class="flex items-center gap-4 p-3">
+                      <span class="text-sm font-black uppercase tracking-wider text-slate-500 w-20 shrink-0">{{ formatMonth(s.month) }}</span>
+                      <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
+                        @if (coverArtAvailable() && s.album_id) {
+                          <img [src]="coverUrl(s.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                      <p class="flex-1 text-sm font-semibold truncate">{{ s.title }}</p>
+                      <span class="text-sm font-bold tabular-nums shrink-0">{{ s.plays }} plays</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+
+        </div>
+      }
+
+      @if (activeTab() === 'activity') {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Recent scrobbles</h2>
+            <p class="text-xs text-slate-400 mb-3">Last 25 plays — not limited to selected range</p>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+              @if (d.recent_scrobbles.length === 0) {
+                <p class="p-6 text-sm text-slate-400">No scrobbles yet.</p>
+              } @else {
+                <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+                  @for (r of d.recent_scrobbles; track $index) {
+                    <li class="flex items-center gap-3 p-3">
+                      <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
+                        @if (coverArtAvailable() && r.album_id) {
+                          <img [src]="coverUrl(r.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
+                        }
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold truncate">{{ r.title }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ r.album }}</p>
+                      </div>
+                      <span class="text-xs font-mono text-slate-400 tabular-nums shrink-0">{{ formatRelative(r.played_at) }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Lifetime</h2>
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-5 space-y-4">
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">First heard</span>
+                <span class="text-sm font-semibold">{{ formatDate(d.first_scrobble) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">Last heard</span>
+                <span class="text-sm font-semibold">{{ formatDate(d.last_scrobble) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">Total plays</span>
+                <span class="text-sm font-semibold tabular-nums">{{ d.lifetime_plays.toLocaleString() }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">Unique tracks played</span>
+                <span class="text-sm font-semibold tabular-nums">{{ d.lifetime_unique_tracks }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">Library tracks</span>
+                <span class="text-sm font-semibold tabular-nums">{{ d.library_tracks }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-slate-500 dark:text-slate-400">Library depth</span>
+                <span class="text-sm font-semibold tabular-nums">{{ libraryDepthPct() }}%</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      }
+
+    </div>
+  </div>
+}

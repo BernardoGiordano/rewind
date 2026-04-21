@@ -560,6 +560,258 @@ function getRecap(db: Database, uid: string, range: Range) {
   };
 }
 
+// --- /api/artist/:id — combined artist detail payload ---
+app.get('/api/artist/:id', (req, res) => {
+  const artistId = req.params['id'];
+  const yearParam = req.query['year'] as string | undefined;
+  const fromParam = req.query['from'] as string | undefined;
+  const toParam = req.query['to'] as string | undefined;
+
+  try {
+    const range = resolveRange(yearParam, fromParam, toParam);
+    const db = getDb();
+    const uid = userId();
+
+    const profile = getArtistProfile(db, uid, artistId, range);
+    if (!profile.artist) {
+      res.status(404).json({ error: 'Artist not found' });
+      return;
+    }
+
+    const result = {
+      ...profile,
+      heatmap: getArtistHeatmap(db, uid, artistId, range),
+      top_tracks: getArtistTopTracks(db, uid, artistId, range),
+      top_albums: getArtistTopAlbums(db, uid, artistId, range),
+      listening_clock: getArtistClock(db, uid, artistId, range),
+      day_of_week: getArtistDayOfWeek(db, uid, artistId, range),
+      rank_trajectory: getArtistRankTrajectory(db, uid, artistId, range),
+      song_of_month: getArtistSongOfMonth(db, uid, artistId, range),
+      recent_scrobbles: getArtistRecentScrobbles(db, uid, artistId),
+    };
+
+    noCache(res);
+    res.json(result);
+  } catch (err: unknown) {
+    res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+function rangeClause(range: Range, alias = 's'): { sql: string; params: number[] } {
+  if (!range) return { sql: '', params: [] };
+  return { sql: ` AND ${alias}.submission_time >= ? AND ${alias}.submission_time < ?`, params: [range.startTs, range.endTs] };
+}
+
+function getArtistProfile(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  const inRange = queryOne<{
+    artist: string | null;
+    plays: number;
+    unique_tracks: number;
+    total_hours: number;
+  }>(db, `
+    SELECT MAX(mf.artist) AS artist,
+      COUNT(*) AS plays,
+      COUNT(DISTINCT mf.id) AS unique_tracks,
+      ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+  `, [uid, artistId, ...rc.params]);
+
+  const overall = queryOne<{ total_plays: number }>(db, `
+    SELECT COUNT(*) AS total_plays
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ?${rc.sql}
+  `, [uid, ...rc.params]);
+
+  const rank = queryOne<{ rnk: number; total_artists: number }>(db, `
+    WITH ranked AS (
+      SELECT mf.artist_id, SUM(mf.duration) AS total_duration,
+        RANK() OVER (ORDER BY SUM(mf.duration) DESC) AS rnk
+      FROM scrobbles s
+      JOIN media_file mf ON s.media_file_id = mf.id
+      WHERE s.user_id = ?${rc.sql}
+      GROUP BY mf.artist_id
+    )
+    SELECT rnk,
+      (SELECT COUNT(*) FROM ranked) AS total_artists
+    FROM ranked WHERE artist_id = ?
+  `, [uid, ...rc.params, artistId]);
+
+  // Always-scoped (ignore range) — first/last scrobble across full history
+  const lifetime = queryOne<{
+    first_scrobble: number | null;
+    last_scrobble: number | null;
+    lifetime_plays: number;
+    lifetime_unique_tracks: number;
+  }>(db, `
+    SELECT MIN(s.submission_time) AS first_scrobble,
+      MAX(s.submission_time) AS last_scrobble,
+      COUNT(*) AS lifetime_plays,
+      COUNT(DISTINCT mf.id) AS lifetime_unique_tracks
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?
+  `, [uid, artistId]);
+
+  // Fallback name if not in range but exists in library
+  let artistName = inRange?.artist ?? null;
+  if (!artistName) {
+    const anyRow = queryOne<{ artist: string }>(db, `
+      SELECT mf.artist FROM media_file mf WHERE mf.artist_id = ? LIMIT 1
+    `, [artistId]);
+    artistName = anyRow?.artist ?? null;
+  }
+
+  // Library depth: tracks the user has ever played vs. total tracks by artist in library
+  const libraryDepth = queryOne<{ played_tracks: number; library_tracks: number }>(db, `
+    SELECT
+      (SELECT COUNT(DISTINCT mf.id)
+        FROM scrobbles s JOIN media_file mf ON s.media_file_id = mf.id
+        WHERE s.user_id = ? AND mf.artist_id = ?) AS played_tracks,
+      (SELECT COUNT(*) FROM media_file mf WHERE mf.artist_id = ?) AS library_tracks
+  `, [uid, artistId, artistId]);
+
+  const totalPlaysAll = overall?.total_plays ?? 0;
+  const sharePct = totalPlaysAll > 0 && inRange ? (inRange.plays / totalPlaysAll) * 100 : 0;
+
+  return {
+    artist_id: artistId,
+    artist: artistName,
+    plays: inRange?.plays ?? 0,
+    unique_tracks: inRange?.unique_tracks ?? 0,
+    total_hours: inRange?.total_hours ?? 0,
+    rank: rank?.rnk ?? null,
+    total_artists: rank?.total_artists ?? null,
+    share_pct: Math.round(sharePct * 100) / 100,
+    first_scrobble: lifetime?.first_scrobble ?? null,
+    last_scrobble: lifetime?.last_scrobble ?? null,
+    lifetime_plays: lifetime?.lifetime_plays ?? 0,
+    lifetime_unique_tracks: lifetime?.lifetime_unique_tracks ?? 0,
+    played_tracks: libraryDepth?.played_tracks ?? 0,
+    library_tracks: libraryDepth?.library_tracks ?? 0,
+  };
+}
+
+function getArtistHeatmap(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    SELECT date(s.submission_time, 'unixepoch') AS day, COUNT(*) AS plays
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+    GROUP BY day ORDER BY day
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistTopTracks(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    SELECT mf.id, mf.title, mf.album, mf.album_id,
+      COUNT(*) AS plays,
+      ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+    GROUP BY mf.id ORDER BY plays DESC, total_minutes DESC LIMIT 100
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistTopAlbums(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    SELECT mf.album, mf.album_id,
+      COUNT(*) AS plays,
+      COUNT(DISTINCT mf.id) AS unique_tracks,
+      ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+    GROUP BY mf.album_id ORDER BY plays DESC LIMIT 50
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistClock(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    SELECT CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER) AS hour,
+      COUNT(*) AS plays
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+    GROUP BY hour ORDER BY hour
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistDayOfWeek(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    SELECT
+      CASE CAST(strftime('%w', s.submission_time, 'unixepoch') AS INTEGER)
+        WHEN 0 THEN 'Sunday' WHEN 1 THEN 'Monday' WHEN 2 THEN 'Tuesday'
+        WHEN 3 THEN 'Wednesday' WHEN 4 THEN 'Thursday' WHEN 5 THEN 'Friday'
+        WHEN 6 THEN 'Saturday'
+      END AS day,
+      COUNT(*) AS plays
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+    GROUP BY strftime('%w', s.submission_time, 'unixepoch')
+    ORDER BY ((CAST(strftime('%w', s.submission_time, 'unixepoch') AS INTEGER) + 6) % 7) ASC
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistRankTrajectory(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    WITH monthly AS (
+      SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
+        mf.artist_id, COUNT(*) AS plays
+      FROM scrobbles s
+      JOIN media_file mf ON s.media_file_id = mf.id
+      WHERE s.user_id = ?${rc.sql}
+      GROUP BY month, mf.artist_id
+    ),
+    ranked AS (
+      SELECT month, artist_id, plays,
+        RANK() OVER (PARTITION BY month ORDER BY plays DESC) AS rnk
+      FROM monthly
+    )
+    SELECT month, plays, rnk FROM ranked WHERE artist_id = ? ORDER BY month
+  `, [uid, ...rc.params, artistId]);
+}
+
+function getArtistSongOfMonth(db: Database, uid: string, artistId: string, range: Range) {
+  const rc = rangeClause(range);
+  return queryAll(db, `
+    WITH monthly_counts AS (
+      SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
+        mf.title, mf.album_id, COUNT(*) AS plays,
+        ROW_NUMBER() OVER (
+          PARTITION BY strftime('%Y-%m', s.submission_time, 'unixepoch')
+          ORDER BY COUNT(*) DESC
+        ) AS rn
+      FROM scrobbles s
+      JOIN media_file mf ON s.media_file_id = mf.id
+      WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
+      GROUP BY month, mf.id
+    )
+    SELECT month, title, album_id, plays FROM monthly_counts WHERE rn = 1 ORDER BY month
+  `, [uid, artistId, ...rc.params]);
+}
+
+function getArtistRecentScrobbles(db: Database, uid: string, artistId: string) {
+  return queryAll(db, `
+    SELECT mf.title, mf.album, mf.album_id, s.submission_time AS played_at
+    FROM scrobbles s
+    JOIN media_file mf ON s.media_file_id = mf.id
+    WHERE s.user_id = ? AND mf.artist_id = ?
+    ORDER BY s.submission_time DESC LIMIT 25
+  `, [uid, artistId]);
+}
+
 // --- Static files & Angular SSR ---
 
 app.use(
