@@ -616,7 +616,7 @@ function getArtistProfile(db: Database, uid: string, artistId: string, range: Ra
     unique_tracks: number;
     total_hours: number;
   }>(db, `
-    SELECT MAX(mf.artist) AS artist,
+    SELECT COALESCE((SELECT a.name FROM artist a WHERE a.id = mf.artist_id), MAX(mf.artist)) AS artist,
       COUNT(*) AS plays,
       COUNT(DISTINCT mf.id) AS unique_tracks,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
@@ -666,7 +666,8 @@ function getArtistProfile(db: Database, uid: string, artistId: string, range: Ra
   let artistName = inRange?.artist ?? null;
   if (!artistName) {
     const anyRow = queryOne<{ artist: string }>(db, `
-      SELECT mf.artist FROM media_file mf WHERE mf.artist_id = ? LIMIT 1
+      SELECT COALESCE((SELECT a.name FROM artist a WHERE a.id = mf.artist_id), mf.artist) AS artist
+      FROM media_file mf WHERE mf.artist_id = ? LIMIT 1
     `, [artistId]);
     artistName = anyRow?.artist ?? null;
   }
