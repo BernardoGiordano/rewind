@@ -9,7 +9,7 @@
   <div class="min-h-dvh flex items-center justify-center bg-white dark:bg-slate-950 px-6">
     <div class="text-center">
       <p class="text-red-500 font-medium">{{ error() }}</p>
-      <a routerLink="/" class="mt-4 inline-block text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline">Back to dashboard</a>
+      <button type="button" (click)="goBack()" class="mt-4 inline-block text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline cursor-pointer">Back</button>
     </div>
   </div>
 } @else if (data(); as d) {
@@ -18,15 +18,15 @@
     <!-- Top nav -->
     <div class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-        <a
-          routerLink="/"
-          [queryParams]="dashboardQueryParams()"
-          class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+        <button
+          type="button"
+          (click)="goBack()"
+          class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
-          <span class="hidden sm:inline">Back to dashboard</span>
+          <span class="hidden sm:inline">Back</span>
           <span class="sm:hidden">Back</span>
-        </a>
+        </button>
         <div class="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400">
           <span class="uppercase tracking-widest">{{ rangeLabel() }}</span>
         </div>

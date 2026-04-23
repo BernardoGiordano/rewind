@@ -32,7 +32,7 @@ import {
   heroSun,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
@@ -92,6 +92,7 @@ export class Dashboard {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   openArtist(artistId: string | null | undefined): void {
     if (!artistId) return;
@@ -190,6 +191,7 @@ export class Dashboard {
 
   constructor() {
     afterNextRender(() => {
+      let urlSelectedYear = false;
       if (isPlatformBrowser(this.platformId)) {
         const storedTheme = localStorage.getItem('rewind.theme');
         const prefersDark = storedTheme
@@ -230,6 +232,23 @@ export class Dashboard {
           }
         }
 
+        // URL query params take priority over stored state (e.g. returning from artist detail)
+        const qp = this.route.snapshot.queryParamMap;
+        const urlFrom = qp.get('from');
+        const urlTo = qp.get('to');
+        const urlYear = qp.get('year');
+        if (urlFrom && urlTo) {
+          this.customRange.set({ from: urlFrom, to: urlTo });
+          this.selectedYear.set('custom');
+          urlSelectedYear = true;
+        } else if (urlYear) {
+          this.selectedYear.set(urlYear);
+          urlSelectedYear = true;
+        } else if (qp.get('range') === 'all-time') {
+          this.selectedYear.set('all-time');
+          urlSelectedYear = true;
+        }
+
         const smallScreen = window.matchMedia('(max-width: 1023px)');
         this.isSmallScreen.set(smallScreen.matches);
         smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
@@ -243,7 +262,7 @@ export class Dashboard {
       this.navidrome.getYears().subscribe({
         next: (years) => {
           this.years.set(years);
-          if (years.length > 0 && this.selectedYear() === 'all-time') {
+          if (!urlSelectedYear && years.length > 0 && this.selectedYear() === 'all-time') {
             this.selectedYear.set(years[0]);
           }
           this.loadData();

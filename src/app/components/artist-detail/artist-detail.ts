@@ -7,8 +7,8 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { DecimalPipe, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DecimalPipe, Location, isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -32,7 +32,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
   templateUrl: './artist-detail.html',
   styleUrl: './artist-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, NgIcon, RouterLink],
+  imports: [DecimalPipe, NgIcon],
   providers: [
     provideIcons({
       heroArrowLeft,
@@ -49,7 +49,10 @@ type TabKey = 'overview' | 'patterns' | 'activity';
 export class ArtistDetail {
   private readonly navidrome = inject(NavidromeService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly canGoBack = signal(false);
 
   readonly artistId = signal<string>('');
   readonly data = signal<ArtistDetailData | null>(null);
@@ -71,12 +74,9 @@ export class ArtistDetail {
 
   readonly dashboardQueryParams = computed<Record<string, string>>(() => {
     const r = this.range();
-    const out: Record<string, string> = {};
-    if (r.kind === 'year') out['year'] = r.year;
-    else if (r.kind === 'custom') {
-      out['from'] = r.from;
-      out['to'] = r.to;
-    }
+    if (r.kind === 'year') return { year: r.year };
+    if (r.kind === 'custom') return { from: r.from, to: r.to };
+    const out: Record<string, string> = { range: 'all-time' };
     return out;
   });
 
@@ -203,6 +203,9 @@ export class ArtistDetail {
 
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
+        const navId = (window.history.state as { navigationId?: number } | null)?.navigationId;
+        this.canGoBack.set(typeof navId === 'number' && navId > 1);
+
         const storedTheme = localStorage.getItem('rewind.theme');
         const prefersDark = storedTheme
           ? storedTheme === 'dark'
@@ -237,6 +240,14 @@ export class ArtistDetail {
 
   selectTab(tab: TabKey): void {
     this.activeTab.set(tab);
+  }
+
+  goBack(): void {
+    if (this.canGoBack()) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/'], { queryParams: this.dashboardQueryParams() });
+    }
   }
 
   trackBarPct(plays: number): number {
