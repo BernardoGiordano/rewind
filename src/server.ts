@@ -276,7 +276,7 @@ function getSummary(db: Database, uid: string, range: Range) {
       SELECT
         COUNT(*) AS total_plays,
         COUNT(DISTINCT mf.id) AS unique_songs,
-        COUNT(DISTINCT mf.artist) AS unique_artists,
+        COUNT(DISTINCT mf.artist_id) AS unique_artists,
         COUNT(DISTINCT mf.album_id) AS unique_albums,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
         ROUND(SUM(mf.duration) / 86400.0, 1) AS total_days
@@ -289,7 +289,7 @@ function getSummary(db: Database, uid: string, range: Range) {
     SELECT
       COUNT(*) AS total_plays,
       COUNT(DISTINCT mf.id) AS unique_songs,
-      COUNT(DISTINCT mf.artist) AS unique_artists,
+      COUNT(DISTINCT mf.artist_id) AS unique_artists,
       COUNT(DISTINCT mf.album_id) AS unique_albums,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
       ROUND(SUM(mf.duration) / 86400.0, 1) AS total_days
@@ -329,23 +329,29 @@ function getTopSongs(db: Database, uid: string, range: Range) {
 function getTopArtists(db: Database, uid: string, range: Range) {
   if (range) {
     return queryAll(db, `
-      SELECT mf.artist, COUNT(*) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
+      SELECT COALESCE(a.name, mf.artist) AS artist,
+        COUNT(*) AS plays,
+        COUNT(DISTINCT mf.id) AS unique_tracks,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
         mf.artist_id
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
+      LEFT JOIN artist a ON a.id = mf.artist_id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 100
+      GROUP BY mf.artist_id ORDER BY total_hours DESC LIMIT 100
     `, [uid, range.startTs, range.endTs]);
   }
   return queryAll(db, `
-    SELECT mf.artist, COUNT(*) AS plays, COUNT(DISTINCT mf.id) AS unique_tracks,
+    SELECT COALESCE(a.name, mf.artist) AS artist,
+      COUNT(*) AS plays,
+      COUNT(DISTINCT mf.id) AS unique_tracks,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours,
       mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
+    LEFT JOIN artist a ON a.id = mf.artist_id
     WHERE s.user_id = ?
-    GROUP BY mf.artist ORDER BY total_hours DESC LIMIT 100
+    GROUP BY mf.artist_id ORDER BY total_hours DESC LIMIT 100
   `, [uid]);
 }
 
@@ -428,7 +434,7 @@ function getMonthlyTrends(db: Database, uid: string, range: NonNullable<Range>) 
     SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
       COUNT(*) AS plays,
       COUNT(DISTINCT mf.id) AS unique_songs,
-      COUNT(DISTINCT mf.artist) AS unique_artists,
+      COUNT(DISTINCT mf.artist_id) AS unique_artists,
       ROUND(SUM(mf.duration) / 3600.0, 1) AS hours
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
@@ -525,7 +531,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
   if (range) {
     return queryAll(db, `
       SELECT (mf.year / 10) * 10 AS decade, COUNT(*) AS total_plays,
-        COUNT(DISTINCT mf.artist) AS unique_artists,
+        COUNT(DISTINCT mf.artist_id) AS unique_artists,
         ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
@@ -536,7 +542,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
   }
   return queryAll(db, `
     SELECT (mf.year / 10) * 10 AS decade, SUM(a.play_count) AS total_plays,
-      COUNT(DISTINCT mf.artist) AS unique_artists,
+      COUNT(DISTINCT mf.artist_id) AS unique_artists,
       ROUND(SUM(mf.duration * a.play_count) / 3600.0, 1) AS total_hours
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
