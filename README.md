@@ -6,6 +6,8 @@ A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.nav
 
 ![Demo3](assets/demo3.png)
 
+![Demo4](assets/demo4.png)
+
 ![Demo](assets/demo.png)
 
 ![Collage](assets/collage.png)
