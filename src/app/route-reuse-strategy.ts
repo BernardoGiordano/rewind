@@ -1,11 +1,18 @@
+import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   BaseRouteReuseStrategy,
   DetachedRouteHandle,
 } from '@angular/router';
 
+@Injectable({ providedIn: 'root' })
 export class CachedRouteReuseStrategy extends BaseRouteReuseStrategy {
   private readonly stored = new Map<string, DetachedRouteHandle>();
+
+  /** Drop all detached route handles — call when auth state changes. */
+  clear(): void {
+    this.stored.clear();
+  }
 
   override shouldDetach(route: ActivatedRouteSnapshot): boolean {
     return this.key(route) !== null;

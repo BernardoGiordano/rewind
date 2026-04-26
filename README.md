@@ -81,7 +81,15 @@ The app will be available at `http://localhost:4000` by default.
 | Variable | Description |
 |---|---|
 | `NAVIDROME_URL` | Base URL of your Navidrome instance (e.g. `https://music.example.com`) |
-| `NAVIDROME_USER` | Navidrome username (used to resolve your user ID for scrobble queries and for Subsonic API authentication) |
-| `NAVIDROME_API_KEY` | Navidrome API key (used for token-based Subsonic auth) |
+| `NAVIDROME_USER` | (Optional) Pin Rewind to a single Navidrome user — see _Authentication_ below |
+| `NAVIDROME_API_KEY` | (Optional) Password / API key for the pinned user above |
+| `SESSION_SECRET` | (Optional) Secret used to sign session cookies. If unset, Rewind generates one and persists it to `.rewind-session-secret` in the working directory. |
 
-Cover art fetching requires `NAVIDROME_URL`, `NAVIDROME_USER`, and `NAVIDROME_API_KEY` to all be set. If any of them is missing, Rewind will still work; you just won't see album artwork on the cards.
+Cover art fetching requires `NAVIDROME_URL` to be set. If it's not, Rewind will still work; you just won't see album artwork on the cards.
+
+## Authentication
+
+Rewind supports two modes:
+
+- **Single-user (transparent):** if both `NAVIDROME_USER` and `NAVIDROME_API_KEY` are set and resolve to a real Navidrome user, Rewind auto-logs in everyone who visits as that user.
+- **Multi-user (login):** if either of those variables is missing, Rewind shows a login page where any Navidrome user can sign in with their username and password. Credentials are validated against your Navidrome instance via the Subsonic API. Sessions are stored in an encrypted, `HttpOnly` cookie and persist until logout.

@@ -212,6 +212,28 @@
 
     <!-- Dark mode toggle + Stories toggle -->
     <div class="mt-auto pt-6 space-y-1">
+
+      @if (currentUser(); as u) {
+        <div class="flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-2 mb-2">
+          <ng-icon name="heroUserCircle" class="w-5 h-5 shrink-0 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">Signed in as</p>
+            <p class="mt-0.5 text-sm font-medium text-slate-900 dark:text-white truncate" [title]="u.username">{{ u.username }}</p>
+          </div>
+          @if (canLogout()) {
+            <button
+              type="button"
+              (click)="logout()"
+              title="Sign out"
+              aria-label="Sign out"
+              class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4" aria-hidden="true" />
+            </button>
+          }
+        </div>
+      }
+
       <button
         type="button"
         (click)="toggleStoriesMode()"
@@ -313,6 +335,28 @@
           aria-orientation="vertical"
           class="absolute right-0 top-full mt-2 w-64 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-20 py-1 focus:outline-none"
         >
+          @if (currentUser(); as u) {
+            <div class="flex items-center gap-2 px-4 py-3">
+              <ng-icon name="heroUserCircle" class="w-5 h-5 shrink-0 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+              <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">Signed in as</p>
+                <p class="mt-0.5 text-sm font-medium text-slate-900 dark:text-white truncate" [title]="u.username">{{ u.username }}</p>
+              </div>
+              @if (canLogout()) {
+                <button
+                  type="button"
+                  (click)="logout()"
+                  title="Sign out"
+                  aria-label="Sign out"
+                  class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4" aria-hidden="true" />
+                </button>
+              }
+            </div>
+            <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+          }
+
           <!-- Interval selector -->
           <div class="px-4 py-3">
             <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Interval</span>

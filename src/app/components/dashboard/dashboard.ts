@@ -13,6 +13,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowPath,
+  heroArrowRightOnRectangle,
   heroCalendarDays,
   heroChartBar,
   heroChevronLeft,
@@ -31,9 +32,11 @@ import {
   heroSquare3Stack3d,
   heroSun,
   heroTrophy,
+  heroUserCircle,
 } from '@ng-icons/heroicons/outline';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { AuthService } from '../../services/auth.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
   type DayOfWeek,
@@ -84,6 +87,8 @@ import { CardsLandscape } from '../cards-landscape/cards-landscape';
       heroHeart,
       heroChevronLeft,
       heroChevronRight,
+      heroUserCircle,
+      heroArrowRightOnRectangle,
     }),
   ],
 })
@@ -93,6 +98,18 @@ export class Dashboard {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+
+  readonly currentUser = this.auth.user;
+  readonly canLogout = this.auth.canLogout;
+
+  logout(): void {
+    this.mobileMenuOpen.set(false);
+    this.auth.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login']),
+    });
+  }
 
   openArtist(artistId: string | null | undefined): void {
     if (!artistId) return;

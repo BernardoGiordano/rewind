@@ -56,3 +56,4 @@ navidrome.db-wal
 
 # Local environment
 .env
+.rewind-session-secret

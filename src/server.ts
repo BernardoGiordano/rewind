@@ -7,9 +7,15 @@ import {
 import type { Database } from 'better-sqlite3';
 import BetterSqlite3 from 'better-sqlite3';
 import express from 'express';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { createHash } from 'node:crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+  scryptSync,
+} from 'node:crypto';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 
@@ -89,19 +95,184 @@ function resolveRange(
   return null;
 }
 
-let cachedUserId: string | null = null;
-function userId(db: Database): string {
-  if (cachedUserId !== null) return cachedUserId;
-  const user = process.env['NAVIDROME_USER'];
-  if (!user) {
-    throw new Error('NAVIDROME_USER is not set');
+// --- Auth context resolution (env transparent mode or session cookie) ---
+
+type AuthContext = {
+  uid: string;
+  username: string;
+  password: string;
+  mode: 'env' | 'session';
+};
+
+function resolveUserId(db: Database, username: string): string | null {
+  const row = queryOne<{ id: string }>(db, `SELECT id FROM user WHERE user_name = ?`, [username]);
+  return row?.id ?? null;
+}
+
+function resolveAuth(req: express.Request): AuthContext | null {
+  const db = getDb();
+  const envUser = process.env['NAVIDROME_USER'];
+  const envKey = process.env['NAVIDROME_API_KEY'];
+  if (envUser && envKey) {
+    const uid = resolveUserId(db, envUser);
+    if (uid) {
+      return { uid, username: envUser, password: envKey, mode: 'env' };
+    }
   }
-  const row = queryOne<{ id: string }>(db, `SELECT id FROM user WHERE user_name = ?`, [user]);
-  if (!row) {
-    throw new Error(`No Navidrome user found with user_name='${user}'`);
+  const session = readSession(req);
+  if (session) {
+    return { ...session, mode: 'session' };
   }
-  cachedUserId = row.id;
-  return cachedUserId;
+  return null;
+}
+
+function envAuthAvailable(): boolean {
+  const envUser = process.env['NAVIDROME_USER'];
+  const envKey = process.env['NAVIDROME_API_KEY'];
+  if (!envUser || !envKey) return false;
+  try {
+    return resolveUserId(getDb(), envUser) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function requireAuth(
+  req: express.Request,
+  res: express.Response,
+): AuthContext | null {
+  const auth = resolveAuth(req);
+  if (!auth) {
+    res.status(401).json({ error: 'Authentication required' });
+    return null;
+  }
+  return auth;
+}
+
+// --- Session cookie (AES-256-GCM) ---
+
+const SESSION_COOKIE = 'rewind_session';
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 365; // 1 year
+
+let cachedSessionKey: Buffer | null = null;
+
+function getSessionKey(): Buffer {
+  if (cachedSessionKey) return cachedSessionKey;
+  let secret = process.env['SESSION_SECRET'];
+  if (!secret) {
+    const secretFile = join(process.cwd(), '.rewind-session-secret');
+    if (existsSync(secretFile)) {
+      secret = readFileSync(secretFile, 'utf8').trim();
+    } else {
+      secret = randomBytes(32).toString('hex');
+      try {
+        writeFileSync(secretFile, secret, { mode: 0o600 });
+        console.log('[auth] Generated new session secret at', secretFile);
+      } catch (err) {
+        console.warn(
+          '[auth] Could not persist session secret — sessions will not survive restart:',
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
+  }
+  cachedSessionKey = scryptSync(secret, 'rewind-session-v1', 32);
+  return cachedSessionKey;
+}
+
+type SessionPayload = {
+  uid: string;
+  username: string;
+  password: string;
+  exp: number;
+};
+
+function encryptSession(payload: SessionPayload): string {
+  const key = getSessionKey();
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(JSON.stringify(payload), 'utf8'),
+    cipher.final(),
+  ]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, ciphertext]).toString('base64url');
+}
+
+function decryptSession(token: string): SessionPayload | null {
+  try {
+    const buf = Buffer.from(token, 'base64url');
+    if (buf.length < 28) return null;
+    const iv = buf.subarray(0, 12);
+    const tag = buf.subarray(12, 28);
+    const ciphertext = buf.subarray(28);
+    const key = getSessionKey();
+    const decipher = createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(tag);
+    const plain = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return JSON.parse(plain.toString('utf8')) as SessionPayload;
+  } catch {
+    return null;
+  }
+}
+
+function parseCookies(header: string | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!header) return out;
+  for (const part of header.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const k = part.slice(0, eq).trim();
+    if (!k) continue;
+    const v = part.slice(eq + 1).trim();
+    try {
+      out[k] = decodeURIComponent(v);
+    } catch {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function readSession(
+  req: express.Request,
+): { uid: string; username: string; password: string } | null {
+  const cookies = parseCookies(req.headers.cookie);
+  const token = cookies[SESSION_COOKIE];
+  if (!token) return null;
+  const data = decryptSession(token);
+  if (!data) return null;
+  if (typeof data.exp !== 'number' || data.exp < Math.floor(Date.now() / 1000)) return null;
+  return { uid: data.uid, username: data.username, password: data.password };
+}
+
+function isSecureRequest(req: express.Request): boolean {
+  if (req.secure) return true;
+  const xfp = req.headers['x-forwarded-proto'];
+  const proto = Array.isArray(xfp) ? xfp[0] : xfp;
+  return typeof proto === 'string' && proto.split(',')[0].trim() === 'https';
+}
+
+function writeSessionCookie(
+  req: express.Request,
+  res: express.Response,
+  payload: { uid: string; username: string; password: string },
+): void {
+  const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
+  const token = encryptSession({ ...payload, exp });
+  const secure = isSecureRequest(req) ? '; Secure' : '';
+  res.setHeader(
+    'Set-Cookie',
+    `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=${SESSION_TTL_SECONDS}`,
+  );
+}
+
+function clearSessionCookie(req: express.Request, res: express.Response): void {
+  const secure = isSecureRequest(req) ? '; Secure' : '';
+  res.setHeader(
+    'Set-Cookie',
+    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=0`,
+  );
 }
 
 // --- Navidrome Subsonic API config ---
@@ -116,6 +287,40 @@ function getNavidromeUser(): string | null {
 
 function getNavidromeApiKey(): string | null {
   return process.env['NAVIDROME_API_KEY'] ?? null;
+}
+
+/** Validate credentials against Navidrome via Subsonic ping endpoint. */
+function pingSubsonic(baseUrl: string, user: string, password: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    try {
+      const params = buildSubsonicAuthParams(user, password);
+      const cleanBase = baseUrl.replace(/\/$/, '');
+      const url = `${cleanBase}/rest/ping.view?${params.toString()}`;
+      const requester = url.startsWith('https') ? httpsRequest : httpRequest;
+      const proxyReq = requester(url, (proxyRes) => {
+        const chunks: Buffer[] = [];
+        proxyRes.on('data', (c: Buffer) => chunks.push(c));
+        proxyRes.on('end', () => {
+          if (!proxyRes.statusCode || proxyRes.statusCode >= 400) {
+            resolve(false);
+            return;
+          }
+          try {
+            const body = Buffer.concat(chunks).toString('utf8');
+            const json = JSON.parse(body);
+            const status = json?.['subsonic-response']?.status;
+            resolve(status === 'ok');
+          } catch {
+            resolve(false);
+          }
+        });
+      });
+      proxyReq.on('error', () => resolve(false));
+      proxyReq.end();
+    } catch {
+      resolve(false);
+    }
+  });
 }
 
 /** Build Subsonic auth params using token-based auth (salt + md5). */
@@ -136,7 +341,7 @@ function buildSubsonicAuthParams(user: string, apiKey: string): URLSearchParams 
 }
 
 function isCoverArtAvailable(): boolean {
-  return !!(getNavidromeUrl() && getNavidromeUser() && getNavidromeApiKey());
+  return !!getNavidromeUrl();
 }
 
 // --- /api/config ---
@@ -146,34 +351,78 @@ function noCache(res: express.Response): void {
 }
 
 app.get('/api/config', (_req, res) => {
-  const url = getNavidromeUrl();
-  const user = getNavidromeUser();
-  const apiKey = getNavidromeApiKey();
-  console.log('[config] NAVIDROME_URL:', url ?? '(not set)');
-  console.log('[config] NAVIDROME_USER:', user ?? '(not set)');
-  console.log('[config] NAVIDROME_API_KEY:', apiKey ? '(set)' : '(not set)');
   noCache(res);
   res.json({ coverArtAvailable: isCoverArtAvailable() });
+});
+
+// --- /api/auth/* ---
+
+const jsonParser = express.json({ limit: '16kb' });
+
+app.get('/api/auth/me', (req, res) => {
+  noCache(res);
+  const auth = resolveAuth(req);
+  if (!auth) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return;
+  }
+  res.json({ username: auth.username, mode: auth.mode });
+});
+
+app.post('/api/auth/login', jsonParser, async (req, res) => {
+  noCache(res);
+  if (envAuthAvailable()) {
+    res.status(409).json({ error: 'Server is configured for env-based auth; login is disabled' });
+    return;
+  }
+  const body = (req.body ?? {}) as { username?: unknown; password?: unknown };
+  const username = typeof body.username === 'string' ? body.username.trim() : '';
+  const password = typeof body.password === 'string' ? body.password : '';
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password are required' });
+    return;
+  }
+  const baseUrl = getNavidromeUrl();
+  if (!baseUrl) {
+    res.status(503).json({ error: 'NAVIDROME_URL is not configured on the server' });
+    return;
+  }
+  const ok = await pingSubsonic(baseUrl, username, password);
+  if (!ok) {
+    res.status(401).json({ error: 'Invalid username or password' });
+    return;
+  }
+  const db = getDb();
+  const uid = resolveUserId(db, username);
+  if (!uid) {
+    res.status(404).json({ error: `No Navidrome user found with user_name='${username}'` });
+    return;
+  }
+  writeSessionCookie(req, res, { uid, username, password });
+  res.json({ username, mode: 'session' });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  noCache(res);
+  clearSessionCookie(req, res);
+  res.json({ ok: true });
 });
 
 // --- /api/cover/:id — proxy to Navidrome getCoverArt ---
 
 app.get('/api/cover/:id', (req, res) => {
   const baseUrl = getNavidromeUrl();
-  const user = getNavidromeUser();
-  const apiKey = getNavidromeApiKey();
-
-  if (!baseUrl || !user || !apiKey) {
-    console.error(
-      '[cover] Not configured — missing NAVIDROME_URL, NAVIDROME_USER or NAVIDROME_API_KEY',
-    );
-    res.status(503).json({ error: 'Navidrome API not configured' });
+  if (!baseUrl) {
+    res.status(503).json({ error: 'NAVIDROME_URL not configured' });
     return;
   }
 
+  const auth = requireAuth(req, res);
+  if (!auth) return;
+
   const coverId = req.params['id'];
   const size = (req.query['size'] as string) ?? '150';
-  const authParams = buildSubsonicAuthParams(user, apiKey);
+  const authParams = buildSubsonicAuthParams(auth.username, auth.password);
   authParams.set('id', coverId);
   authParams.set('size', size);
 
@@ -215,8 +464,10 @@ app.get('/api/cover/:id', (req, res) => {
 });
 
 // --- Available years ---
-app.get('/api/years', (_req, res) => {
+app.get('/api/years', (req, res) => {
   try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
     const db = getDb();
     const rows = queryAll<{ year: string }>(
       db,
@@ -226,7 +477,7 @@ app.get('/api/years', (_req, res) => {
       WHERE user_id = ?
       ORDER BY year DESC
     `,
-      [userId(db)],
+      [auth.uid],
     );
     noCache(res);
     res.json(rows.map((r) => r.year));
@@ -243,9 +494,11 @@ app.get('/api/stats/:type', (req, res) => {
   const toParam = req.query['to'] as string | undefined;
 
   try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
     const range = resolveRange(yearParam, fromParam, toParam);
     const db = getDb();
-    const uid = userId(db);
+    const uid = auth.uid;
     let result: unknown;
 
     switch (statType) {
@@ -687,9 +940,11 @@ app.get('/api/artist/:id', (req, res) => {
   const toParam = req.query['to'] as string | undefined;
 
   try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
     const range = resolveRange(yearParam, fromParam, toParam);
     const db = getDb();
-    const uid = userId(db);
+    const uid = auth.uid;
 
     const profile = getArtistProfile(db, uid, artistId, range);
     if (!profile.artist) {
@@ -1016,16 +1271,19 @@ async function bootstrap() {
 
     console.log('--- Navidrome Rewind ---');
     console.log('DB path:          ', resolveDbPath());
+    console.log('Navidrome URL:    ', getNavidromeUrl() ?? '(not set)');
+    const envUser = getNavidromeUser();
+    const envKey = getNavidromeApiKey();
+    if (envUser && envKey) {
+      console.log('Auth mode:         transparent (NAVIDROME_USER + NAVIDROME_API_KEY)');
+      console.log('Navidrome user:   ', envUser);
+    } else {
+      console.log('Auth mode:         login (per-user via /login)');
+    }
     console.log(
       'Cover art:        ',
-      isCoverArtAvailable()
-        ? '✓ enabled'
-        : '✗ disabled (set NAVIDROME_URL, NAVIDROME_USER, NAVIDROME_API_KEY)',
+      isCoverArtAvailable() ? '✓ enabled' : '✗ disabled (set NAVIDROME_URL)',
     );
-    if (isCoverArtAvailable()) {
-      console.log('Navidrome URL:    ', getNavidromeUrl());
-      console.log('Navidrome user:   ', getNavidromeUser());
-    }
     console.log('------------------------');
 
     app.listen(port, (error) => {
