@@ -80,19 +80,40 @@ export class ArtistDetail {
     return out;
   });
 
-  // Derived heatmap: 52 weeks x 7 days grid, Sunday-top
+  // Derived heatmap: 7-day rows, Sunday-top, filling the selected range.
+  // Empty days are rendered as 0-play cells so the most recent date is always on the right.
   readonly heatmapCells = computed(() => {
     const d = this.data();
-    if (!d || d.heatmap.length === 0) return null;
+    if (!d) return null;
+
+    const range = this.range();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let start: Date;
+    let end: Date;
+    if (range.kind === 'year') {
+      const y = parseInt(range.year, 10);
+      start = new Date(y, 0, 1);
+      end = new Date(y, 11, 31);
+      if (end > today) end = today;
+    } else if (range.kind === 'custom') {
+      start = parseIsoDate(range.from);
+      end = parseIsoDate(range.to);
+    } else {
+      // all-time: from first scrobble (or 52 weeks ago if no data) up to today
+      if (d.heatmap.length > 0) {
+        start = parseIsoDate(d.heatmap[0].day);
+      } else {
+        start = new Date(today);
+        start.setDate(start.getDate() - 52 * 7);
+      }
+      end = today;
+    }
+    if (end < start) return null;
 
     const byDay = new Map<string, number>();
     for (const h of d.heatmap) byDay.set(h.day, h.plays);
-
-    // Determine date range from heatmap itself (server already filters)
-    const firstDay = d.heatmap[0].day;
-    const lastDay = d.heatmap[d.heatmap.length - 1].day;
-    const start = parseIsoDate(firstDay);
-    const end = parseIsoDate(lastDay);
 
     // Snap start to previous Sunday
     const gridStart = new Date(start);
@@ -118,6 +139,50 @@ export class ArtistDetail {
     const d = this.data();
     if (!d) return 0;
     return d.heatmap.reduce((m, h) => (h.plays > m ? h.plays : m), 0);
+  });
+
+  readonly heatmapTotalPlays = computed(() => {
+    const d = this.data();
+    if (!d) return 0;
+    return d.heatmap.reduce((sum, h) => sum + h.plays, 0);
+  });
+
+  readonly heatmapWeekCount = computed(() => {
+    const cells = this.heatmapCells();
+    if (!cells) return 0;
+    return Math.ceil(cells.length / 7);
+  });
+
+  readonly heatmapMonthLabels = computed(() => {
+    const cells = this.heatmapCells();
+    if (!cells) return [];
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const weeks = Math.ceil(cells.length / 7);
+    const labels: { col: number; label: string }[] = [];
+    let prevMonth = -1;
+    for (let w = 0; w < weeks; w++) {
+      // Use the first in-range day of the week (or first day if none)
+      let monthCell = cells[w * 7];
+      for (let dOff = 0; dOff < 7; dOff++) {
+        const c = cells[w * 7 + dOff];
+        if (c?.inRange) { monthCell = c; break; }
+      }
+      if (!monthCell) continue;
+      const month = parseIsoDate(monthCell.date).getMonth();
+      if (month !== prevMonth) {
+        // Only label if this week has at least ~3 days in the new month so the label fits
+        let inNewMonth = 0;
+        for (let dOff = 0; dOff < 7; dOff++) {
+          const c = cells[w * 7 + dOff];
+          if (c && parseIsoDate(c.date).getMonth() === month) inNewMonth++;
+        }
+        if (inNewMonth >= 3 || w === 0) {
+          labels.push({ col: w + 1, label: names[month] });
+          prevMonth = month;
+        }
+      }
+    }
+    return labels;
   });
 
   readonly maxTrackPlays = computed(() => {

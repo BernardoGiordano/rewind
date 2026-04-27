@@ -121,15 +121,55 @@
         <!-- Heatmap -->
         @if (heatmapCells(); as cells) {
           <section class="mb-10">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Activity heatmap</h2>
+            <div class="flex items-baseline justify-between mb-4">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Activity heatmap</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
+                <span class="font-black tabular-nums text-slate-900 dark:text-white">{{ heatmapTotalPlays().toLocaleString() }}</span>
+                {{ heatmapTotalPlays() === 1 ? 'play' : 'plays' }} in this period
+              </p>
+            </div>
             <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 overflow-x-auto">
-              <div class="grid grid-rows-7 grid-flow-col gap-[3px]" style="grid-auto-columns: 12px;">
-                @for (cell of cells; track cell.date) {
+              <div class="flex gap-2">
+                <!-- Day labels -->
+                <div class="grid grid-rows-7 gap-[3px] text-[10px] text-slate-500 dark:text-slate-400 pt-[18px] shrink-0">
+                  <span class="h-3 leading-3"></span>
+                  <span class="h-3 leading-3">Mon</span>
+                  <span class="h-3 leading-3"></span>
+                  <span class="h-3 leading-3">Wed</span>
+                  <span class="h-3 leading-3"></span>
+                  <span class="h-3 leading-3">Fri</span>
+                  <span class="h-3 leading-3"></span>
+                </div>
+                <div class="min-w-0">
+                  <!-- Month labels -->
                   <div
-                    [class]="'w-3 h-3 rounded-sm ' + heatmapColor(cell)"
-                    [title]="cell.date + ': ' + cell.plays + ' plays'"
-                  ></div>
-                }
+                    class="grid gap-[3px] mb-1 text-[10px] text-slate-500 dark:text-slate-400 h-[14px]"
+                    [style.grid-template-columns]="'repeat(' + heatmapWeekCount() + ', 12px)'"
+                  >
+                    @for (m of heatmapMonthLabels(); track m.col) {
+                      <span [style.grid-column-start]="m.col" class="whitespace-nowrap">{{ m.label }}</span>
+                    }
+                  </div>
+                  <!-- Cells -->
+                  <div class="grid grid-rows-7 grid-flow-col gap-[3px]" style="grid-auto-columns: 12px;">
+                    @for (cell of cells; track cell.date) {
+                      <div
+                        [class]="'w-3 h-3 rounded-sm ' + heatmapColor(cell)"
+                        [title]="cell.date + ': ' + cell.plays + ' plays'"
+                      ></div>
+                    }
+                  </div>
+                </div>
+              </div>
+              <!-- Legend -->
+              <div class="flex items-center justify-end gap-2 mt-3 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>Less</span>
+                <span class="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-800"></span>
+                <span class="w-3 h-3 rounded-sm bg-rose-200 dark:bg-rose-900"></span>
+                <span class="w-3 h-3 rounded-sm bg-rose-300 dark:bg-rose-600"></span>
+                <span class="w-3 h-3 rounded-sm bg-rose-400"></span>
+                <span class="w-3 h-3 rounded-sm bg-rose-500"></span>
+                <span>More</span>
               </div>
             </div>
           </section>
