@@ -15,20 +15,49 @@
 } @else if (data(); as d) {
   <div class="h-dvh overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
-    <!-- Top nav -->
-    <div class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-        <button
-          type="button"
-          (click)="goBack()"
-          class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-        >
-          <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
-          <span class="hidden sm:inline">Back</span>
-          <span class="sm:hidden">Back</span>
-        </button>
-        <div class="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400">
-          <span class="uppercase tracking-widest">{{ rangeLabel() }}</span>
+    <!-- Sticky header: nav + tabs combined to avoid gap -->
+    <div class="sticky top-0 z-20">
+      <!-- Top nav -->
+      <div class="backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+          <button
+            type="button"
+            (click)="goBack()"
+            class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
+            <span class="hidden sm:inline">Back</span>
+            <span class="sm:hidden">Back</span>
+          </button>
+          <div class="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400">
+            <span class="uppercase tracking-widest">{{ rangeLabel() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex gap-6" role="tablist">
+            @for (t of [
+              { key: 'overview', label: 'Overview' },
+              { key: 'patterns', label: 'Patterns' },
+              { key: 'activity', label: 'Activity' }
+            ]; track t.key) {
+              <button
+                type="button"
+                role="tab"
+                [attr.aria-selected]="activeTab() === t.key"
+                (click)="selectTab($any(t.key))"
+                class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+                [class]="activeTab() === t.key
+                  ? 'border-rose-500 text-slate-900 dark:text-white'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+              >
+                {{ t.label }}
+              </button>
+            }
+          </nav>
         </div>
       </div>
     </div>
@@ -85,32 +114,6 @@
           <p class="mt-1 text-2xl font-black tabular-nums">{{ libraryDepthPct() }}%</p>
           <p class="text-xs text-slate-400 tabular-nums mt-0.5">{{ d.played_tracks }}/{{ d.library_tracks }}</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="sticky top-[49px] z-10 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex gap-6" role="tablist">
-          @for (t of [
-            { key: 'overview', label: 'Overview' },
-            { key: 'patterns', label: 'Patterns' },
-            { key: 'activity', label: 'Activity' }
-          ]; track t.key) {
-            <button
-              type="button"
-              role="tab"
-              [attr.aria-selected]="activeTab() === t.key"
-              (click)="selectTab($any(t.key))"
-              class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
-              [class]="activeTab() === t.key
-                ? 'border-rose-500 text-slate-900 dark:text-white'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            >
-              {{ t.label }}
-            </button>
-          }
-        </nav>
       </div>
     </div>
 
