@@ -25,6 +25,7 @@ import { NavidromeService, type StatRange } from '../../services/navidrome.servi
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
 import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
+import { MONTH_SHORT, formatYearMonthWithYear, padHour, parseIsoDate, toIsoDate } from '../../utils/format';
 
 type TabKey = 'overview' | 'patterns' | 'activity';
 
@@ -155,7 +156,6 @@ export class ArtistDetail {
   readonly heatmapMonthLabels = computed(() => {
     const cells = this.heatmapCells();
     if (!cells) return [];
-    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const weeks = Math.ceil(cells.length / 7);
     const labels: { col: number; label: string }[] = [];
     let prevMonth = -1;
@@ -176,7 +176,7 @@ export class ArtistDetail {
           if (c && parseIsoDate(c.date).getMonth() === month) inNewMonth++;
         }
         if (inNewMonth >= 3 || w === 0) {
-          labels.push({ col: w + 1, label: names[month] });
+          labels.push({ col: w + 1, label: MONTH_SHORT[month] });
           prevMonth = month;
         }
       }
@@ -329,11 +329,7 @@ export class ArtistDetail {
     return 'bg-rose-200 dark:bg-rose-900';
   }
 
-  formatMonth(month: string): string {
-    const [y, m] = month.split('-');
-    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${names[parseInt(m, 10) - 1] ?? m} ${y.slice(2)}`;
-  }
+  readonly formatMonth = formatYearMonthWithYear;
 
   formatDate(ts: number | null): string {
     if (!ts) return '—';
@@ -351,9 +347,7 @@ export class ArtistDetail {
     return this.formatDate(ts);
   }
 
-  padHour(h: number): string {
-    return String(h).padStart(2, '0');
-  }
+  readonly padHour = padHour;
 
   toggleDarkMode(): void {
     const next = !this.darkMode();
@@ -365,14 +359,3 @@ export class ArtistDetail {
   }
 }
 
-function parseIsoDate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function toIsoDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}

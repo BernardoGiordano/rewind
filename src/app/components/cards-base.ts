@@ -19,11 +19,7 @@ import {
   type TopGenre,
   type TopSong,
 } from '../models/stats';
-
-const MONTH_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
+import { formatNum, formatYearMonth, padHour } from '../utils/format';
 
 @Directive()
 export abstract class CardsBase {
@@ -91,19 +87,9 @@ export abstract class CardsBase {
     return this.navidrome.coverUrl(id, size);
   }
 
-  formatNum(n: number): string {
-    if (n >= 1000) return n.toLocaleString();
-    return String(n);
-  }
-
-  padHour(h: number): string {
-    return String(h).padStart(2, '0');
-  }
-
-  formatMonth(month: string): string {
-    const [, m] = month.split('-');
-    return MONTH_SHORT[parseInt(m, 10) - 1] ?? month;
-  }
+  readonly formatNum = formatNum;
+  readonly padHour = padHour;
+  readonly formatMonth = formatYearMonth;
 
   genreBarWidth(plays: number): number {
     return (plays / this.maxGenrePlays()) * 100;

@@ -60,6 +60,7 @@ import {
 import { CardsPortrait } from '../cards-portrait/cards-portrait';
 import { CardsSquare } from '../cards-square/cards-square';
 import { CardsLandscape } from '../cards-landscape/cards-landscape';
+import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
 
 @Component({
   selector: 'app-dashboard',
@@ -578,20 +579,6 @@ export class Dashboard {
   }
 }
 
-const MONTH_FULL = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-const MONTH_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-function parseLocalIso(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
 function sameDate(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear()
     && a.getMonth() === b.getMonth()
@@ -599,8 +586,8 @@ function sameDate(a: Date, b: Date): boolean {
 }
 
 export function formatRangeLabel(fromIso: string, toIso: string): string {
-  const from = parseLocalIso(fromIso);
-  const to = parseLocalIso(toIso);
+  const from = parseIsoDate(fromIso);
+  const to = parseIsoDate(toIso);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
