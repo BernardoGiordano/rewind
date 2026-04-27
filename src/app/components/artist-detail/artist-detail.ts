@@ -315,16 +315,6 @@ export class ArtistDetail {
     }
   }
 
-  trackBarPct(plays: number): number {
-    const m = this.maxTrackPlays();
-    return m > 0 ? (plays / m) * 100 : 0;
-  }
-
-  albumBarPct(plays: number): number {
-    const m = this.maxAlbumPlays();
-    return m > 0 ? (plays / m) * 100 : 0;
-  }
-
   clockBarPct(plays: number): number {
     return (plays / this.maxClockPlays()) * 100;
   }
