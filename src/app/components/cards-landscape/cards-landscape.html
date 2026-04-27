@@ -52,9 +52,7 @@
               (keydown.enter)="openArtist(song.artist_id, $event)"
             >
               <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
-                @if (coverArtAvailable() && song.album_id) {
-                  <img [src]="coverUrl(song.album_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                }
+                <app-cover [id]="song.album_id" [size]="600" />
               </div>
               <div class="mt-4 shrink-0">
                 <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">#1 Song</p>
@@ -105,9 +103,7 @@
                       <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10 mx-auto">
-                          @if (coverArtAvailable() && song.album_id) {
-                            <img [src]="coverUrl(song.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
+                          <app-cover [id]="song.album_id" [size]="100" />
                         </div>
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
@@ -141,9 +137,7 @@
             >
               <div class="flex-1 flex items-center justify-center min-h-0">
                 <div class="aspect-square h-full max-h-full rounded-full overflow-hidden bg-white/10 shadow-2xl">
-                  @if (coverArtAvailable() && artist.artist_id) {
-                    <img [src]="coverUrl(artist.artist_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                  }
+                  <app-cover [id]="artist.artist_id" [size]="600" />
                 </div>
               </div>
               <div class="mt-4 shrink-0">
@@ -194,9 +188,7 @@
                       <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-full overflow-hidden bg-white/10 mx-auto">
-                          @if (coverArtAvailable() && artist.artist_id) {
-                            <img [src]="coverUrl(artist.artist_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
+                          <app-cover [id]="artist.artist_id" [size]="100" />
                         </div>
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
@@ -229,9 +221,7 @@
               (keydown.enter)="openArtist(album.artist_id, $event)"
             >
               <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
-                @if (coverArtAvailable() && album.album_id) {
-                  <img [src]="coverUrl(album.album_id, 600)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                }
+                <app-cover [id]="album.album_id" [size]="600" />
               </div>
               <div class="mt-4 shrink-0">
                 <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">#1 Album</p>
@@ -282,9 +272,7 @@
                       <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 2 }}</td>
                       <td class="py-1.5">
                         <div class="w-10 h-10 rounded-md overflow-hidden bg-white/10 mx-auto">
-                          @if (coverArtAvailable() && album.album_id) {
-                            <img [src]="coverUrl(album.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                          }
+                          <app-cover [id]="album.album_id" [size]="100" />
                         </div>
                       </td>
                       <td class="max-w-0 pr-4 py-1.5">
@@ -562,9 +550,7 @@
                     <td class="text-white/30 text-sm font-black tabular-nums text-right py-1.5 group-hover:text-white/60">{{ i + 1 }}</td>
                     <td class="py-1.5">
                       <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10 mx-auto">
-                        @if (coverArtAvailable() && track.album_id) {
-                          <img [src]="coverUrl(track.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="track.album_id" [size]="100" />
                       </div>
                     </td>
                     <td class="max-w-0 pr-4 py-1.5">
@@ -662,9 +648,7 @@
                     <td class="text-white/60 text-sm font-black uppercase tracking-wider py-2">{{ formatMonth(s.month) }}</td>
                     <td class="py-2">
                       <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg mx-auto">
-                        @if (coverArtAvailable() && s.album_id) {
-                          <img [src]="coverUrl(s.album_id, 150)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="s.album_id" [size]="150" />
                       </div>
                     </td>
                     <td class="max-w-0 pr-4 py-2">
@@ -761,9 +745,7 @@
                   (click)="openArtist(d.top_artist.artist_id, $event)"
                   (keydown.enter)="openArtist(d.top_artist.artist_id, $event)"
                 >
-                  @if (coverArtAvailable() && d.top_artist.artist_id) {
-                    <img [src]="coverUrl(d.top_artist.artist_id, 800)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                  }
+                  <app-cover [id]="d.top_artist.artist_id" [size]="800" />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
                   <div class="absolute bottom-0 left-0 right-0 p-5">
                     <p class="text-white/70 text-xs font-bold uppercase tracking-widest">#1 Artist</p>

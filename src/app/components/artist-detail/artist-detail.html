@@ -66,9 +66,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
       <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
         <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden bg-gradient-to-br from-rose-500 to-pink-900 shrink-0 shadow-xl">
-          @if (coverArtAvailable() && d.artist_id) {
-            <img [src]="coverUrl(d.artist_id, 400)" alt="" class="w-full h-full object-cover" loading="eager" />
-          }
+          <app-cover [id]="d.artist_id" [size]="400" [eager]="true" />
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-xs font-bold uppercase tracking-widest text-rose-500">Artist</p>
@@ -191,9 +189,7 @@
                     <li class="flex items-center gap-3 p-3">
                       <span class="text-sm font-black tabular-nums text-slate-400 w-6 text-right">{{ i + 1 }}</span>
                       <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
-                        @if (coverArtAvailable() && t.album_id) {
-                          <img [src]="coverUrl(t.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="t.album_id" [size]="100" />
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold truncate">{{ t.title }}</p>
@@ -221,9 +217,7 @@
                     <li class="flex items-center gap-3 p-3">
                       <span class="text-sm font-black tabular-nums text-slate-400 w-6 text-right">{{ i + 1 }}</span>
                       <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
-                        @if (coverArtAvailable() && a.album_id) {
-                          <img [src]="coverUrl(a.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="a.album_id" [size]="100" />
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold truncate">{{ a.album }}</p>
@@ -352,9 +346,7 @@
                     <li class="flex items-center gap-4 p-3">
                       <span class="text-sm font-black uppercase tracking-wider text-slate-500 w-20 shrink-0">{{ formatMonth(s.month) }}</span>
                       <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
-                        @if (coverArtAvailable() && s.album_id) {
-                          <img [src]="coverUrl(s.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="s.album_id" [size]="100" />
                       </div>
                       <p class="flex-1 text-sm font-semibold truncate">{{ s.title }}</p>
                       <span class="text-sm font-bold tabular-nums shrink-0">{{ s.plays }} plays</span>
@@ -381,9 +373,7 @@
                   @for (r of d.recent_scrobbles; track $index) {
                     <li class="flex items-center gap-3 p-3">
                       <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
-                        @if (coverArtAvailable() && r.album_id) {
-                          <img [src]="coverUrl(r.album_id, 100)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                        }
+                        <app-cover [id]="r.album_id" [size]="100" />
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold truncate">{{ r.title }}</p>
