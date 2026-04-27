@@ -46,9 +46,7 @@
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  @if (coverArtAvailable() && song.album_id) {
-                    <img [src]="coverUrl(song.album_id, 400)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                  }
+                  <app-cover [id]="song.album_id" [size]="400" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
@@ -65,9 +63,7 @@
                 <div class="flex items-center gap-3 min-w-0">
                   <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
                   <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                    @if (coverArtAvailable() && song.album_id) {
-                      <img [src]="coverUrl(song.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                    }
+                    <app-cover [id]="song.album_id" [size]="200" />
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-white font-semibold text-base truncate">{{ song.title }}</p>
@@ -90,9 +86,7 @@
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-36 h-36 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  @if (coverArtAvailable() && artist.artist_id) {
-                    <img [src]="coverUrl(artist.artist_id, 400)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                  }
+                  <app-cover [id]="artist.artist_id" [size]="400" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
@@ -109,9 +103,7 @@
                 <div class="flex items-center gap-3 min-w-0">
                   <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
                   <div class="w-12 h-12 rounded-full shrink-0 overflow-hidden bg-white/10">
-                    @if (coverArtAvailable() && artist.artist_id) {
-                      <img [src]="coverUrl(artist.artist_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                    }
+                    <app-cover [id]="artist.artist_id" [size]="200" />
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-white font-semibold text-base truncate">{{ artist.artist }}</p>
@@ -134,9 +126,7 @@
             @if (i === 0) {
               <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
                 <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  @if (coverArtAvailable() && album.album_id) {
-                    <img [src]="coverUrl(album.album_id, 400)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                  }
+                  <app-cover [id]="album.album_id" [size]="400" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
@@ -153,9 +143,7 @@
                 <div class="flex items-center gap-3 min-w-0">
                   <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
                   <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                    @if (coverArtAvailable() && album.album_id) {
-                      <img [src]="coverUrl(album.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                    }
+                    <app-cover [id]="album.album_id" [size]="200" />
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-white font-semibold text-base truncate">{{ album.album }}</p>
@@ -288,9 +276,7 @@
             <div class="flex items-center gap-4 min-w-0">
               <span class="text-white/40 text-xl font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
               <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                @if (coverArtAvailable() && track.album_id) {
-                  <img [src]="coverUrl(track.album_id)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                }
+                <app-cover [id]="track.album_id" />
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-white font-semibold text-base truncate">{{ track.title }}</p>
@@ -334,9 +320,7 @@
             <div class="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2.5 min-w-0">
               <span class="text-white/60 text-xs font-black uppercase tracking-wider w-9 shrink-0">{{ formatMonth(s.month) }}</span>
               <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                @if (coverArtAvailable() && s.album_id) {
-                  <img [src]="coverUrl(s.album_id, 200)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                }
+                <app-cover [id]="s.album_id" [size]="200" />
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-white font-semibold text-sm truncate">{{ s.title }}</p>
@@ -379,9 +363,7 @@
             <!-- Left: top artist hero -->
             @if (d.top_artist) {
               <div class="relative w-1/2 rounded-2xl overflow-hidden bg-white/10 shrink-0">
-                @if (coverArtAvailable() && d.top_artist.artist_id) {
-                  <img [src]="coverUrl(d.top_artist.artist_id, 800)" alt="" class="w-full h-full object-cover" loading="lazy" />
-                }
+                <app-cover [id]="d.top_artist.artist_id" [size]="800" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-5">
                   <p class="text-white/70 text-xs font-bold uppercase tracking-widest">#1 Artist</p>

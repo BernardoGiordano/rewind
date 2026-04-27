@@ -24,6 +24,7 @@ import {
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
 import { formatRangeLabel } from '../dashboard/dashboard';
+import { CoverComponent } from '../cover';
 
 type TabKey = 'overview' | 'patterns' | 'activity';
 
@@ -32,7 +33,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
   templateUrl: './artist-detail.html',
   styleUrl: './artist-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, NgIcon],
+  imports: [DecimalPipe, NgIcon, CoverComponent],
   providers: [
     provideIcons({
       heroArrowLeft,
@@ -60,8 +61,6 @@ export class ArtistDetail {
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<TabKey>('overview');
   readonly darkMode = signal(false);
-
-  readonly coverArtAvailable = this.navidrome.coverArtAvailable;
 
   readonly range = signal<StatRange>({ kind: 'all-time' });
 
@@ -297,10 +296,6 @@ export class ArtistDetail {
         this.loading.set(false);
       },
     });
-  }
-
-  coverUrl(id: string, size = 300): string {
-    return this.navidrome.coverUrl(id, size);
   }
 
   selectTab(tab: TabKey): void {
