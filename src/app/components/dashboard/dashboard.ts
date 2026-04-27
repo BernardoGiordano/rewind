@@ -186,12 +186,6 @@ export class Dashboard {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
-  // Bar width helpers using max values
-  protected maxGenrePlays = 0;
-  protected maxClockPlays = 0;
-  protected maxDayPlays = 0;
-  protected maxDecadePlays = 0;
-
   readonly visibleStats = computed(() => {
     const year = this.selectedYear();
     return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
@@ -550,27 +544,18 @@ export class Dashboard {
       case 'top-albums':
         this.topAlbums.set(data as TopAlbum[]);
         break;
-      case 'top-genres': {
-        const genres = data as TopGenre[];
-        this.topGenres.set(genres);
-        this.maxGenrePlays = Math.max(...genres.map((g) => g.plays), 1);
+      case 'top-genres':
+        this.topGenres.set(data as TopGenre[]);
         break;
-      }
-      case 'listening-clock': {
-        const clock = data as ListeningClock[];
-        this.listeningClock.set(clock);
-        this.maxClockPlays = Math.max(...clock.map((c) => c.plays), 1);
+      case 'listening-clock':
+        this.listeningClock.set(data as ListeningClock[]);
         break;
-      }
       case 'monthly-trends':
         this.monthlyTrends.set(data as MonthlyTrend[]);
         break;
-      case 'day-of-week': {
-        const days = data as DayOfWeek[];
-        this.dayOfWeek.set(days);
-        this.maxDayPlays = Math.max(...days.map((d) => d.plays), 1);
+      case 'day-of-week':
+        this.dayOfWeek.set(data as DayOfWeek[]);
         break;
-      }
       case 'streak':
         this.streaks.set(data as ListeningStreak[]);
         break;
@@ -583,12 +568,9 @@ export class Dashboard {
       case 'song-of-month':
         this.songOfMonth.set(data as SongOfMonth[]);
         break;
-      case 'favorite-decades': {
-        const decades = data as FavoriteDecade[];
-        this.favoriteDecades.set(decades);
-        this.maxDecadePlays = Math.max(...decades.map((d) => d.total_plays), 1);
+      case 'favorite-decades':
+        this.favoriteDecades.set(data as FavoriteDecade[]);
         break;
-      }
       case 'recap':
         this.recapData.set(data as RecapData);
         break;

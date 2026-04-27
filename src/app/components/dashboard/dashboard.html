@@ -552,10 +552,6 @@
           @switch (effectiveCardMode()) {
             @case ('landscape') {
               <app-cards-landscape
-                [maxGenrePlays]="maxGenrePlays"
-                [maxClockPlays]="maxClockPlays"
-                [maxDayPlays]="maxDayPlays"
-                [maxDecadePlays]="maxDecadePlays"
                 [rangeLabel]="rangeLabel()"
                 [selectedStat]="selectedStat()"
                 [selectedDef]="selectedDef()"
@@ -578,10 +574,6 @@
             }
             @case ('square') {
               <app-cards-square
-                [maxGenrePlays]="maxGenrePlays"
-                [maxClockPlays]="maxClockPlays"
-                [maxDayPlays]="maxDayPlays"
-                [maxDecadePlays]="maxDecadePlays"
                 [rangeLabel]="rangeLabel()"
                 [selectedStat]="selectedStat()"
                 [selectedDef]="selectedDef()"
@@ -603,10 +595,6 @@
             }
             @default {
               <app-cards-portrait
-                [maxGenrePlays]="maxGenrePlays"
-                [maxClockPlays]="maxClockPlays"
-                [maxDayPlays]="maxDayPlays"
-                [maxDecadePlays]="maxDecadePlays"
                 [rangeLabel]="rangeLabel()"
                 [selectedStat]="selectedStat()"
                 [selectedDef]="selectedDef()"
