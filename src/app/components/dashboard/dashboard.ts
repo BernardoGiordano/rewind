@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  HostListener,
   inject,
   PLATFORM_ID,
   signal,
@@ -343,6 +344,37 @@ export class Dashboard {
     if (!this.storiesMode()) return;
     this.storiesPaused.set(false);
     this.advanceStories();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (this.customPickerOpen() || this.mobileMenuOpen()) return;
+
+    const target = event.target as HTMLElement | null;
+    if (target) {
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable) {
+        return;
+      }
+    }
+
+    const stats = this.visibleStats();
+    if (stats.length === 0) return;
+
+    event.preventDefault();
+    const currentIdx = stats.findIndex((s) => s.type === this.selectedStat());
+    const baseIdx = currentIdx >= 0 ? currentIdx : 0;
+    const nextIdx =
+      event.key === 'ArrowLeft'
+        ? (baseIdx - 1 + stats.length) % stats.length
+        : (baseIdx + 1) % stats.length;
+
+    this.storiesIndex.set(nextIdx);
+    this.selectStat(stats[nextIdx].type);
+    this.storiesPaused.set(false);
+    if (this.storiesMode()) this.runStoriesTimer();
   }
 
   storiesPrev(): void {
