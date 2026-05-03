@@ -17,6 +17,7 @@ import {
   heroArrowRightOnRectangle,
   heroCalendarDays,
   heroChartBar,
+  heroChevronDown,
   heroChevronLeft,
   heroChevronRight,
   heroClock,
@@ -87,6 +88,7 @@ import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
       heroPause,
       heroSun,
       heroHeart,
+      heroChevronDown,
       heroChevronLeft,
       heroChevronRight,
       heroUserCircle,
@@ -139,6 +141,7 @@ export class Dashboard {
   readonly isSmallScreen = signal(false);
   readonly storiesMode = signal(true);
   readonly sidebarCollapsed = signal(false);
+  readonly songsStatsCollapsed = signal(false);
   readonly storiesPaused = signal(false);
   readonly storiesIndex = signal(0);
   readonly exporting = signal(false);
@@ -232,6 +235,11 @@ export class Dashboard {
           this.sidebarCollapsed.set(storedSidebar === 'true');
         }
 
+        const storedSongsStats = localStorage.getItem('rewind.songsStatsCollapsed');
+        if (storedSongsStats !== null) {
+          this.songsStatsCollapsed.set(storedSongsStats === 'true');
+        }
+
         const storedRange = localStorage.getItem('rewind.customRange');
         if (storedRange) {
           try {
@@ -311,6 +319,14 @@ export class Dashboard {
     this.sidebarCollapsed.set(next);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.sidebarCollapsed', String(next));
+    }
+  }
+
+  toggleSongsStats(): void {
+    const next = !this.songsStatsCollapsed();
+    this.songsStatsCollapsed.set(next);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('rewind.songsStatsCollapsed', String(next));
     }
   }
 
