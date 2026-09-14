@@ -1,0 +1,460 @@
+<div
+  #scroller
+  class="h-dvh overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100"
+>
+  <!-- Sticky header: nav + tabs combined to avoid gap -->
+  <div class="sticky top-0 z-20">
+    <!-- Top nav -->
+    <div
+      class="backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4"
+      >
+        <button
+          type="button"
+          (click)="goBack()"
+          class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
+          Back
+        </button>
+        <div class="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400">
+          <span class="uppercase tracking-widest">Library</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex gap-6" role="tablist" aria-label="Library views">
+          @for (t of tabs; track t.key) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="kind() === t.key"
+              (click)="browse(t.key)"
+              class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+              [class]="
+                kind() === t.key
+                  ? 'border-rose-500 text-slate-900 dark:text-white'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              "
+            >
+              {{ t.label }}
+            </button>
+          }
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+    @if (focus(); as f) {
+      <!-- Drill-down: the selected artist or album -->
+      <nav
+        class="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-4"
+        aria-label="Breadcrumb"
+      >
+        <button
+          type="button"
+          (click)="show(kind(), '', '')"
+          class="cursor-pointer shrink-0 hover:text-slate-900 dark:hover:text-white transition-colors"
+        >
+          All {{ kind() }}
+        </button>
+        @if (artistCrumb(); as a) {
+          <ng-icon name="heroChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+          @if (focusIsAlbum()) {
+            <button
+              type="button"
+              (click)="show('albums', a.id, '')"
+              class="cursor-pointer truncate hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              {{ a.name }}
+            </button>
+          } @else {
+            <span class="truncate text-slate-900 dark:text-white">{{ a.name }}</span>
+          }
+        }
+        @if (context().album; as al) {
+          <ng-icon name="heroChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+          <span class="truncate text-slate-900 dark:text-white">{{ al.name }}</span>
+        }
+      </nav>
+
+      <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
+        <div
+          class="w-28 h-28 sm:w-36 sm:h-36 overflow-hidden bg-slate-100 dark:bg-slate-900 shrink-0 shadow-xl"
+          [class]="focusIsAlbum() ? 'rounded-2xl' : 'rounded-full'"
+        >
+          <app-cover [id]="f.cover_id" [size]="400" [eager]="true" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold uppercase tracking-widest text-rose-500">
+            {{ focusIsAlbum() ? 'Album' : 'Artist' }}
+          </p>
+          <h1 class="mt-1 text-3xl sm:text-5xl font-black leading-none truncate">{{ f.name }}</h1>
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            @if (artistCrumb(); as a) {
+              <a
+                [routerLink]="['/artist', a.id]"
+                class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <ng-icon name="heroChartBarSquare" class="w-4 h-4" aria-hidden="true" />
+                Listening stats
+              </a>
+            }
+            @if (album() && canScrobble()) {
+              <button
+                type="button"
+                (click)="start('album', album(), f.name)"
+                class="cursor-pointer inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium bg-rose-500 text-white hover:bg-rose-600 transition-colors"
+              >
+                <ng-icon name="heroPlus" class="w-4 h-4" aria-hidden="true" />
+                Scrobble album
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <p class="text-xs font-bold uppercase tracking-widest text-rose-500">Your collection</p>
+      <h1 class="mt-1 text-4xl sm:text-6xl font-black leading-none">Library</h1>
+      <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+        Everything Rewind can see, including music you have never played. Add the listens that never
+        made it to Navidrome.
+      </p>
+    }
+
+    <!-- Search -->
+    <form class="mt-8 flex gap-2" (ngSubmit)="applySearch()">
+      <label class="sr-only" for="library-search">Search your library</label>
+      <div class="relative flex-1 min-w-0">
+        <ng-icon
+          name="heroMagnifyingGlass"
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
+          aria-hidden="true"
+        />
+        <input
+          id="library-search"
+          type="search"
+          name="search"
+          autocomplete="off"
+          [ngModel]="search()"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Search artists, albums or songs"
+          class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 pl-9 pr-9 py-2.5 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 transition-colors"
+        />
+        @if (search()) {
+          <button
+            type="button"
+            (click)="clearSearch()"
+            aria-label="Clear search"
+            class="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          >
+            <ng-icon name="heroXMark" class="w-4 h-4" aria-hidden="true" />
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    @if (error()) {
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-8 text-center" role="alert">
+        <p class="text-red-500 font-medium">{{ error() }}</p>
+        <button
+          type="button"
+          (click)="load()"
+          class="mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline cursor-pointer"
+        >
+          Retry
+        </button>
+      </div>
+    } @else if (loading()) {
+      <div class="py-24 text-center" role="status">
+        <div
+          class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
+        ></div>
+        <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading library…</p>
+      </div>
+    } @else if (!items().length) {
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-12 text-center">
+        <p class="text-sm font-medium text-slate-900 dark:text-white">No music found</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          @if (search()) {
+            Nothing matches “{{ search() }}” in {{ kind() }}.
+          } @else {
+            This view is empty.
+          }
+        </p>
+      </div>
+    } @else {
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          {{ kind() }}
+        </h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 tabular-nums">
+          {{ rangeStart() }}–{{ rangeEnd() }} of
+          <span class="font-black text-slate-900 dark:text-white">{{
+            total().toLocaleString()
+          }}</span>
+        </p>
+      </div>
+
+      @if (kind() === 'songs') {
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+          <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+            @for (item of items(); track item.id) {
+              <li class="flex items-center gap-3 p-3">
+                @if (album()) {
+                  <span
+                    class="text-sm font-black tabular-nums text-slate-400 w-6 text-right shrink-0"
+                    >{{ item.track_number }}</span
+                  >
+                }
+                <div
+                  class="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0"
+                >
+                  <app-cover [id]="item.cover_id" [size]="100" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold truncate">{{ item.title }}</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {{ item.artist }} · {{ item.album }}
+                  </p>
+                </div>
+                <div class="text-right shrink-0 w-16">
+                  <p class="text-sm font-bold tabular-nums">{{ item.plays }}</p>
+                  <p class="text-xs text-slate-400">{{ item.plays === 1 ? 'play' : 'plays' }}</p>
+                </div>
+                @if (canScrobble()) {
+                  <button
+                    type="button"
+                    (click)="start('song', item.id, item.title)"
+                    [attr.aria-label]="'Add a scrobble for ' + item.title"
+                    title="Add scrobble"
+                    class="cursor-pointer shrink-0 flex items-center justify-center w-8 h-8 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    <ng-icon name="heroPlus" class="w-4 h-4" aria-hidden="true" />
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8">
+          @for (item of items(); track item.id) {
+            <article class="group relative min-w-0">
+              <div class="relative">
+                <div
+                  class="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-sm group-hover:shadow-xl transition-shadow"
+                  [class]="kind() === 'artists' ? 'rounded-full' : 'rounded-xl'"
+                >
+                  <app-cover [id]="item.cover_id" [size]="300" />
+                </div>
+
+                <!-- Secondary action, revealed on hover where hover exists -->
+                <div
+                  class="absolute z-20 opacity-80 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+                  [class]="kind() === 'artists' ? 'bottom-[13%] right-[13%]' : 'bottom-2 right-2'"
+                >
+                  @if (kind() === 'artists') {
+                    <a
+                      [routerLink]="['/artist', item.id]"
+                      title="Listening stats"
+                      [attr.aria-label]="'Listening stats for ' + item.title"
+                      class="flex items-center justify-center w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-md ring-1 ring-slate-200 dark:ring-slate-700 transition-colors"
+                    >
+                      <ng-icon name="heroChartBarSquare" class="w-4 h-4" aria-hidden="true" />
+                    </a>
+                  } @else if (canScrobble()) {
+                    <button
+                      type="button"
+                      (click)="start('album', item.id, item.title)"
+                      title="Scrobble album"
+                      [attr.aria-label]="'Scrobble the album ' + item.title"
+                      class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-md ring-1 ring-slate-200 dark:ring-slate-700 transition-colors"
+                    >
+                      <ng-icon name="heroPlus" class="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <h3 class="mt-3 text-sm font-semibold truncate">
+                {{ item.title || 'Unknown artist' }}
+              </h3>
+              @if (item.artist) {
+                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ item.artist }}</p>
+              }
+              <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500 tabular-nums truncate">
+                @if (item.year) {
+                  {{ item.year }} ·
+                }
+                {{ item.songs }} {{ item.songs === 1 ? 'song' : 'songs' }}
+                @if (item.albums !== undefined) {
+                  · {{ item.albums }} {{ item.albums === 1 ? 'album' : 'albums' }}
+                }
+              </p>
+              <p class="text-xs text-slate-400 dark:text-slate-500 tabular-nums truncate">
+                {{ item.plays }} {{ item.plays === 1 ? 'play' : 'plays' }}
+              </p>
+
+              <!-- Covers the whole tile so the card itself is the primary target -->
+              <button
+                type="button"
+                (click)="open(item)"
+                [attr.aria-label]="'Browse ' + (item.title || 'Unknown artist')"
+                class="absolute inset-0 z-10 cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              ></button>
+            </article>
+          }
+        </div>
+      }
+
+      <!-- Pagination -->
+      @if (hasPrevious() || hasNext()) {
+        <div class="flex items-center justify-center gap-2 mt-10">
+          <button
+            type="button"
+            [disabled]="!hasPrevious()"
+            (click)="page(offset() - pageSize)"
+            class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            [disabled]="!hasNext()"
+            (click)="page(offset() + pageSize)"
+            class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      }
+
+      @if (!canScrobble()) {
+        <p class="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
+          Manual scrobbles need a Navidrome connection. Set NAVIDROME_URL to enable them.
+        </p>
+      }
+    }
+  </div>
+</div>
+
+<!-- Scrobble dialog -->
+<dialog
+  #scrobbleDialog
+  (cancel)="close($event)"
+  aria-labelledby="scrobble-title"
+  class="w-[min(32rem,calc(100vw-2rem))] rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 p-0"
+>
+  <div class="p-6">
+    <p class="text-xs font-bold uppercase tracking-widest text-rose-500">
+      {{ selection()?.kind === 'album' ? 'Scrobble album' : 'Add scrobble' }}
+    </p>
+    <h2 id="scrobble-title" class="mt-1 text-xl font-black leading-tight truncate">
+      {{ selection()?.title }}
+    </h2>
+
+    @if (!submitted()) {
+      <label
+        for="scrobble-time"
+        class="block mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+      >
+        {{ selection()?.kind === 'album' ? 'Finished listening at' : 'Listened at' }}
+      </label>
+      <input
+        id="scrobble-time"
+        type="datetime-local"
+        [(ngModel)]="when"
+        (ngModelChange)="changedTime()"
+        [disabled]="busy()"
+        class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 disabled:opacity-50 transition-colors"
+      />
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        {{ timezone }}
+        @if (selection()?.kind === 'album') {
+          · Tracks are laid out backwards from this time using their durations.
+        }
+      </p>
+
+      @if (previewError()) {
+        <p class="mt-4 text-sm text-red-500 font-medium" role="alert">{{ previewError() }}</p>
+      }
+
+      @if (entries().length) {
+        <div class="mt-5 rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden">
+          <ol class="max-h-56 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800">
+            @for (entry of entries(); track entry.id) {
+              <li class="flex items-center gap-3 px-3 py-2">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold truncate">{{ entry.title }}</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+                    {{ entry.time | date: 'medium' }}
+                  </p>
+                </div>
+              </li>
+            }
+          </ol>
+        </div>
+        <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+          Writes to Navidrome and may forward to your connected scrobbling services.
+        </p>
+      }
+    }
+
+    @if (message()) {
+      <p
+        class="mt-5 text-sm font-medium"
+        role="status"
+        [class]="failed() ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'"
+      >
+        {{ message() }}
+      </p>
+    }
+
+    <div class="flex justify-end gap-2 mt-6">
+      <button
+        type="button"
+        [disabled]="busy()"
+        (click)="close()"
+        class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-default transition-colors"
+      >
+        {{ submitted() ? 'Close' : 'Cancel' }}
+      </button>
+      @if (!submitted()) {
+        @if (!entries().length) {
+          <button
+            type="button"
+            [disabled]="busy()"
+            (click)="preview()"
+            class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 disabled:opacity-40 disabled:cursor-default transition-opacity"
+          >
+            {{ busy() ? 'Preparing…' : 'Preview' }}
+          </button>
+        } @else {
+          <button
+            type="button"
+            [disabled]="busy()"
+            (click)="submit()"
+            class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-40 disabled:cursor-default transition-colors"
+          >
+            {{
+              busy()
+                ? 'Submitting…'
+                : 'Add ' + entries().length + (entries().length === 1 ? ' scrobble' : ' scrobbles')
+            }}
+          </button>
+        }
+      }
+    </div>
+  </div>
+</dialog>

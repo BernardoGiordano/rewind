@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowPath,
@@ -30,14 +31,22 @@ import {
   heroPause,
   heroPlay,
   heroRadio,
+  heroRectangleStack,
   heroSparkles,
   heroSquare3Stack3d,
   heroSun,
   heroTrophy,
   heroUserCircle,
 } from '@ng-icons/heroicons/outline';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterLink,
+} from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
@@ -68,7 +77,7 @@ import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
+  imports: [NgIcon, RouterLink, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -93,6 +102,7 @@ import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
       heroChevronRight,
       heroUserCircle,
       heroArrowRightOnRectangle,
+      heroRectangleStack,
     }),
   ],
 })
@@ -135,7 +145,8 @@ export class Dashboard {
   readonly portraitCard = viewChild(CardsPortrait);
   readonly landscapeCard = viewChild(CardsLandscape);
 
-  readonly darkMode = signal(false);
+  private readonly theme = inject(ThemeService);
+  readonly darkMode = this.theme.dark;
   readonly mobileMenuOpen = signal(false);
   readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
   readonly isSmallScreen = signal(false);
@@ -206,16 +217,26 @@ export class Dashboard {
   }
 
   constructor() {
+    this.navidrome.historyChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.navidrome
+        .getYears()
+        .subscribe({ next: (years) => this.years.set(years), error: () => {} });
+      this.loadData();
+    });
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationStart) this.clearStoriesTimer();
+      if (
+        event instanceof NavigationEnd &&
+        event.urlAfterRedirects.split('?')[0] === '/' &&
+        this.storiesMode() &&
+        !this.storiesPaused()
+      ) {
+        this.runStoriesTimer();
+      }
+    });
     afterNextRender(() => {
       let urlSelectedYear = false;
       if (isPlatformBrowser(this.platformId)) {
-        const storedTheme = localStorage.getItem('rewind.theme');
-        const prefersDark = storedTheme
-          ? storedTheme === 'dark'
-          : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.darkMode.set(prefersDark);
-        document.documentElement.classList.toggle('dark', prefersDark);
-
         const storedCardMode = localStorage.getItem('rewind.cardMode');
         if (
           storedCardMode === 'portrait' ||
@@ -331,12 +352,7 @@ export class Dashboard {
   }
 
   toggleDarkMode(): void {
-    const next = !this.darkMode();
-    this.darkMode.set(next);
-    if (isPlatformBrowser(this.platformId)) {
-      document.documentElement.classList.toggle('dark', next);
-      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
-    }
+    this.theme.toggle();
   }
 
   toggleStoriesMode(): void {
@@ -596,9 +612,11 @@ export class Dashboard {
 }
 
 function sameDate(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear()
-    && a.getMonth() === b.getMonth()
-    && a.getDate() === b.getDate();
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 export function formatRangeLabel(fromIso: string, toIso: string): string {

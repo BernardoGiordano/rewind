@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DecimalPipe, Location, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -18,14 +18,22 @@ import {
   heroClock,
   heroFire,
   heroMusicalNote,
+  heroRectangleStack,
   heroSquare3Stack3d,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { ThemeService } from '../../services/theme.service';
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
 import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
-import { MONTH_SHORT, formatYearMonthWithYear, padHour, parseIsoDate, toIsoDate } from '../../utils/format';
+import {
+  MONTH_SHORT,
+  formatYearMonthWithYear,
+  padHour,
+  parseIsoDate,
+  toIsoDate,
+} from '../../utils/format';
 
 type TabKey = 'overview' | 'patterns' | 'activity';
 
@@ -34,7 +42,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
   templateUrl: './artist-detail.html',
   styleUrl: './artist-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, NgIcon, CoverComponent],
+  imports: [DecimalPipe, NgIcon, CoverComponent, RouterLink],
   providers: [
     provideIcons({
       heroArrowLeft,
@@ -45,6 +53,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
       heroChartBar,
       heroFire,
       heroTrophy,
+      heroRectangleStack,
     }),
   ],
 })
@@ -61,7 +70,8 @@ export class ArtistDetail {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<TabKey>('overview');
-  readonly darkMode = signal(false);
+  private readonly theme = inject(ThemeService);
+  readonly darkMode = this.theme.dark;
 
   readonly range = signal<StatRange>({ kind: 'all-time' });
 
@@ -164,7 +174,10 @@ export class ArtistDetail {
       let monthCell = cells[w * 7];
       for (let dOff = 0; dOff < 7; dOff++) {
         const c = cells[w * 7 + dOff];
-        if (c?.inRange) { monthCell = c; break; }
+        if (c?.inRange) {
+          monthCell = c;
+          break;
+        }
       }
       if (!monthCell) continue;
       const month = parseIsoDate(monthCell.date).getMonth();
@@ -252,30 +265,21 @@ export class ArtistDetail {
   });
 
   constructor() {
-    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(
-      ([params, query]) => {
-        this.artistId.set(params.get('id') ?? '');
-        const year = query.get('year');
-        const from = query.get('from');
-        const to = query.get('to');
-        if (from && to) this.range.set({ kind: 'custom', from, to });
-        else if (year) this.range.set({ kind: 'year', year });
-        else this.range.set({ kind: 'all-time' });
-        this.load();
-      },
-    );
+    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
+      this.artistId.set(params.get('id') ?? '');
+      const year = query.get('year');
+      const from = query.get('from');
+      const to = query.get('to');
+      if (from && to) this.range.set({ kind: 'custom', from, to });
+      else if (year) this.range.set({ kind: 'year', year });
+      else this.range.set({ kind: 'all-time' });
+      this.load();
+    });
 
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
         const navId = (window.history.state as { navigationId?: number } | null)?.navigationId;
         this.canGoBack.set(typeof navId === 'number' && navId > 1);
-
-        const storedTheme = localStorage.getItem('rewind.theme');
-        const prefersDark = storedTheme
-          ? storedTheme === 'dark'
-          : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.darkMode.set(prefersDark);
-        document.documentElement.classList.toggle('dark', prefersDark);
       }
       this.navidrome.loadConfig();
     });
@@ -350,12 +354,6 @@ export class ArtistDetail {
   readonly padHour = padHour;
 
   toggleDarkMode(): void {
-    const next = !this.darkMode();
-    this.darkMode.set(next);
-    if (isPlatformBrowser(this.platformId)) {
-      document.documentElement.classList.toggle('dark', next);
-      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
-    }
+    this.theme.toggle();
   }
 }
-

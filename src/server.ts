@@ -7,6 +7,7 @@ import {
 import type { Database } from 'better-sqlite3';
 import BetterSqlite3 from 'better-sqlite3';
 import express from 'express';
+import { libraryRouter } from './server/library';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -343,6 +344,8 @@ function buildSubsonicAuthParams(user: string, apiKey: string): URLSearchParams 
 function isCoverArtAvailable(): boolean {
   return !!getNavidromeUrl();
 }
+
+app.use('/api/library', libraryRouter({ getDb, requireAuth, getUrl: getNavidromeUrl, authParams: buildSubsonicAuthParams }));
 
 // --- /api/config ---
 
