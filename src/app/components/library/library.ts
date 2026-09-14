@@ -6,18 +6,16 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  PLATFORM_ID,
   signal,
   viewChild,
 } from '@angular/core';
-import { DatePipe, isPlatformBrowser, Location } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  heroArrowLeft,
   heroChartBarSquare,
   heroChevronRight,
   heroMagnifyingGlass,
@@ -60,13 +58,13 @@ const TABS: { key: LibraryKind; label: string }[] = [
 
 @Component({
   selector: 'app-library',
+  host: { class: 'block h-full' },
   templateUrl: './library.html',
   styleUrl: './library.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink, CoverComponent, DatePipe, NgIcon],
   providers: [
     provideIcons({
-      heroArrowLeft,
       heroChartBarSquare,
       heroChevronRight,
       heroMagnifyingGlass,
@@ -79,8 +77,6 @@ export class Library {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly location = inject(Location);
-  private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
   private readonly navidrome = inject(NavidromeService);
 
@@ -97,7 +93,6 @@ export class Library {
   readonly loading = signal(true);
   readonly error = signal('');
   readonly canScrobble = signal(false);
-  readonly canGoBack = signal(false);
 
   /** Drill-down: the artist or album whose contents are listed, named by the server. */
   readonly artist = signal('');
@@ -137,10 +132,6 @@ export class Library {
   constructor() {
     afterNextRender(() => {
       this.navidrome.loadConfig();
-      if (isPlatformBrowser(this.platformId)) {
-        const navId = (window.history.state as { navigationId?: number } | null)?.navigationId;
-        this.canGoBack.set(typeof navId === 'number' && navId > 1);
-      }
       this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
         const kind = params.get('kind');
         this.kind.set(kind === 'albums' || kind === 'songs' ? kind : 'artists');
@@ -189,11 +180,6 @@ export class Library {
           this.loading.set(false);
         },
       });
-  }
-
-  goBack(): void {
-    if (this.canGoBack()) this.location.back();
-    else void this.router.navigate(['/']);
   }
 
   /** Each tab keeps whatever part of the drill-down still applies at its level. */

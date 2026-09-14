@@ -23,7 +23,6 @@ import {
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
-import { ThemeService } from '../../services/theme.service';
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
 import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
@@ -39,6 +38,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
 
 @Component({
   selector: 'app-artist-detail',
+  host: { class: 'block h-full' },
   templateUrl: './artist-detail.html',
   styleUrl: './artist-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,8 +70,6 @@ export class ArtistDetail {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<TabKey>('overview');
-  private readonly theme = inject(ThemeService);
-  readonly darkMode = this.theme.dark;
 
   readonly range = signal<StatRange>({ kind: 'all-time' });
 
@@ -353,7 +351,4 @@ export class ArtistDetail {
 
   readonly padHour = padHour;
 
-  toggleDarkMode(): void {
-    this.theme.toggle();
-  }
 }

@@ -1,19 +1,19 @@
 @if (loading() && !data()) {
-  <div class="h-dvh overflow-y-auto flex items-center justify-center bg-white dark:bg-slate-950">
+  <div class="h-full overflow-y-auto flex items-center justify-center bg-white dark:bg-slate-950">
     <div class="text-center">
       <div class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
       <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading artist…</p>
     </div>
   </div>
 } @else if (error()) {
-  <div class="min-h-dvh flex items-center justify-center bg-white dark:bg-slate-950 px-6">
+  <div class="h-full flex items-center justify-center bg-white dark:bg-slate-950 px-6">
     <div class="text-center">
       <p class="text-red-500 font-medium">{{ error() }}</p>
       <button type="button" (click)="goBack()" class="mt-4 inline-block text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline cursor-pointer">Back</button>
     </div>
   </div>
 } @else if (data(); as d) {
-  <div class="h-dvh overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+  <div class="h-full overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
     <!-- Sticky header: nav + tabs combined to avoid gap -->
     <div class="sticky top-0 z-20">
@@ -26,8 +26,7 @@
             class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
           >
             <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
-            <span class="hidden sm:inline">Back</span>
-            <span class="sm:hidden">Back</span>
+            Back
           </button>
           <div class="flex items-center gap-4">
             <a

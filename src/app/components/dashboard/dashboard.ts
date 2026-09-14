@@ -8,6 +8,7 @@ import {
   inject,
   PLATFORM_ID,
   signal,
+  TemplateRef,
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -15,7 +16,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowPath,
-  heroArrowRightOnRectangle,
   heroCalendarDays,
   heroChartBar,
   heroChevronDown,
@@ -31,23 +31,13 @@ import {
   heroPause,
   heroPlay,
   heroRadio,
-  heroRectangleStack,
   heroSparkles,
   heroSquare3Stack3d,
-  heroSun,
   heroTrophy,
-  heroUserCircle,
 } from '@ng-icons/heroicons/outline';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  NavigationStart,
-  Router,
-  RouterLink,
-} from '@angular/router';
+import { ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
-import { ThemeService } from '../../services/theme.service';
-import { AuthService } from '../../services/auth.service';
+import { ShellService } from '../../shell/shell.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
   type DayOfWeek,
@@ -72,12 +62,30 @@ import { CardsSquare } from '../cards-square/cards-square';
 import { CardsLandscape } from '../cards-landscape/cards-landscape';
 import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
 
+const STAT_ICONS: Record<StatType, string> = {
+  summary: 'heroMusicalNote',
+  'top-songs': 'heroEllipsisHorizontalCircle',
+  'top-artists': 'heroMicrophone',
+  'top-albums': 'heroSquare3Stack3d',
+  'top-genres': 'heroSparkles',
+  'listening-clock': 'heroClock',
+  'monthly-trends': 'heroChartBar',
+  'day-of-week': 'heroCalendarDays',
+  streak: 'heroFire',
+  'late-night': 'heroMoon',
+  'on-repeat': 'heroArrowPath',
+  'song-of-month': 'heroTrophy',
+  'favorite-decades': 'heroRadio',
+  recap: 'heroHeart',
+};
+
 @Component({
   selector: 'app-dashboard',
+  host: { class: 'block h-full' },
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, RouterLink, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -95,14 +103,10 @@ import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
       heroRadio,
       heroPlay,
       heroPause,
-      heroSun,
       heroHeart,
       heroChevronDown,
       heroChevronLeft,
       heroChevronRight,
-      heroUserCircle,
-      heroArrowRightOnRectangle,
-      heroRectangleStack,
     }),
   ],
 })
@@ -112,17 +116,13 @@ export class Dashboard {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly auth = inject(AuthService);
+  private readonly shell = inject(ShellService);
 
-  readonly currentUser = this.auth.user;
-  readonly canLogout = this.auth.canLogout;
+  /** Dashboard-only controls the Shell renders inside its mobile menu. */
+  readonly shellActions = viewChild<TemplateRef<unknown>>('shellActions');
 
-  logout(): void {
-    this.mobileMenuOpen.set(false);
-    this.auth.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login']),
-    });
+  closeShellMenu(): void {
+    this.shell.closeMenu();
   }
 
   openArtist(artistId: string | null | undefined): void {
@@ -145,9 +145,6 @@ export class Dashboard {
   readonly portraitCard = viewChild(CardsPortrait);
   readonly landscapeCard = viewChild(CardsLandscape);
 
-  private readonly theme = inject(ThemeService);
-  readonly darkMode = this.theme.dark;
-  readonly mobileMenuOpen = signal(false);
   readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
   readonly isSmallScreen = signal(false);
   readonly storiesMode = signal(true);
@@ -225,16 +222,13 @@ export class Dashboard {
     });
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) this.clearStoriesTimer();
-      if (
-        event instanceof NavigationEnd &&
-        event.urlAfterRedirects.split('?')[0] === '/' &&
-        this.storiesMode() &&
-        !this.storiesPaused()
-      ) {
-        this.runStoriesTimer();
+      if (event instanceof NavigationEnd && event.urlAfterRedirects.split('?')[0] === '/') {
+        this.shell.setRouteActions(this.shellActions() ?? null);
+        if (this.storiesMode() && !this.storiesPaused()) this.runStoriesTimer();
       }
     });
     afterNextRender(() => {
+      this.shell.setRouteActions(this.shellActions() ?? null);
       let urlSelectedYear = false;
       if (isPlatformBrowser(this.platformId)) {
         const storedCardMode = localStorage.getItem('rewind.cardMode');
@@ -320,14 +314,6 @@ export class Dashboard {
     this.destroyRef.onDestroy(() => this.clearStoriesTimer());
   }
 
-  toggleMobileMenu(): void {
-    this.mobileMenuOpen.update((v) => !v);
-  }
-
-  closeMobileMenu(): void {
-    this.mobileMenuOpen.set(false);
-  }
-
   selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
     this.cardMode.set(mode);
     if (isPlatformBrowser(this.platformId)) {
@@ -351,12 +337,8 @@ export class Dashboard {
     }
   }
 
-  toggleDarkMode(): void {
-    this.theme.toggle();
-  }
-
   toggleStoriesMode(): void {
-    this.mobileMenuOpen.set(false);
+    this.shell.closeMenu();
     if (this.storiesMode()) {
       this.stopStories();
     } else {
@@ -377,7 +359,7 @@ export class Dashboard {
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.customPickerOpen() || this.mobileMenuOpen()) return;
+    if (this.customPickerOpen() || this.shell.menuOpen()) return;
 
     const target = event.target as HTMLElement | null;
     if (target) {
@@ -517,6 +499,10 @@ export class Dashboard {
       }
     }
     this.loadData();
+  }
+
+  statIcon(type: StatType): string {
+    return STAT_ICONS[type];
   }
 
   loadData(): void {

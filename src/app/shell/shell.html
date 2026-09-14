@@ -1,0 +1,296 @@
+<div class="h-dvh flex flex-col lg:pl-16 bg-white dark:bg-slate-950">
+  <!-- DESKTOP RAIL — brand, sections, chrome -->
+  <nav
+    class="hidden lg:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800"
+    aria-label="Sections"
+  >
+    <a
+      routerLink="/"
+      class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm whitespace-nowrap"
+      >Navidrome Rewind</a
+    >
+
+    <ul role="list" class="flex-1 flex flex-col items-center justify-center gap-1">
+      @for (s of sections; track s.id) {
+        <li>
+          <a
+            [routerLink]="s.route"
+            routerLinkActive="bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+            [routerLinkActiveOptions]="{ exact: s.exact }"
+            #active="routerLinkActive"
+            [attr.aria-current]="active.isActive ? 'page' : null"
+            [title]="s.label"
+            [attr.aria-label]="s.label"
+            class="flex items-center justify-center w-10 h-10 rounded-xl transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+          >
+            <ng-icon [name]="s.icon" class="w-5 h-5" aria-hidden="true" />
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="flex flex-col items-center gap-1">
+      <button
+        type="button"
+        (click)="toggleDarkMode()"
+        [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+        [title]="darkMode() ? 'Light mode' : 'Dark mode'"
+        class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+      >
+        <ng-icon [name]="darkMode() ? 'heroSun' : 'heroMoon'" class="w-5 h-5" aria-hidden="true" />
+      </button>
+
+      <a
+        href="https://github.com/BernardoGiordano/rewind"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="GitHub"
+        aria-label="GitHub"
+        class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z"
+          />
+        </svg>
+      </a>
+
+      <a
+        href="https://www.paypal.com/paypalme/BernardoGiordano"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Donate"
+        aria-label="Donate"
+        class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+          />
+        </svg>
+      </a>
+
+      @if (currentUser(); as u) {
+        <div class="w-8 border-t border-slate-200 dark:border-slate-800 my-1"></div>
+        @if (canLogout()) {
+          <button
+            type="button"
+            (click)="logout()"
+            [title]="'Sign out ' + u.username"
+            [attr.aria-label]="'Sign out ' + u.username"
+            class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            <ng-icon name="heroArrowRightOnRectangle" class="w-5 h-5" aria-hidden="true" />
+          </button>
+        } @else {
+          <span
+            [title]="'Signed in as ' + u.username"
+            class="flex items-center justify-center w-10 h-10 text-slate-400 dark:text-slate-500"
+          >
+            <ng-icon name="heroUserCircle" class="w-5 h-5" aria-hidden="true" />
+          </span>
+        }
+      }
+    </div>
+  </nav>
+
+  <!-- MOBILE BAR — brand, sections, menu -->
+  <header
+    class="lg:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between gap-3"
+  >
+    <a routerLink="/" class="text-base font-mono font-bold text-slate-900 dark:text-white truncate"
+      >Navidrome Rewind</a
+    >
+
+    <div class="flex items-center gap-1">
+      @for (s of sections; track s.id) {
+        <a
+          [routerLink]="s.route"
+          routerLinkActive="bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+          [routerLinkActiveOptions]="{ exact: s.exact }"
+          #active="routerLinkActive"
+          [attr.aria-current]="active.isActive ? 'page' : null"
+          [attr.aria-label]="s.label"
+          class="flex items-center justify-center w-9 h-9 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <ng-icon [name]="s.icon" class="w-5 h-5" aria-hidden="true" />
+        </a>
+      }
+
+      <button
+        type="button"
+        id="shell-menu-trigger"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-controls]="menuOpen() ? 'shell-menu' : null"
+        aria-haspopup="true"
+        aria-label="Open options menu"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+          />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  @if (menuOpen()) {
+    <div class="lg:hidden fixed inset-0 z-30" (click)="closeMenu()" aria-hidden="true"></div>
+
+    <div
+      id="shell-menu"
+      role="menu"
+      aria-labelledby="shell-menu-trigger"
+      aria-orientation="vertical"
+      class="lg:hidden fixed right-4 top-14 mt-1 w-64 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-40 py-1 focus:outline-none"
+    >
+      @if (currentUser(); as u) {
+        <div class="flex items-center gap-2 px-4 py-3">
+          <ng-icon
+            name="heroUserCircle"
+            class="w-5 h-5 shrink-0 text-slate-500 dark:text-slate-400"
+            aria-hidden="true"
+          />
+          <div class="flex-1 min-w-0">
+            <p
+              class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none"
+            >
+              Signed in as
+            </p>
+            <p
+              class="mt-0.5 text-sm font-medium text-slate-900 dark:text-white truncate"
+              [title]="u.username"
+            >
+              {{ u.username }}
+            </p>
+          </div>
+          @if (canLogout()) {
+            <button
+              type="button"
+              (click)="logout()"
+              title="Sign out"
+              aria-label="Sign out"
+              class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4" aria-hidden="true" />
+            </button>
+          }
+        </div>
+        <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+      }
+
+      @for (s of sections; track s.id) {
+        <a
+          [routerLink]="s.route"
+          routerLinkActive="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white"
+          [routerLinkActiveOptions]="{ exact: s.exact }"
+          role="menuitem"
+          (click)="closeMenu()"
+          class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        >
+          <ng-icon [name]="s.icon" class="w-4 h-4 shrink-0" aria-hidden="true" />
+          {{ s.label }}
+        </a>
+      }
+
+      @if (routeActions(); as actions) {
+        <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+        <ng-container [ngTemplateOutlet]="actions" />
+      }
+
+      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+
+      <button
+        type="button"
+        role="menuitem"
+        (click)="toggleDarkMode(); closeMenu()"
+        class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+      >
+        <ng-icon
+          [name]="darkMode() ? 'heroSun' : 'heroMoon'"
+          class="w-4 h-4 shrink-0"
+          aria-hidden="true"
+        />
+        {{ darkMode() ? 'Light mode' : 'Dark mode' }}
+      </button>
+
+      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+
+      <a
+        href="https://github.com/BernardoGiordano/rewind"
+        target="_blank"
+        rel="noopener noreferrer"
+        role="menuitem"
+        (click)="closeMenu()"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z"
+          />
+        </svg>
+        GitHub
+      </a>
+
+      <a
+        href="https://www.paypal.com/paypalme/BernardoGiordano"
+        target="_blank"
+        rel="noopener noreferrer"
+        role="menuitem"
+        (click)="closeMenu()"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+      >
+        <svg
+          class="w-4 h-4 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+          />
+        </svg>
+        Donate
+      </a>
+
+      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+
+      <p class="px-4 py-2.5 text-sm text-slate-400 dark:text-slate-500">
+        Made with
+        <ng-icon
+          name="heroHeart"
+          class="w-4 h-4 inline text-red-500 fill-current"
+          aria-hidden="true"
+        />
+        by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
+      </p>
+    </div>
+  }
+
+  <!-- Spacer under the fixed mobile bar -->
+  <div class="h-14 shrink-0 lg:hidden" aria-hidden="true"></div>
+
+  <!-- CONTENT SLOT -->
+  <div class="flex-1 min-h-0">
+    <router-outlet />
+  </div>
+</div>
