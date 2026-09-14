@@ -4,27 +4,32 @@
   <button
     type="button"
     (click)="toggleSidebar()"
-    [attr.aria-expanded]="!sidebarCollapsed()"
-    [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+    [attr.aria-expanded]="sidebarShowing()"
+    [attr.aria-label]="sidebarShowing() ? 'Collapse sidebar' : 'Expand sidebar'"
     title="Toggle sidebar"
-    class="hidden lg:flex fixed top-4 -translate-x-1/2 z-30 items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
-    [class]="sidebarCollapsed() ? 'left-16' : 'left-[22rem] xl:left-[24rem]'"
+    class="hidden medium-up:flex fixed top-4 -translate-x-1/2 z-50 items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
+    [class]="sidebarToggleClasses()"
   >
     <ng-icon
-      [name]="sidebarCollapsed() ? 'heroChevronRight' : 'heroChevronLeft'"
+      [name]="sidebarShowing() ? 'heroChevronLeft' : 'heroChevronRight'"
       class="w-4 h-4"
       aria-hidden="true"
     />
   </button>
 
-  <!-- SIDEBAR — year chips + stat list -->
+  <!-- Drawer backdrop — medium only. The rail stays clickable. -->
+  @if (drawerOpen()) {
+    <div
+      class="hidden medium:block fixed inset-y-0 right-0 left-16 z-30 bg-black/30"
+      (click)="closeDrawer()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- SIDEBAR — year chips + stat list. Pinned at expanded, a drawer at medium. -->
   <aside
-    class="hidden lg:flex lg:flex-col lg:flex-none lg:fixed lg:inset-y-0 lg:left-16 bg-slate-50 dark:bg-slate-900 overflow-hidden transition-[width,filter] duration-200"
-    [class]="
-      sidebarCollapsed()
-        ? 'lg:w-0 lg:border-r-0 blur-sm'
-        : 'lg:w-72 xl:w-80 border-r border-slate-200 dark:border-slate-800'
-    "
+    class="hidden medium-up:flex medium-up:flex-col medium-up:flex-none fixed inset-y-0 left-16 z-40 bg-slate-50 dark:bg-slate-900 overflow-hidden border-r border-slate-200 dark:border-slate-800 transition-[width,filter] duration-200"
+    [class]="sidebarClasses()"
   >
     <!-- Scrollable content area -->
     <div class="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-10 pb-4">
@@ -232,7 +237,7 @@
     </div>
   </aside>
 
-  <!-- Dashboard controls the Shell renders in its mobile menu -->
+  <!-- Dashboard controls the Shell renders in its compact menu -->
   <ng-template #shellActions>
     <div class="px-4 py-3">
       <span
@@ -326,12 +331,12 @@
     </button>
   </ng-template>
 
-  <!-- Mobile stat sheet -->
+  <!-- Compact stat sheet -->
   @if (statSheetOpen()) {
     <app-stat-sheet (close)="closeStatSheet()" />
   }
 
-  <!-- Custom date picker overlay (mobile + desktop) -->
+  <!-- Custom date picker overlay — every mode -->
   @if (customPickerOpen()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="fixed inset-0 bg-black/40" (click)="closeCustomPicker()" aria-hidden="true"></div>
@@ -353,7 +358,7 @@
   <!-- MAIN CONTENT — card + sticky export -->
   <main
     class="flex-1 flex flex-col bg-white dark:bg-slate-950 transition-[margin] duration-200 overflow-y-auto"
-    [class]="sidebarCollapsed() ? 'lg:ml-0' : 'lg:ml-72 xl:ml-80'"
+    [class]="mainClasses()"
   >
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
@@ -380,13 +385,14 @@
     } @else {
       <!-- Card area -->
       <div class="flex-1 flex items-center justify-center">
-        <!-- Outer wrapper: full-screen on mobile, auto-sized on desktop -->
+        <!-- Outer wrapper: full-bleed at compact, sized from medium up -->
         <div
-          class="w-full h-full lg:h-auto lg:max-w-full"
-          [class.lg:w-auto]="effectiveCardMode() !== 'landscape'"
-          [class.lg:w-full]="effectiveCardMode() === 'landscape'"
-          [class.lg:p-6]="effectiveCardMode() !== 'landscape'"
-          [class.lg:px-12]="effectiveCardMode() !== 'landscape'"
+          class="w-full h-full medium-up:h-auto medium-up:max-w-full"
+          [class]="
+            effectiveCardMode() === 'landscape'
+              ? 'medium-up:w-full'
+              : 'medium-up:w-auto medium-up:p-6 medium-up:px-12'
+          "
         >
           <!-- Inner wrapper: relative anchor for absolute overlays, touch target for swipe -->
           <div
@@ -489,7 +495,7 @@
             <button
               type="button"
               (click)="prevStat()"
-              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 hidden lg:flex items-center justify-start pl-3 group"
+              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 hidden medium-up:flex items-center justify-start pl-3 group"
               aria-label="Previous stat"
             >
               <div
@@ -515,7 +521,7 @@
             <button
               type="button"
               (click)="nextStat()"
-              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 hidden lg:flex items-center justify-end pr-3 group"
+              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 hidden medium-up:flex items-center justify-end pr-3 group"
               aria-label="Next stat"
             >
               <div
@@ -538,12 +544,12 @@
               </div>
             </button>
 
-            <!-- Mobile adapter: current stat, tap to open the sheet -->
+            <!-- Compact adapter: current stat, tap to open the sheet -->
             <button
               type="button"
               (click)="openStatSheet()"
               [attr.aria-expanded]="statSheetOpen()"
-              class="export-ignore cursor-pointer lg:hidden absolute bottom-3 left-3 z-20 flex items-center gap-1.5 max-w-[55%] pl-3 pr-2 py-1.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-sm font-medium hover:bg-black/60 transition-colors"
+              class="export-ignore cursor-pointer medium-up:hidden absolute bottom-3 left-3 z-20 flex items-center gap-1.5 max-w-[55%] pl-3 pr-2 py-1.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-sm font-medium hover:bg-black/60 transition-colors"
             >
               <span class="truncate">{{ selectedDef()?.label ?? 'Statistics' }}</span>
               <ng-icon
@@ -610,10 +616,10 @@
     }
   </main>
 
-  <!-- Made with love — desktop only, fixed bottom-right -->
+  <!-- Made with love — expanded only, fixed bottom-right -->
   @if (cardMode() !== 'landscape') {
     <p
-      class="hidden lg:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none"
+      class="hidden expanded:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none"
       aria-hidden="true"
     >
       Made with <span class="text-red-500">❤</span> by

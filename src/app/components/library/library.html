@@ -5,7 +5,7 @@
   <!-- Sticky tabs -->
   <div class="sticky top-0 z-20">
     <div class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
         <nav class="flex gap-6" role="tablist" aria-label="Library views">
           @for (t of tabs; track t.key) {
             <button
@@ -29,7 +29,7 @@
   </div>
 
   <!-- Hero -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 pt-8 pb-6">
     @if (focus(); as f) {
       <!-- Drill-down: the selected artist or album -->
       <nav
@@ -63,9 +63,9 @@
         }
       </nav>
 
-      <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
+      <div class="flex flex-col medium-up:flex-row gap-6 items-start medium-up:items-end">
         <div
-          class="w-28 h-28 sm:w-36 sm:h-36 overflow-hidden bg-slate-100 dark:bg-slate-900 shrink-0 shadow-xl"
+          class="w-28 h-28 medium-up:w-36 medium-up:h-36 overflow-hidden bg-slate-100 dark:bg-slate-900 shrink-0 shadow-xl"
           [class]="focusIsAlbum() ? 'rounded-2xl' : 'rounded-full'"
         >
           <app-cover [id]="f.cover_id" [size]="400" [eager]="true" />
@@ -74,7 +74,9 @@
           <p class="text-xs font-bold uppercase tracking-widest text-rose-500">
             {{ focusIsAlbum() ? 'Album' : 'Artist' }}
           </p>
-          <h1 class="mt-1 text-3xl sm:text-5xl font-black leading-none truncate">{{ f.name }}</h1>
+          <h1 class="mt-1 text-3xl medium-up:text-5xl font-black leading-none truncate">
+            {{ f.name }}
+          </h1>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             @if (artistCrumb(); as a) {
               <a
@@ -100,7 +102,7 @@
       </div>
     } @else {
       <p class="text-xs font-bold uppercase tracking-widest text-rose-500">Your collection</p>
-      <h1 class="mt-1 text-4xl sm:text-6xl font-black leading-none">Library</h1>
+      <h1 class="mt-1 text-4xl medium-up:text-6xl font-black leading-none">Library</h1>
       <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
         Everything Rewind can see, including music you have never played. Add the listens that never
         made it to Navidrome.
@@ -141,7 +143,7 @@
   </div>
 
   <!-- Results -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 pb-16">
     @if (error()) {
       <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-8 text-center" role="alert">
         <p class="text-red-500 font-medium">{{ error() }}</p>
@@ -226,7 +228,9 @@
           </ul>
         </div>
       } @else {
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8">
+        <div
+          class="grid grid-cols-2 medium-up:grid-cols-3 expanded:grid-cols-4 wide:grid-cols-5 gap-x-5 gap-y-8"
+        >
           @for (item of items(); track item.id) {
             <article class="group relative min-w-0">
               <div class="relative">

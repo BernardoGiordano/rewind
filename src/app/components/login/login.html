@@ -1,7 +1,9 @@
 <div class="min-h-dvh flex flex-col bg-white dark:bg-slate-950">
   <!-- Top bar — branding + dark mode toggle -->
-  <div class="flex items-center justify-between px-6 py-4 lg:px-10 lg:py-6">
-    <h1 class="font-mono font-bold text-slate-900 dark:text-white tracking-tight text-base lg:text-lg">
+  <div class="flex items-center justify-between px-6 py-4 expanded:px-10 expanded:py-6">
+    <h1
+      class="font-mono font-bold text-slate-900 dark:text-white tracking-tight text-base expanded:text-lg"
+    >
       Navidrome Rewind
     </h1>
     <button
@@ -21,7 +23,9 @@
   <!-- Card -->
   <div class="flex-1 flex items-center justify-center px-4 pb-10">
     <div class="w-full max-w-sm">
-      <div class="rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+      <div
+        class="rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 medium-up:p-8"
+      >
         <div class="mb-6">
           <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Sign in</h2>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -32,11 +36,16 @@
         <form (submit)="submit($event)" class="space-y-4" novalidate>
           <!-- Username -->
           <div>
-            <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+            <label
+              for="username"
+              class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5"
+            >
               Username
             </label>
             <div class="relative">
-              <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 dark:text-slate-500">
+              <span
+                class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 dark:text-slate-500"
+              >
                 <ng-icon name="heroUser" class="w-4 h-4" aria-hidden="true" />
               </span>
               <input
@@ -58,11 +67,16 @@
 
           <!-- Password -->
           <div>
-            <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+            <label
+              for="password"
+              class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5"
+            >
               Password
             </label>
             <div class="relative">
-              <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 dark:text-slate-500">
+              <span
+                class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 dark:text-slate-500"
+              >
                 <ng-icon name="heroLockClosed" class="w-4 h-4" aria-hidden="true" />
               </span>
               <input
@@ -97,7 +111,11 @@
               role="alert"
               class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 px-3 py-2 text-sm text-red-700 dark:text-red-300"
             >
-              <ng-icon name="heroExclamationCircle" class="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+              <ng-icon
+                name="heroExclamationCircle"
+                class="w-4 h-4 mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
               <span>{{ error() }}</span>
             </div>
           }
@@ -108,7 +126,10 @@
             class="w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             @if (submitting()) {
-              <span class="inline-block w-4 h-4 border-2 border-white/40 dark:border-slate-900/40 border-t-white dark:border-t-slate-900 rounded-full animate-spin" aria-hidden="true"></span>
+              <span
+                class="inline-block w-4 h-4 border-2 border-white/40 dark:border-slate-900/40 border-t-white dark:border-t-slate-900 rounded-full animate-spin"
+                aria-hidden="true"
+              ></span>
               Signing in…
             } @else {
               Sign in

@@ -43,7 +43,7 @@ import { StatNavigator } from './stat-navigator';
     }),
   ],
   template: `
-    <div class="fixed inset-0 z-50 lg:hidden">
+    <div class="fixed inset-0 z-50 medium-up:hidden">
       <div class="absolute inset-0 bg-black/40" (click)="close.emit()" aria-hidden="true"></div>
 
       <div

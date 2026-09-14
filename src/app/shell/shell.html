@@ -1,7 +1,7 @@
-<div class="h-dvh flex flex-col lg:pl-16 bg-white dark:bg-slate-950">
-  <!-- DESKTOP RAIL — brand, sections, chrome -->
+<div class="h-dvh flex flex-col medium-up:pl-16 bg-white dark:bg-slate-950">
+  <!-- RAIL — brand, sections, chrome. Medium and expanded. -->
   <nav
-    class="hidden lg:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800"
+    class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800"
     aria-label="Sections"
   >
     <a
@@ -107,9 +107,9 @@
     </div>
   </nav>
 
-  <!-- MOBILE BAR — brand, sections, menu -->
+  <!-- COMPACT BAR — brand, sections, menu. Medium and expanded use the rail. -->
   <header
-    class="lg:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between gap-3"
+    class="medium-up:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between gap-3"
   >
     <a routerLink="/" class="text-base font-mono font-bold text-slate-900 dark:text-white truncate"
       >Navidrome Rewind</a
@@ -152,14 +152,14 @@
   </header>
 
   @if (menuOpen()) {
-    <div class="lg:hidden fixed inset-0 z-30" (click)="closeMenu()" aria-hidden="true"></div>
+    <div class="medium-up:hidden fixed inset-0 z-30" (click)="closeMenu()" aria-hidden="true"></div>
 
     <div
       id="shell-menu"
       role="menu"
       aria-labelledby="shell-menu-trigger"
       aria-orientation="vertical"
-      class="lg:hidden fixed right-4 top-14 mt-1 w-64 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-40 py-1 focus:outline-none"
+      class="medium-up:hidden fixed right-4 top-14 mt-1 w-64 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-40 py-1 focus:outline-none"
     >
       @if (currentUser(); as u) {
         <div class="flex items-center gap-2 px-4 py-3">
@@ -294,8 +294,8 @@
     </div>
   }
 
-  <!-- Spacer under the fixed mobile bar -->
-  <div class="h-14 shrink-0 lg:hidden" aria-hidden="true"></div>
+  <!-- Spacer under the fixed compact bar -->
+  <div class="h-14 shrink-0 medium-up:hidden" aria-hidden="true"></div>
 
   <!-- CONTENT SLOT -->
   <div class="flex-1 min-h-0">

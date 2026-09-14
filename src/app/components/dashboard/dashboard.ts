@@ -38,6 +38,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { LayoutModeService } from '../../shell/layout-mode';
 import { ShellService } from '../../shell/shell.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
@@ -107,8 +108,9 @@ export class Dashboard {
   private readonly route = inject(ActivatedRoute);
   private readonly shell = inject(ShellService);
   private readonly nav = inject(StatNavigator);
+  private readonly layout = inject(LayoutModeService);
 
-  /** Dashboard-only controls the Shell renders inside its mobile menu. */
+  /** Dashboard-only controls the Shell renders inside its compact menu. */
   readonly shellActions = viewChild<TemplateRef<unknown>>('shellActions');
 
   closeShellMenu(): void {
@@ -136,8 +138,10 @@ export class Dashboard {
   readonly landscapeCard = viewChild(CardsLandscape);
 
   readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
-  readonly isSmallScreen = signal(false);
+
+  /** Expanded keeps the sidebar pinned and remembers it; medium opens the same panel as a drawer. */
   readonly sidebarCollapsed = signal(false);
+  readonly drawerOpen = signal(false);
   readonly songsStatsCollapsed = signal(false);
   readonly statSheetOpen = signal(false);
   readonly exporting = signal(false);
@@ -173,9 +177,48 @@ export class Dashboard {
 
   readonly selectedDef = computed(() => this.nav.definition() ?? undefined);
 
+  /** A compact viewport has no room for anything but the portrait card. */
   readonly effectiveCardMode = computed(() =>
-    this.isSmallScreen() ? 'portrait' : this.cardMode(),
+    this.layout.isCompact() ? 'portrait' : this.cardMode(),
   );
+
+  /**
+   * Sidebar width per layout mode. `sidebarCollapsed` drives the expanded
+   * classes and `drawerOpen` the medium ones, so the server renders the
+   * sidebar pinned at expanded and the drawer closed at medium without
+   * knowing the viewport.
+   */
+  readonly sidebarClasses = computed(() => {
+    const expanded = this.sidebarCollapsed()
+      ? 'expanded:w-0 expanded:border-r-0 expanded:blur-sm'
+      : 'expanded:w-72 wide:w-80';
+    const medium = this.drawerOpen()
+      ? 'medium:w-72 medium:shadow-xl'
+      : 'medium:w-0 medium:border-r-0';
+    return `${expanded} ${medium}`;
+  });
+
+  /** Expanded pushes the card aside; medium overlays it, so only expanded gets a margin. */
+  readonly mainClasses = computed(() =>
+    this.sidebarCollapsed() ? 'expanded:ml-0' : 'expanded:ml-72 wide:ml-80',
+  );
+
+  /**
+   * Whether the panel is on screen right now. Only the handle's label and icon
+   * read it, so a correction on hydration costs nothing but an icon flip.
+   */
+  readonly sidebarShowing = computed(() =>
+    this.layout.isExpanded() ? !this.sidebarCollapsed() : this.drawerOpen(),
+  );
+
+  /** The collapse handle rides the sidebar's right edge in whichever mode is showing it. */
+  readonly sidebarToggleClasses = computed(() => {
+    const expanded = this.sidebarCollapsed()
+      ? 'expanded:left-16'
+      : 'expanded:left-[22rem] wide:left-[24rem]';
+    const medium = this.drawerOpen() ? 'medium:left-[22rem]' : 'medium:left-16';
+    return `${expanded} ${medium}`;
+  });
 
   // Stat data signals
   readonly summaryData = signal<ListeningSummary | null>(null);
@@ -275,10 +318,6 @@ export class Dashboard {
           this.selectedYear.set('all-time');
           urlSelectedYear = true;
         }
-
-        const smallScreen = window.matchMedia('(max-width: 1023px)');
-        this.isSmallScreen.set(smallScreen.matches);
-        smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
       this.navidrome.loadConfig();
       const start = () => {
@@ -307,11 +346,19 @@ export class Dashboard {
   }
 
   toggleSidebar(): void {
+    if (!this.layout.isExpanded()) {
+      this.drawerOpen.update((open) => !open);
+      return;
+    }
     const next = !this.sidebarCollapsed();
     this.sidebarCollapsed.set(next);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.sidebarCollapsed', String(next));
     }
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen.set(false);
   }
 
   toggleSongsStats(): void {
@@ -332,6 +379,7 @@ export class Dashboard {
 
   selectStat(type: StatType): void {
     this.nav.select(type);
+    this.closeDrawer();
   }
 
   nextStat(): void {
@@ -373,11 +421,17 @@ export class Dashboard {
     this.swipeStart = null;
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeDrawer();
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (this.customPickerOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
+    if (this.drawerOpen()) return;
 
     const target = event.target as HTMLElement | null;
     if (target) {
@@ -395,6 +449,7 @@ export class Dashboard {
   selectYear(year: string): void {
     this.selectedYear.set(year);
     this.nav.setAllTime(year === 'all-time');
+    this.closeDrawer();
   }
 
   toggleCustomPicker(): void {
