@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   HostListener,
   inject,
   PLATFORM_ID,
@@ -35,7 +36,7 @@ import {
   heroSquare3Stack3d,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
-import { ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NavidromeService, type StatRange } from '../../services/navidrome.service';
 import { ShellService } from '../../shell/shell.service';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
@@ -50,7 +51,6 @@ import {
   type OnRepeatEntry,
   type RecapData,
   type SongOfMonth,
-  STAT_DEFINITIONS,
   type StatType,
   type TopAlbum,
   type TopArtist,
@@ -61,23 +61,12 @@ import { CardsPortrait } from '../cards-portrait/cards-portrait';
 import { CardsSquare } from '../cards-square/cards-square';
 import { CardsLandscape } from '../cards-landscape/cards-landscape';
 import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
+import { StatNavigator } from './stat-navigator';
+import { STAT_PARAM } from './stat-traversal';
+import { StatSheet } from './stat-sheet';
 
-const STAT_ICONS: Record<StatType, string> = {
-  summary: 'heroMusicalNote',
-  'top-songs': 'heroEllipsisHorizontalCircle',
-  'top-artists': 'heroMicrophone',
-  'top-albums': 'heroSquare3Stack3d',
-  'top-genres': 'heroSparkles',
-  'listening-clock': 'heroClock',
-  'monthly-trends': 'heroChartBar',
-  'day-of-week': 'heroCalendarDays',
-  streak: 'heroFire',
-  'late-night': 'heroMoon',
-  'on-repeat': 'heroArrowPath',
-  'song-of-month': 'heroTrophy',
-  'favorite-decades': 'heroRadio',
-  recap: 'heroHeart',
-};
+/** Horizontal travel that counts as a swipe rather than a tap. */
+const SWIPE_THRESHOLD_PX = 48;
 
 @Component({
   selector: 'app-dashboard',
@@ -85,7 +74,7 @@ const STAT_ICONS: Record<StatType, string> = {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker, StatSheet],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -117,6 +106,7 @@ export class Dashboard {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly shell = inject(ShellService);
+  private readonly nav = inject(StatNavigator);
 
   /** Dashboard-only controls the Shell renders inside its mobile menu. */
   readonly shellActions = viewChild<TemplateRef<unknown>>('shellActions');
@@ -147,22 +137,29 @@ export class Dashboard {
 
   readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
   readonly isSmallScreen = signal(false);
-  readonly storiesMode = signal(true);
   readonly sidebarCollapsed = signal(false);
   readonly songsStatsCollapsed = signal(false);
-  readonly storiesPaused = signal(false);
-  readonly storiesIndex = signal(0);
+  readonly statSheetOpen = signal(false);
   readonly exporting = signal(false);
 
-  private storiesTimeout: ReturnType<typeof setTimeout> | null = null;
+  // Stat selection, ordering, autoplay and URL sync live in the navigator.
+  readonly stats = this.nav.list;
+  readonly selectedStat = this.nav.current;
+  readonly statIndex = this.nav.index;
+  readonly autoplay = this.nav.autoplay;
+  readonly autoplayPaused = this.nav.paused;
 
   readonly years = signal<string[]>([]);
   readonly selectedYear = signal<string>('all-time');
   readonly customRange = signal<{ from: string; to: string } | null>(null);
   readonly customPickerOpen = signal(false);
-  readonly selectedStat = signal<StatType>('summary');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  /** Data loads once the browser has resolved the stored range, not during SSR. */
+  private readonly ready = signal(false);
+
+  private swipeStart: { x: number; y: number } | null = null;
 
   readonly rangeLabel = computed(() => {
     const y = this.selectedYear();
@@ -174,9 +171,7 @@ export class Dashboard {
     return y;
   });
 
-  readonly selectedDef = computed(() =>
-    STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
-  );
+  readonly selectedDef = computed(() => this.nav.definition() ?? undefined);
 
   readonly effectiveCardMode = computed(() =>
     this.isSmallScreen() ? 'portrait' : this.cardMode(),
@@ -198,11 +193,6 @@ export class Dashboard {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
-  readonly visibleStats = computed(() => {
-    const year = this.selectedYear();
-    return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
-  });
-
   private currentRange(): StatRange {
     const y = this.selectedYear();
     if (y === 'all-time') return { kind: 'all-time' };
@@ -214,17 +204,23 @@ export class Dashboard {
   }
 
   constructor() {
+    // One load path: whatever moves the selection or the range, the fetch follows.
+    effect(() => {
+      const type = this.nav.current();
+      const range = this.currentRange();
+      if (!this.ready()) return;
+      this.fetchStat(type, range);
+    });
+
     this.navidrome.historyChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.navidrome
         .getYears()
         .subscribe({ next: (years) => this.years.set(years), error: () => {} });
-      this.loadData();
+      this.reload();
     });
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event instanceof NavigationStart) this.clearStoriesTimer();
       if (event instanceof NavigationEnd && event.urlAfterRedirects.split('?')[0] === '/') {
         this.shell.setRouteActions(this.shellActions() ?? null);
-        if (this.storiesMode() && !this.storiesPaused()) this.runStoriesTimer();
       }
     });
     afterNextRender(() => {
@@ -238,11 +234,6 @@ export class Dashboard {
           storedCardMode === 'landscape'
         ) {
           this.cardMode.set(storedCardMode);
-        }
-
-        const storedStories = localStorage.getItem('rewind.storiesMode');
-        if (storedStories !== null) {
-          this.storiesMode.set(storedStories === 'true');
         }
 
         const storedSidebar = localStorage.getItem('rewind.sidebarCollapsed');
@@ -290,10 +281,10 @@ export class Dashboard {
         smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
       this.navidrome.loadConfig();
-      const maybeStartStories = () => {
-        if (this.storiesMode()) {
-          this.startStories();
-        }
+      const start = () => {
+        this.nav.setAllTime(this.selectedYear() === 'all-time');
+        this.nav.restore(this.route.snapshot.queryParamMap.get(STAT_PARAM));
+        this.ready.set(true);
       };
       this.navidrome.getYears().subscribe({
         next: (years) => {
@@ -301,17 +292,11 @@ export class Dashboard {
           if (!urlSelectedYear && years.length > 0 && this.selectedYear() === 'all-time') {
             this.selectedYear.set(years[0]);
           }
-          this.loadData();
-          maybeStartStories();
+          start();
         },
-        error: () => {
-          this.loadData();
-          maybeStartStories();
-        },
+        error: () => start(),
       });
     });
-
-    this.destroyRef.onDestroy(() => this.clearStoriesTimer());
   }
 
   selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
@@ -337,29 +322,62 @@ export class Dashboard {
     }
   }
 
-  toggleStoriesMode(): void {
-    this.shell.closeMenu();
-    if (this.storiesMode()) {
-      this.stopStories();
-    } else {
-      this.startStories();
-    }
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('rewind.storiesMode', String(this.storiesMode()));
-    }
+  openStatSheet(): void {
+    this.statSheetOpen.set(true);
   }
 
-  storiesNext(): void {
-    if (!this.storiesMode()) return;
-    this.storiesPaused.set(false);
-    this.advanceStories();
+  closeStatSheet(): void {
+    this.statSheetOpen.set(false);
+  }
+
+  selectStat(type: StatType): void {
+    this.nav.select(type);
+  }
+
+  nextStat(): void {
+    this.nav.next();
+  }
+
+  prevStat(): void {
+    this.nav.prev();
+  }
+
+  toggleAutoplay(): void {
+    this.shell.closeMenu();
+    this.nav.toggleAutoplay();
+  }
+
+  toggleAutoplayPause(): void {
+    this.nav.togglePause();
+  }
+
+  // Touch adapter: a horizontal drag across the card steps to the neighbouring stat.
+  onCardPointerDown(event: PointerEvent): void {
+    this.swipeStart = event.pointerType === 'touch' ? { x: event.clientX, y: event.clientY } : null;
+  }
+
+  onCardPointerUp(event: PointerEvent): void {
+    const start = this.swipeStart;
+    this.swipeStart = null;
+    if (!start) return;
+
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) <= Math.abs(dy)) return;
+
+    if (dx < 0) this.nav.next();
+    else this.nav.prev();
+  }
+
+  onCardPointerCancel(): void {
+    this.swipeStart = null;
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.customPickerOpen() || this.shell.menuOpen()) return;
+    if (this.customPickerOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
 
     const target = event.target as HTMLElement | null;
     if (target) {
@@ -369,91 +387,14 @@ export class Dashboard {
       }
     }
 
-    const stats = this.visibleStats();
-    if (stats.length === 0) return;
-
     event.preventDefault();
-    const currentIdx = stats.findIndex((s) => s.type === this.selectedStat());
-    const baseIdx = currentIdx >= 0 ? currentIdx : 0;
-    const nextIdx =
-      event.key === 'ArrowLeft'
-        ? (baseIdx - 1 + stats.length) % stats.length
-        : (baseIdx + 1) % stats.length;
-
-    this.storiesIndex.set(nextIdx);
-    this.selectStat(stats[nextIdx].type);
-    this.storiesPaused.set(false);
-    if (this.storiesMode()) this.runStoriesTimer();
-  }
-
-  storiesPrev(): void {
-    const stats = this.visibleStats();
-    const prev = Math.max(0, this.storiesIndex() - 1);
-    this.storiesIndex.set(prev);
-    this.selectStat(stats[prev].type);
-    this.storiesPaused.set(false);
-    if (this.storiesMode()) {
-      this.runStoriesTimer();
-    }
-  }
-
-  toggleStoriesPause(): void {
-    if (this.storiesPaused()) {
-      this.storiesPaused.set(false);
-      this.runStoriesTimer();
-    } else {
-      this.storiesPaused.set(true);
-      this.clearStoriesTimer();
-    }
-  }
-
-  startStories(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const stats = this.visibleStats();
-    const currentType = this.selectedStat();
-    const idx = stats.findIndex((s) => s.type === currentType);
-    this.storiesIndex.set(idx >= 0 ? idx : 0);
-    this.storiesMode.set(true);
-    this.storiesPaused.set(false);
-    this.runStoriesTimer();
-  }
-
-  private stopStories(): void {
-    this.storiesMode.set(false);
-    this.storiesPaused.set(false);
-    this.clearStoriesTimer();
-  }
-
-  private clearStoriesTimer(): void {
-    if (this.storiesTimeout !== null) {
-      clearTimeout(this.storiesTimeout);
-      this.storiesTimeout = null;
-    }
-  }
-
-  private runStoriesTimer(): void {
-    this.clearStoriesTimer();
-    this.storiesTimeout = setTimeout(() => {
-      this.advanceStories();
-    }, 10000);
-  }
-
-  private advanceStories(): void {
-    const stats = this.visibleStats();
-    const next = (this.storiesIndex() + 1) % stats.length;
-    this.storiesIndex.set(next);
-    this.selectStat(stats[next].type);
-    this.runStoriesTimer();
+    if (event.key === 'ArrowLeft') this.nav.prev();
+    else this.nav.next();
   }
 
   selectYear(year: string): void {
     this.selectedYear.set(year);
-    const stat = this.selectedStat();
-    const def = STAT_DEFINITIONS.find((d) => d.type === stat);
-    if (def?.yearOnly && year === 'all-time') {
-      this.selectedStat.set('summary');
-    }
-    this.loadData();
+    this.nav.setAllTime(year === 'all-time');
   }
 
   toggleCustomPicker(): void {
@@ -467,11 +408,11 @@ export class Dashboard {
   onCustomRangeSelected(range: { from: string; to: string }): void {
     this.customRange.set(range);
     this.selectedYear.set('custom');
+    this.nav.setAllTime(false);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.customRange', JSON.stringify(range));
     }
     this.customPickerOpen.set(false);
-    this.loadData();
   }
 
   onCustomRangeCleared(): void {
@@ -481,34 +422,18 @@ export class Dashboard {
     }
     if (this.selectedYear() === 'custom') {
       const years = this.years();
-      this.selectedYear.set(years.length > 0 ? years[0] : 'all-time');
-      this.loadData();
+      const year = years.length > 0 ? years[0] : 'all-time';
+      this.selectedYear.set(year);
+      this.nav.setAllTime(year === 'all-time');
     }
   }
 
-  selectStat(type: StatType): void {
-    this.selectedStat.set(type);
-    // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
-    if (this.storiesMode()) {
-      const stats = this.visibleStats();
-      const idx = stats.findIndex((s) => s.type === type);
-      if (idx >= 0 && idx !== this.storiesIndex()) {
-        this.storiesIndex.set(idx);
-        this.storiesPaused.set(false);
-        this.runStoriesTimer();
-      }
-    }
-    this.loadData();
+  /** Re-runs the current request, for retry after an error and for fresh scrobbles. */
+  reload(): void {
+    this.fetchStat(this.nav.current(), this.currentRange());
   }
 
-  statIcon(type: StatType): string {
-    return STAT_ICONS[type];
-  }
-
-  loadData(): void {
-    const type = this.selectedStat();
-    const range = this.currentRange();
-
+  private fetchStat(type: StatType, range: StatRange): void {
     this.loading.set(true);
     this.error.set(null);
 
@@ -544,7 +469,7 @@ export class Dashboard {
     this.exporting.set(false);
 
     const link = document.createElement('a');
-    link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
+    link.download = `navidrome-rewind-${this.nav.current()}-${this.selectedYear()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   }

@@ -104,7 +104,7 @@
         </button>
         @if (!songsStatsCollapsed()) {
           <ul role="list" class="space-y-1">
-            @for (def of visibleStats(); track def.type) {
+            @for (def of stats(); track def.type) {
               <li>
                 <button
                   type="button"
@@ -116,7 +116,7 @@
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   "
                 >
-                  <ng-icon [name]="statIcon(def.type)" class="w-4 h-4" aria-hidden="true" />
+                  <ng-icon [name]="def.icon" class="w-4 h-4" aria-hidden="true" />
                   {{ def.label }}
                 </button>
               </li>
@@ -130,12 +130,12 @@
     <div class="flex-none border-t border-slate-200 dark:border-slate-800 px-5 pb-4 pt-2">
       <button
         type="button"
-        (click)="toggleStoriesMode()"
+        (click)="toggleAutoplay()"
         class="cursor-pointer w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
-        [attr.aria-pressed]="storiesMode()"
-        [attr.aria-label]="storiesMode() ? 'Stop stories autoplay' : 'Start stories autoplay'"
+        [attr.aria-pressed]="autoplay()"
+        [attr.aria-label]="autoplay() ? 'Stop autoplay' : 'Start autoplay'"
       >
-        @if (storiesMode()) {
+        @if (autoplay()) {
           <ng-icon name="heroPause" class="w-4 h-4 shrink-0" aria-hidden="true" />
           Stop autoplay
         } @else {
@@ -290,10 +290,10 @@
     <button
       type="button"
       role="menuitem"
-      (click)="toggleStoriesMode()"
+      (click)="toggleAutoplay()"
       class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
     >
-      @if (storiesMode()) {
+      @if (autoplay()) {
         <ng-icon name="heroPause" class="w-4 h-4 shrink-0" aria-hidden="true" />
         Stop autoplay
       } @else {
@@ -326,6 +326,11 @@
     </button>
   </ng-template>
 
+  <!-- Mobile stat sheet -->
+  @if (statSheetOpen()) {
+    <app-stat-sheet (close)="closeStatSheet()" />
+  }
+
   <!-- Custom date picker overlay (mobile + desktop) -->
   @if (customPickerOpen()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -348,12 +353,14 @@
   <!-- MAIN CONTENT — card + sticky export -->
   <main
     class="flex-1 flex flex-col bg-white dark:bg-slate-950 transition-[margin] duration-200 overflow-y-auto"
-    [class]="sidebarCollapsed() ? 'lg:ml-0' : 'lg:ml-72 xl:ml-80'">
+    [class]="sidebarCollapsed() ? 'lg:ml-0' : 'lg:ml-72 xl:ml-80'"
+  >
     @if (loading()) {
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center">
           <div
-            class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
+            class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
+          ></div>
           <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading stats…</p>
         </div>
       </div>
@@ -363,16 +370,16 @@
           <p class="text-red-500 font-medium">{{ error() }}</p>
           <button
             type="button"
-            (click)="loadData()"
+            (click)="reload()"
             class="cursor-pointer mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white underline"
-          >Retry
+          >
+            Retry
           </button>
         </div>
       </div>
     } @else {
       <!-- Card area -->
       <div class="flex-1 flex items-center justify-center">
-
         <!-- Outer wrapper: full-screen on mobile, auto-sized on desktop -->
         <div
           class="w-full h-full lg:h-auto lg:max-w-full"
@@ -381,173 +388,223 @@
           [class.lg:p-6]="effectiveCardMode() !== 'landscape'"
           [class.lg:px-12]="effectiveCardMode() !== 'landscape'"
         >
-
-          <!-- Inner wrapper: relative anchor for absolute overlays -->
-          <div class="relative w-full h-full">
-
-          <!-- The exported card element -->
-          @switch (effectiveCardMode()) {
-            @case ('landscape') {
-              <app-cards-landscape
-                [rangeLabel]="rangeLabel()"
-                [selectedStat]="selectedStat()"
-                [selectedDef]="selectedDef()"
-                [summaryData]="summaryData()"
-                [topSongs]="topSongs()"
-                [topArtists]="topArtists()"
-                [topAlbums]="topAlbums()"
-                [topGenres]="topGenres()"
-                [listeningClock]="listeningClock()"
-                [monthlyTrends]="monthlyTrends()"
-                [dayOfWeek]="dayOfWeek()"
-                [streaks]="streaks()"
-                [lateNight]="lateNight()"
-                [onRepeat]="onRepeat()"
-                [songOfMonth]="songOfMonth()"
-                [favoriteDecades]="favoriteDecades()"
-                [recapData]="recapData()"
-                (artistClick)="openArtist($event)"
-              ></app-cards-landscape>
-            }
-            @case ('square') {
-              <app-cards-square
-                [rangeLabel]="rangeLabel()"
-                [selectedStat]="selectedStat()"
-                [selectedDef]="selectedDef()"
-                [summaryData]="summaryData()"
-                [topSongs]="topSongs()"
-                [topArtists]="topArtists()"
-                [topAlbums]="topAlbums()"
-                [topGenres]="topGenres()"
-                [listeningClock]="listeningClock()"
-                [monthlyTrends]="monthlyTrends()"
-                [dayOfWeek]="dayOfWeek()"
-                [streaks]="streaks()"
-                [lateNight]="lateNight()"
-                [onRepeat]="onRepeat()"
-                [songOfMonth]="songOfMonth()"
-                [favoriteDecades]="favoriteDecades()"
-                [recapData]="recapData()"
-              ></app-cards-square>
-            }
-            @default {
-              <app-cards-portrait
-                [rangeLabel]="rangeLabel()"
-                [selectedStat]="selectedStat()"
-                [selectedDef]="selectedDef()"
-                [summaryData]="summaryData()"
-                [topSongs]="topSongs()"
-                [topArtists]="topArtists()"
-                [topAlbums]="topAlbums()"
-                [topGenres]="topGenres()"
-                [listeningClock]="listeningClock()"
-                [monthlyTrends]="monthlyTrends()"
-                [dayOfWeek]="dayOfWeek()"
-                [streaks]="streaks()"
-                [lateNight]="lateNight()"
-                [onRepeat]="onRepeat()"
-                [songOfMonth]="songOfMonth()"
-                [favoriteDecades]="favoriteDecades()"
-                [recapData]="recapData()"
-              ></app-cards-portrait>
-            }
-          }
-
-          <!-- Stories overlay: progress bars + prev/next (not exported) -->
-          @if (storiesMode()) {
-            <!-- Progress bars -->
-            <div
-              class="export-ignore absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
-              aria-hidden="true"
-            >
-              @for (stat of visibleStats(); track stat.type; let i = $index) {
-                <div class="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
-                  @if (i < storiesIndex()) {
-                    <div class="h-full w-full bg-white rounded-full"></div>
-                  } @else if (i === storiesIndex()) {
-                    <div
-                      class="h-full bg-white rounded-full"
-                      [class.stories-bar-active]="!storiesPaused()"
-                      [class.stories-bar-paused]="storiesPaused()"
-                    ></div>
-                  }
-                </div>
+          <!-- Inner wrapper: relative anchor for absolute overlays, touch target for swipe -->
+          <div
+            class="relative w-full h-full touch-pan-y"
+            (pointerdown)="onCardPointerDown($event)"
+            (pointerup)="onCardPointerUp($event)"
+            (pointercancel)="onCardPointerCancel()"
+          >
+            <!-- The exported card element -->
+            @switch (effectiveCardMode()) {
+              @case ('landscape') {
+                <app-cards-landscape
+                  [rangeLabel]="rangeLabel()"
+                  [selectedStat]="selectedStat()"
+                  [selectedDef]="selectedDef()"
+                  [summaryData]="summaryData()"
+                  [topSongs]="topSongs()"
+                  [topArtists]="topArtists()"
+                  [topAlbums]="topAlbums()"
+                  [topGenres]="topGenres()"
+                  [listeningClock]="listeningClock()"
+                  [monthlyTrends]="monthlyTrends()"
+                  [dayOfWeek]="dayOfWeek()"
+                  [streaks]="streaks()"
+                  [lateNight]="lateNight()"
+                  [onRepeat]="onRepeat()"
+                  [songOfMonth]="songOfMonth()"
+                  [favoriteDecades]="favoriteDecades()"
+                  [recapData]="recapData()"
+                  (artistClick)="openArtist($event)"
+                ></app-cards-landscape>
               }
-            </div>
+              @case ('square') {
+                <app-cards-square
+                  [rangeLabel]="rangeLabel()"
+                  [selectedStat]="selectedStat()"
+                  [selectedDef]="selectedDef()"
+                  [summaryData]="summaryData()"
+                  [topSongs]="topSongs()"
+                  [topArtists]="topArtists()"
+                  [topAlbums]="topAlbums()"
+                  [topGenres]="topGenres()"
+                  [listeningClock]="listeningClock()"
+                  [monthlyTrends]="monthlyTrends()"
+                  [dayOfWeek]="dayOfWeek()"
+                  [streaks]="streaks()"
+                  [lateNight]="lateNight()"
+                  [onRepeat]="onRepeat()"
+                  [songOfMonth]="songOfMonth()"
+                  [favoriteDecades]="favoriteDecades()"
+                  [recapData]="recapData()"
+                ></app-cards-square>
+              }
+              @default {
+                <app-cards-portrait
+                  [rangeLabel]="rangeLabel()"
+                  [selectedStat]="selectedStat()"
+                  [selectedDef]="selectedDef()"
+                  [summaryData]="summaryData()"
+                  [topSongs]="topSongs()"
+                  [topArtists]="topArtists()"
+                  [topAlbums]="topAlbums()"
+                  [topGenres]="topGenres()"
+                  [listeningClock]="listeningClock()"
+                  [monthlyTrends]="monthlyTrends()"
+                  [dayOfWeek]="dayOfWeek()"
+                  [streaks]="streaks()"
+                  [lateNight]="lateNight()"
+                  [onRepeat]="onRepeat()"
+                  [songOfMonth]="songOfMonth()"
+                  [favoriteDecades]="favoriteDecades()"
+                  [recapData]="recapData()"
+                ></app-cards-portrait>
+              }
+            }
 
-            <!-- Prev button — left edge (narrow) -->
+            <!-- Autoplay progress (not exported) -->
+            @if (autoplay()) {
+              <div
+                class="export-ignore absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
+                aria-hidden="true"
+              >
+                @for (stat of stats(); track stat.type; let i = $index) {
+                  <div class="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
+                    @if (i < statIndex()) {
+                      <div class="h-full w-full bg-white rounded-full"></div>
+                    } @else if (i === statIndex()) {
+                      <div
+                        class="h-full bg-white rounded-full"
+                        [class.stories-bar-active]="!autoplayPaused()"
+                        [class.stories-bar-paused]="autoplayPaused()"
+                      ></div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Pointer adapter: edge arrows. Touch uses the swipe on the card instead. -->
             <button
               type="button"
-              (click)="storiesPrev()"
-              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 flex items-center justify-start pl-3 group"
-              aria-label="Previous card"
+              (click)="prevStat()"
+              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 hidden lg:flex items-center justify-start pl-3 group"
+              aria-label="Previous stat"
             >
               <div
-                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                     aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
+              >
+                <svg
+                  class="w-4 h-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 19.5 8.25 12l7.5-7.5"
+                  />
                 </svg>
               </div>
             </button>
 
-            <!-- Next button — right edge (narrow) -->
             <button
               type="button"
-              (click)="storiesNext()"
-              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 flex items-center justify-end pr-3 group"
-              aria-label="Next card"
+              (click)="nextStat()"
+              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 hidden lg:flex items-center justify-end pr-3 group"
+              aria-label="Next stat"
             >
               <div
-                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                     aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
+              >
+                <svg
+                  class="w-4 h-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
                 </svg>
               </div>
             </button>
-          }
 
-          <!-- Bottom-right overlay: pause/resume (stories only) + export (always) -->
-          <div class="export-ignore absolute bottom-3 right-3 z-20 flex items-center gap-2">
-            @if (storiesMode()) {
+            <!-- Mobile adapter: current stat, tap to open the sheet -->
+            <button
+              type="button"
+              (click)="openStatSheet()"
+              [attr.aria-expanded]="statSheetOpen()"
+              class="export-ignore cursor-pointer lg:hidden absolute bottom-3 left-3 z-20 flex items-center gap-1.5 max-w-[55%] pl-3 pr-2 py-1.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-sm font-medium hover:bg-black/60 transition-colors"
+            >
+              <span class="truncate">{{ selectedDef()?.label ?? 'Statistics' }}</span>
+              <ng-icon
+                name="heroChevronDown"
+                class="w-4 h-4 shrink-0 rotate-180"
+                aria-hidden="true"
+              />
+            </button>
+
+            <!-- Bottom-right overlay: pause/resume (autoplay only) + export (always) -->
+            <div class="export-ignore absolute bottom-3 right-3 z-20 flex items-center gap-2">
+              @if (autoplay()) {
+                <button
+                  type="button"
+                  (click)="toggleAutoplayPause()"
+                  class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+                  [attr.aria-label]="autoplayPaused() ? 'Resume autoplay' : 'Pause autoplay'"
+                >
+                  @if (autoplayPaused()) {
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+                      />
+                    </svg>
+                  } @else {
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  }
+                </button>
+              }
+              <!-- Export / download button — always visible -->
               <button
                 type="button"
-                (click)="toggleStoriesPause()"
+                (click)="exportCard()"
                 class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
-                [attr.aria-label]="storiesPaused() ? 'Resume autoplay' : 'Pause autoplay'"
+                aria-label="Export image"
+                title="Export image"
               >
-                @if (storiesPaused()) {
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-                  </svg>
-                } @else {
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill-rule="evenodd"
-                          d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z"
-                          clip-rule="evenodd" />
-                  </svg>
-                }
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                  />
+                </svg>
               </button>
-            }
-            <!-- Export / download button — always visible -->
-            <button
-              type="button"
-              (click)="exportCard()"
-              class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
-              aria-label="Export image"
-              title="Export image"
-            >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                   aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-              </svg>
-            </button>
+            </div>
           </div>
-
-          </div><!-- /inner wrapper -->
+          <!-- /inner wrapper -->
         </div>
       </div>
     }
@@ -557,8 +614,10 @@
   @if (cardMode() !== 'landscape') {
     <p
       class="hidden lg:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none"
-      aria-hidden="true">
-      Made with <span class="text-red-500">❤</span> by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
+      aria-hidden="true"
+    >
+      Made with <span class="text-red-500">❤</span> by
+      <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
     </p>
   }
 </div>

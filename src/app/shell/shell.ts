@@ -6,13 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import {
-  NavigationStart,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
+import { NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -26,7 +20,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
-import { SECTIONS } from './sections';
+import { SectionRegistry } from './section-registry';
 import { ShellService } from './shell.service';
 
 /**
@@ -38,7 +32,7 @@ import { ShellService } from './shell.service';
   templateUrl: './shell.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIcon, NgTemplateOutlet],
+  imports: [RouterOutlet, RouterLink, NgIcon, NgTemplateOutlet],
   providers: [
     provideIcons({
       heroChartPie,
@@ -56,9 +50,11 @@ export class Shell {
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly shell = inject(ShellService);
+  private readonly registry = inject(SectionRegistry);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly sections = SECTIONS;
+  readonly sections = this.registry.sections;
+  readonly activeSection = this.registry.active;
   readonly darkMode = this.theme.dark;
   readonly currentUser = this.auth.user;
   readonly canLogout = this.auth.canLogout;

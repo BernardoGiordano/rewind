@@ -26,6 +26,7 @@ import { NavidromeService, type StatRange } from '../../services/navidrome.servi
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
 import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
+import { SectionRegistry } from '../../shell/section-registry';
 import {
   MONTH_SHORT,
   formatYearMonthWithYear,
@@ -63,6 +64,7 @@ export class ArtistDetail {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly registry = inject(SectionRegistry);
   private readonly canGoBack = signal(false);
 
   readonly artistId = signal<string>('');
@@ -304,11 +306,14 @@ export class ArtistDetail {
     this.activeTab.set(tab);
   }
 
+  /** Back where the user came from, or to the owning section when the page was deep-linked. */
   goBack(): void {
     if (this.canGoBack()) {
       this.location.back();
     } else {
-      this.router.navigate(['/'], { queryParams: this.dashboardQueryParams() });
+      this.router.navigate([this.registry.routeFor(this.router.url)], {
+        queryParams: this.dashboardQueryParams(),
+      });
     }
   }
 
@@ -350,5 +355,4 @@ export class ArtistDetail {
   }
 
   readonly padHour = padHour;
-
 }
