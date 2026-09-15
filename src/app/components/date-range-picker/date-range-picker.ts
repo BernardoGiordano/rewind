@@ -52,18 +52,18 @@ function parseIso(iso: string): Date {
         <button
           type="button"
           (click)="prevMonth()"
-          class="cursor-pointer p-1 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+          class="cursor-pointer p-1 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
           aria-label="Previous month"
         >
           <ng-icon name="heroChevronLeft" class="w-4 h-4" aria-hidden="true" />
         </button>
-        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <span class="text-sm font-semibold text-ink-soft">
           {{ monthLabel() }}
         </span>
         <button
           type="button"
           (click)="nextMonth()"
-          class="cursor-pointer p-1 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+          class="cursor-pointer p-1 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
           aria-label="Next month"
         >
           <ng-icon name="heroChevronRight" class="w-4 h-4" aria-hidden="true" />
@@ -73,7 +73,7 @@ function parseIso(iso: string): Date {
       <!-- Weekday header -->
       <div class="grid grid-cols-7 gap-0.5 mb-1">
         @for (w of weekdays; track w) {
-          <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center py-1">{{ w }}</div>
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint text-center py-1">{{ w }}</div>
         }
       </div>
 
@@ -94,8 +94,8 @@ function parseIso(iso: string): Date {
       </div>
 
       <!-- Footer -->
-      <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-        <span class="text-slate-500 dark:text-slate-400">
+      <div class="mt-3 pt-3 border-t border-edge-raised flex items-center justify-between text-xs">
+        <span class="text-ink-muted">
           @if (pendingStart()) {
             @if (hoverIso(); as h) {
               {{ formatShort(pendingStart()!) }} – {{ formatShort(h) }}
@@ -109,7 +109,7 @@ function parseIso(iso: string): Date {
         <button
           type="button"
           (click)="clear()"
-          class="cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          class="cursor-pointer text-ink-muted hover:text-ink transition-colors"
         >
           Clear
         </button>
@@ -204,13 +204,13 @@ export class DateRangePicker {
       return 'text-slate-300 dark:text-slate-600 cursor-not-allowed';
     }
     if (cell.isStart || cell.isEnd) {
-      classes.push('bg-slate-900 dark:bg-white text-white dark:text-slate-900');
+      classes.push('bg-selected text-on-selected');
     } else if (cell.inRange) {
-      classes.push('bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white');
+      classes.push('bg-slate-200 dark:bg-slate-700 text-ink');
     } else if (cell.inMonth) {
-      classes.push('text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700');
+      classes.push('text-ink-soft hover:bg-fill-raised');
     } else {
-      classes.push('text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700');
+      classes.push('text-slate-300 dark:text-slate-600 hover:bg-fill-raised');
     }
     if (cell.isToday && !cell.isStart && !cell.isEnd) {
       classes.push('ring-1 ring-slate-400 dark:ring-slate-500');

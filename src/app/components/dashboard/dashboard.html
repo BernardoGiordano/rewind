@@ -1,5 +1,5 @@
 <!-- Route content only — chrome (sections, theme, identity, links) lives in the Shell -->
-<div class="flex h-full bg-white dark:bg-slate-950">
+<div class="flex h-full bg-surface">
   <!-- Sidebar collapse toggle — half on the sidebar, half on main content -->
   <button
     type="button"
@@ -7,7 +7,7 @@
     [attr.aria-expanded]="sidebarShowing()"
     [attr.aria-label]="sidebarShowing() ? 'Collapse sidebar' : 'Expand sidebar'"
     title="Toggle sidebar"
-    class="hidden medium-up:flex fixed top-4 -translate-x-1/2 z-50 items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
+    class="hidden medium-up:flex fixed top-4 -translate-x-1/2 z-50 items-center justify-center w-7 h-7 rounded-full bg-surface-raised border border-edge-raised text-ink-muted hover:text-ink hover:bg-fill-raised shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
     [class]="sidebarToggleClasses()"
   >
     <ng-icon
@@ -26,66 +26,19 @@
     ></div>
   }
 
-  <!-- SIDEBAR — year chips + stat list. Pinned at expanded, a drawer at medium. -->
+  <!-- SIDEBAR — interval chips + stat list. Pinned at expanded, a drawer at medium. -->
   <aside
-    class="hidden medium-up:flex medium-up:flex-col medium-up:flex-none fixed inset-y-0 left-16 z-40 bg-slate-50 dark:bg-slate-900 overflow-hidden border-r border-slate-200 dark:border-slate-800 transition-[width,filter] duration-200"
+    class="hidden medium-up:flex medium-up:flex-col medium-up:flex-none fixed inset-y-0 left-16 z-40 bg-surface-sunken overflow-hidden border-r border-edge transition-[width,filter] duration-200"
     [class]="sidebarClasses()"
   >
     <!-- Scrollable content area -->
     <div class="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-10 pb-4">
-      <!-- Year selector -->
+      <!-- Interval — the chips the Shell also mounts in its rail panel and compact menu -->
       <div>
-        <span
-          class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3"
-          >Year</span
+        <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3"
+          >Interval</span
         >
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            (click)="selectYear('all-time')"
-            class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-            [class]="
-              selectedYear() === 'all-time'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-            "
-          >
-            All Time
-          </button>
-          @for (y of years(); track y) {
-            <button
-              type="button"
-              (click)="selectYear(y)"
-              class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-              [class]="
-                selectedYear() === y
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-              "
-            >
-              {{ y }}
-            </button>
-          }
-
-          <!-- Custom range chip -->
-          <button
-            type="button"
-            (click)="toggleCustomPicker()"
-            [attr.aria-expanded]="customPickerOpen()"
-            class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-            [class]="
-              selectedYear() === 'custom'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-            "
-          >
-            @if (selectedYear() === 'custom' && customRange()) {
-              {{ rangeLabel() }}
-            } @else {
-              Custom…
-            }
-          </button>
-        </div>
+        <app-range-chips (chosen)="closeDrawer()" />
       </div>
 
       <!-- Stat selector -->
@@ -95,14 +48,12 @@
           (click)="toggleSongsStats()"
           class="cursor-pointer w-full flex items-center justify-between mb-3"
         >
-          <h2
-            class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-          >
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Songs statistics
           </h2>
           <ng-icon
             name="heroChevronDown"
-            class="w-3 h-3 text-slate-500 dark:text-slate-400 transition-transform duration-200"
+            class="w-3 h-3 text-ink-muted transition-transform duration-200"
             [class.rotate-[-90deg]]="songsStatsCollapsed()"
             aria-hidden="true"
           />
@@ -117,8 +68,8 @@
                   class="cursor-pointer w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left"
                   [class]="
                     selectedStat() === def.type
-                      ? 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-900 dark:text-white'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-fill-strong/80 text-ink'
+                      : 'text-ink-muted hover:bg-fill hover:text-ink'
                   "
                 >
                   <ng-icon [name]="def.icon" class="w-4 h-4" aria-hidden="true" />
@@ -132,11 +83,11 @@
     </div>
 
     <!-- Fixed bottom section — card controls -->
-    <div class="flex-none border-t border-slate-200 dark:border-slate-800 px-5 pb-4 pt-2">
+    <div class="flex-none border-t border-edge px-5 pb-4 pt-2">
       <button
         type="button"
         (click)="toggleAutoplay()"
-        class="cursor-pointer w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        class="cursor-pointer w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-fill hover:text-ink transition-colors"
         [attr.aria-pressed]="autoplay()"
         [attr.aria-label]="autoplay() ? 'Stop autoplay' : 'Start autoplay'"
       >
@@ -151,7 +102,7 @@
 
       <!-- Card aspect toggle -->
       <div
-        class="mt-2 flex items-center gap-1 p-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+        class="mt-2 flex items-center gap-1 p-1 rounded-xl bg-surface-raised border border-edge-raised"
         role="group"
         aria-label="Card aspect ratio"
       >
@@ -164,8 +115,8 @@
           class="cursor-pointer flex flex-1 items-center justify-center h-9 rounded-lg transition-colors"
           [class]="
             cardMode() === 'portrait'
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
+              ? 'bg-selected text-on-selected'
+              : 'text-ink-muted hover:bg-fill-raised hover:text-ink'
           "
         >
           <svg
@@ -190,8 +141,8 @@
           class="cursor-pointer flex flex-1 items-center justify-center h-9 rounded-lg transition-colors"
           [class]="
             cardMode() === 'square'
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
+              ? 'bg-selected text-on-selected'
+              : 'text-ink-muted hover:bg-fill-raised hover:text-ink'
           "
         >
           <svg
@@ -216,8 +167,8 @@
           class="cursor-pointer flex flex-1 items-center justify-center h-9 rounded-lg transition-colors"
           [class]="
             cardMode() === 'landscape'
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
+              ? 'bg-selected text-on-selected'
+              : 'text-ink-muted hover:bg-fill-raised hover:text-ink'
           "
         >
           <svg
@@ -239,64 +190,11 @@
 
   <!-- Dashboard controls the Shell renders in its compact menu -->
   <ng-template #shellActions>
-    <div class="px-4 py-3">
-      <span
-        class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2"
-        >Interval</span
-      >
-      <div class="flex flex-wrap gap-1.5">
-        <button
-          type="button"
-          (click)="selectYear('all-time'); closeShellMenu()"
-          class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-          [class]="
-            selectedYear() === 'all-time'
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-          "
-        >
-          All Time
-        </button>
-        @for (y of years(); track y) {
-          <button
-            type="button"
-            (click)="selectYear(y); closeShellMenu()"
-            class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-            [class]="
-              selectedYear() === y
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-            "
-          >
-            {{ y }}
-          </button>
-        }
-        <button
-          type="button"
-          (click)="closeShellMenu(); toggleCustomPicker()"
-          class="cursor-pointer px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-          [class]="
-            selectedYear() === 'custom'
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-          "
-        >
-          @if (selectedYear() === 'custom' && customRange()) {
-            {{ rangeLabel() }}
-          } @else {
-            Custom…
-          }
-        </button>
-      </div>
-    </div>
-
-    <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
-
     <button
       type="button"
       role="menuitem"
       (click)="toggleAutoplay()"
-      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
     >
       @if (autoplay()) {
         <ng-icon name="heroPause" class="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -311,7 +209,7 @@
       type="button"
       role="menuitem"
       (click)="exportCard(); closeShellMenu()"
-      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
     >
       <svg
         class="w-4 h-4 shrink-0"
@@ -336,28 +234,9 @@
     <app-stat-sheet (close)="closeStatSheet()" />
   }
 
-  <!-- Custom date picker overlay — every mode -->
-  @if (customPickerOpen()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="fixed inset-0 bg-black/40" (click)="closeCustomPicker()" aria-hidden="true"></div>
-      <div
-        class="relative z-10 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700"
-        role="dialog"
-        aria-label="Pick a custom date range"
-      >
-        <app-date-range-picker
-          [initialFrom]="customRange()?.from ?? null"
-          [initialTo]="customRange()?.to ?? null"
-          (rangeSelected)="onCustomRangeSelected($event)"
-          (cleared)="onCustomRangeCleared()"
-        />
-      </div>
-    </div>
-  }
-
   <!-- MAIN CONTENT — card + sticky export -->
   <main
-    class="flex-1 flex flex-col bg-white dark:bg-slate-950 transition-[margin] duration-200 overflow-y-auto"
+    class="flex-1 flex flex-col bg-surface transition-[margin] duration-200 overflow-y-auto"
     [class]="mainClasses()"
   >
     @if (loading()) {
@@ -366,7 +245,7 @@
           <div
             class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
           ></div>
-          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading stats…</p>
+          <p class="mt-4 text-sm text-ink-muted">Loading stats…</p>
         </div>
       </div>
     } @else if (error()) {
@@ -376,7 +255,7 @@
           <button
             type="button"
             (click)="reload()"
-            class="cursor-pointer mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white underline"
+            class="cursor-pointer mt-4 text-sm text-ink-muted hover:text-slate-700 dark:hover:text-white underline"
           >
             Retry
           </button>
@@ -615,15 +494,4 @@
       </div>
     }
   </main>
-
-  <!-- Made with love — expanded only, fixed bottom-right -->
-  @if (cardMode() !== 'landscape') {
-    <p
-      class="hidden expanded:block text-sm font-medium fixed bottom-4 right-4 text-slate-800 dark:text-slate-200 pointer-events-none select-none"
-      aria-hidden="true"
-    >
-      Made with <span class="text-red-500">❤</span> by
-      <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
-    </p>
-  }
 </div>

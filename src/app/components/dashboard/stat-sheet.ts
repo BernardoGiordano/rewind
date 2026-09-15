@@ -50,14 +50,14 @@ import { StatNavigator } from './stat-navigator';
         role="dialog"
         aria-modal="true"
         aria-label="Choose a statistic"
-        class="absolute inset-x-0 bottom-0 max-h-[75dvh] flex flex-col rounded-t-2xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700"
+        class="absolute inset-x-0 bottom-0 max-h-[75dvh] flex flex-col rounded-t-2xl bg-surface-raised shadow-lg ring-1 ring-edge-raised"
       >
         <div class="flex-none pt-2 pb-1 flex justify-center" aria-hidden="true">
           <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
         </div>
 
         <h2
-          class="flex-none px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+          class="flex-none px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted"
         >
           Songs statistics
         </h2>
@@ -72,8 +72,8 @@ import { StatNavigator } from './stat-navigator';
                 class="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors"
                 [class]="
                   current() === def.type
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
-                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    ? 'bg-fill-raised text-ink'
+                    : 'text-ink-soft hover:bg-fill-raised'
                 "
               >
                 <ng-icon [name]="def.icon" class="w-5 h-5 shrink-0" aria-hidden="true" />

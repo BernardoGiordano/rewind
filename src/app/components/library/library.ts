@@ -109,6 +109,12 @@ export class Library {
   });
 
   readonly search = signal('');
+
+  /** The standing hero is an introduction, so it yields once the user is searching or paging. */
+  readonly heroCollapsed = computed(() => this.offset() > 0 || this.search().length > 0);
+
+  /** Song rows read badly at full width, so the songs view takes a narrower measure. */
+  readonly measure = computed(() => (this.kind() === 'songs' ? 'max-w-3xl' : 'max-w-7xl'));
   readonly rangeStart = computed(() => (this.total() === 0 ? 0 : this.offset() + 1));
   readonly rangeEnd = computed(() => Math.min(this.offset() + PAGE_SIZE, this.total()));
   readonly hasPrevious = computed(() => this.offset() > 0);

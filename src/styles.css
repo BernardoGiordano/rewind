@@ -16,6 +16,58 @@
 @custom-variant expanded (@media (min-width: 1024px));
 @custom-variant wide (@media (min-width: 1280px));
 
+/* Surface roles. Templates reference roles (bg-surface, text-ink-muted,
+   border-edge) instead of spelling slate pairs inline, so a retune happens here.
+   Each role is defined once for light and flipped once under html.dark.
+
+   Card gradients in STAT_DEFINITIONS are artwork, not chrome, and stay literal. */
+@theme {
+  --color-surface: #fff;
+  --color-surface-sunken: oklch(98.4% 0.003 247.858);
+  --color-surface-raised: #fff;
+
+  --color-fill: oklch(96.8% 0.007 247.896);
+  --color-fill-raised: oklch(96.8% 0.007 247.896);
+  --color-fill-strong: oklch(92.9% 0.013 255.508);
+
+  --color-edge: oklch(92.9% 0.013 255.508);
+  --color-edge-raised: oklch(92.9% 0.013 255.508);
+
+  --color-ink: oklch(20.8% 0.042 265.755);
+  --color-ink-body: oklch(20.8% 0.042 265.755);
+  --color-ink-soft: oklch(37.2% 0.044 257.287);
+  --color-ink-muted: oklch(55.4% 0.046 257.417);
+  --color-ink-faint: oklch(70.4% 0.04 256.788);
+
+  --color-selected: oklch(20.8% 0.042 265.755);
+  --color-on-selected: #fff;
+
+  --color-accent: oklch(64.5% 0.246 16.439);
+  --color-accent-strong: oklch(58.6% 0.253 17.585);
+}
+
+html.dark {
+  --color-surface: oklch(12.9% 0.042 264.695);
+  --color-surface-sunken: oklch(20.8% 0.042 265.755);
+  --color-surface-raised: oklch(27.9% 0.041 260.031);
+
+  --color-fill: oklch(27.9% 0.041 260.031);
+  --color-fill-raised: oklch(37.2% 0.044 257.287);
+  --color-fill-strong: oklch(37.2% 0.044 257.287);
+
+  --color-edge: oklch(27.9% 0.041 260.031);
+  --color-edge-raised: oklch(37.2% 0.044 257.287);
+
+  --color-ink: #fff;
+  --color-ink-body: oklch(96.8% 0.007 247.896);
+  --color-ink-soft: oklch(92.9% 0.013 255.508);
+  --color-ink-muted: oklch(70.4% 0.04 256.788);
+  --color-ink-faint: oklch(55.4% 0.046 257.417);
+
+  --color-selected: #fff;
+  --color-on-selected: oklch(20.8% 0.042 265.755);
+}
+
 @theme {
   --font-sans:
     Satoshi, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -83,7 +135,7 @@ html {
 }
 
 body {
-  @apply bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+  @apply bg-surface text-ink-body;
   height: 100%;
   overflow: hidden;
 }

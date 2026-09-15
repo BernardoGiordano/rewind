@@ -1,12 +1,12 @@
-<div class="h-dvh flex flex-col medium-up:pl-16 bg-white dark:bg-slate-950">
+<div class="h-dvh flex flex-col medium-up:pl-16 bg-surface">
   <!-- RAIL — brand, sections, chrome. Medium and expanded. -->
   <nav
-    class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800"
+    class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-surface-sunken border-r border-edge"
     aria-label="Sections"
   >
     <a
       routerLink="/"
-      class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-slate-900 dark:text-white tracking-tight text-sm whitespace-nowrap"
+      class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-ink tracking-tight text-sm whitespace-nowrap"
       >Navidrome Rewind</a
     >
 
@@ -21,8 +21,8 @@
             class="flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
             [class]="
               activeSection()?.id === s.id
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-selected text-on-selected'
+                : 'text-ink-muted hover:bg-fill hover:text-ink'
             "
           >
             <ng-icon [name]="s.icon" class="w-5 h-5" aria-hidden="true" />
@@ -32,12 +32,34 @@
     </ul>
 
     <div class="flex flex-col items-center gap-1">
+      @if (showRange()) {
+        <button
+          type="button"
+          (click)="toggleRangePanel()"
+          [attr.aria-expanded]="rangePanelOpen()"
+          [attr.aria-label]="'Change interval, currently ' + rangeLabel()"
+          [title]="'Interval · ' + rangeLabel()"
+          class="cursor-pointer flex flex-col items-center gap-0.5 w-12 py-1.5 rounded-xl transition-colors"
+          [class]="
+            rangePanelOpen()
+              ? 'bg-selected text-on-selected'
+              : 'text-ink-muted hover:bg-fill hover:text-ink'
+          "
+        >
+          <ng-icon name="heroCalendarDays" class="w-5 h-5" aria-hidden="true" />
+          <span class="font-mono text-[9px] leading-none max-w-full truncate">{{
+            rangeShortLabel()
+          }}</span>
+        </button>
+        <div class="w-8 border-t border-edge my-1"></div>
+      }
+
       <button
         type="button"
         (click)="toggleDarkMode()"
         [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
         [title]="darkMode() ? 'Light mode' : 'Dark mode'"
-        class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
       >
         <ng-icon [name]="darkMode() ? 'heroSun' : 'heroMoon'" class="w-5 h-5" aria-hidden="true" />
       </button>
@@ -48,7 +70,7 @@
         rel="noopener noreferrer"
         title="GitHub"
         aria-label="GitHub"
-        class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        class="flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -65,7 +87,7 @@
         rel="noopener noreferrer"
         title="Donate"
         aria-label="Donate"
-        class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+        class="flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
       >
         <svg
           class="w-5 h-5"
@@ -84,21 +106,21 @@
       </a>
 
       @if (currentUser(); as u) {
-        <div class="w-8 border-t border-slate-200 dark:border-slate-800 my-1"></div>
+        <div class="w-8 border-t border-edge my-1"></div>
         @if (canLogout()) {
           <button
             type="button"
             (click)="logout()"
             [title]="'Sign out ' + u.username"
             [attr.aria-label]="'Sign out ' + u.username"
-            class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+            class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
           >
             <ng-icon name="heroArrowRightOnRectangle" class="w-5 h-5" aria-hidden="true" />
           </button>
         } @else {
           <span
             [title]="'Signed in as ' + u.username"
-            class="flex items-center justify-center w-10 h-10 text-slate-400 dark:text-slate-500"
+            class="flex items-center justify-center w-10 h-10 text-ink-faint"
           >
             <ng-icon name="heroUserCircle" class="w-5 h-5" aria-hidden="true" />
           </span>
@@ -109,11 +131,9 @@
 
   <!-- COMPACT BAR — brand, sections, menu. Medium and expanded use the rail. -->
   <header
-    class="medium-up:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between gap-3"
+    class="medium-up:hidden fixed top-0 inset-x-0 z-30 h-14 bg-surface-sunken border-b border-edge px-4 flex items-center justify-between gap-3"
   >
-    <a routerLink="/" class="text-base font-mono font-bold text-slate-900 dark:text-white truncate"
-      >Navidrome Rewind</a
-    >
+    <a routerLink="/" class="text-base font-mono font-bold text-ink truncate">Navidrome Rewind</a>
 
     <div class="flex items-center gap-1">
       @for (s of sections; track s.id) {
@@ -124,8 +144,8 @@
           class="flex items-center justify-center w-9 h-9 rounded-full transition-colors"
           [class]="
             activeSection()?.id === s.id
-              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-selected text-on-selected'
+              : 'text-ink-soft hover:bg-fill'
           "
         >
           <ng-icon [name]="s.icon" class="w-5 h-5" aria-hidden="true" />
@@ -140,7 +160,7 @@
         [attr.aria-controls]="menuOpen() ? 'shell-menu' : null"
         aria-haspopup="true"
         aria-label="Open options menu"
-        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-ink-soft bg-fill hover:bg-fill-strong transition-colors"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -159,25 +179,22 @@
       role="menu"
       aria-labelledby="shell-menu-trigger"
       aria-orientation="vertical"
-      class="medium-up:hidden fixed right-4 top-14 mt-1 w-64 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 z-40 py-1 focus:outline-none"
+      class="medium-up:hidden fixed right-4 top-14 mt-1 w-64 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised z-40 py-1 focus:outline-none"
     >
       @if (currentUser(); as u) {
         <div class="flex items-center gap-2 px-4 py-3">
           <ng-icon
             name="heroUserCircle"
-            class="w-5 h-5 shrink-0 text-slate-500 dark:text-slate-400"
+            class="w-5 h-5 shrink-0 text-ink-muted"
             aria-hidden="true"
           />
           <div class="flex-1 min-w-0">
             <p
-              class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none"
+              class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint leading-none"
             >
               Signed in as
             </p>
-            <p
-              class="mt-0.5 text-sm font-medium text-slate-900 dark:text-white truncate"
-              [title]="u.username"
-            >
+            <p class="mt-0.5 text-sm font-medium text-ink truncate" [title]="u.username">
               {{ u.username }}
             </p>
           </div>
@@ -187,13 +204,13 @@
               (click)="logout()"
               title="Sign out"
               aria-label="Sign out"
-              class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
+              class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
             >
               <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4" aria-hidden="true" />
             </button>
           }
         </div>
-        <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+        <div role="separator" class="my-1 border-t border-edge-raised"></div>
       }
 
       @for (s of sections; track s.id) {
@@ -202,30 +219,36 @@
           [attr.aria-current]="activeSection()?.id === s.id ? 'page' : null"
           role="menuitem"
           (click)="closeMenu()"
-          class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          [class]="
-            activeSection()?.id === s.id
-              ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
-              : 'text-slate-700 dark:text-slate-200'
-          "
+          class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-fill-raised transition-colors"
+          [class]="activeSection()?.id === s.id ? 'bg-fill-raised text-ink' : 'text-ink-soft'"
         >
           <ng-icon [name]="s.icon" class="w-4 h-4 shrink-0" aria-hidden="true" />
           {{ s.label }}
         </a>
       }
 
+      @if (showRange()) {
+        <div role="separator" class="my-1 border-t border-edge-raised"></div>
+        <div class="px-4 py-3">
+          <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2"
+            >Interval</span
+          >
+          <app-range-chips (chosen)="closeMenu()" />
+        </div>
+      }
+
       @if (routeActions(); as actions) {
-        <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+        <div role="separator" class="my-1 border-t border-edge-raised"></div>
         <ng-container [ngTemplateOutlet]="actions" />
       }
 
-      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+      <div role="separator" class="my-1 border-t border-edge-raised"></div>
 
       <button
         type="button"
         role="menuitem"
         (click)="toggleDarkMode(); closeMenu()"
-        class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+        class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
       >
         <ng-icon
           [name]="darkMode() ? 'heroSun' : 'heroMoon'"
@@ -235,7 +258,7 @@
         {{ darkMode() ? 'Light mode' : 'Dark mode' }}
       </button>
 
-      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+      <div role="separator" class="my-1 border-t border-edge-raised"></div>
 
       <a
         href="https://github.com/BernardoGiordano/rewind"
@@ -243,7 +266,7 @@
         rel="noopener noreferrer"
         role="menuitem"
         (click)="closeMenu()"
-        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors"
       >
         <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -261,7 +284,7 @@
         rel="noopener noreferrer"
         role="menuitem"
         (click)="closeMenu()"
-        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors"
       >
         <svg
           class="w-4 h-4 shrink-0"
@@ -280,18 +303,54 @@
         Donate
       </a>
 
-      <div role="separator" class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
+      <div role="separator" class="my-1 border-t border-edge-raised"></div>
 
-      <p class="px-4 py-2.5 text-sm text-slate-400 dark:text-slate-500">
-        Made with
-        <ng-icon
-          name="heroHeart"
-          class="w-4 h-4 inline text-red-500 fill-current"
-          aria-hidden="true"
-        />
-        by <a href="https://github.com/BernardoGiordano">Bernardo Giordano</a>
-      </p>
+      <p class="px-4 py-2.5 text-sm text-ink-faint"><app-byline /></p>
     </div>
+  }
+
+  <!-- RANGE PANEL — anchored to the rail at medium-up, a centred sheet on compact. -->
+  @if (rangePanelOpen()) {
+    <div class="fixed inset-0 z-50" (click)="closeRangePanel()" aria-hidden="true"></div>
+    <div
+      role="dialog"
+      aria-label="Interval"
+      class="fixed z-60 w-72 p-4 rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised left-1/2 -translate-x-1/2 top-16 medium-up:left-[4.5rem] medium-up:translate-x-0 medium-up:top-auto medium-up:bottom-3"
+    >
+      <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3"
+        >Interval</span
+      >
+      <app-range-chips (chosen)="closeRangePanel()" />
+    </div>
+  }
+
+  <!-- CUSTOM RANGE PICKER — every layout mode -->
+  @if (rangePickerOpen()) {
+    <div class="fixed inset-0 z-60 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-black/40" (click)="closeRangePicker()" aria-hidden="true"></div>
+      <div
+        class="relative z-10 rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised"
+        role="dialog"
+        aria-label="Pick a custom date range"
+      >
+        <app-date-range-picker
+          [initialFrom]="customRange()?.from ?? null"
+          [initialTo]="customRange()?.to ?? null"
+          (rangeSelected)="onCustomRangeSelected($event)"
+          (cleared)="onCustomRangeCleared()"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Author credit — expanded only, and only where the route leaves the corner free -->
+  @if (quietCorner()) {
+    <p
+      class="hidden expanded:block fixed bottom-4 right-4 z-20 text-sm font-medium text-ink-soft pointer-events-none select-none"
+      aria-hidden="true"
+    >
+      <app-byline />
+    </p>
   }
 
   <!-- Spacer under the fixed compact bar -->

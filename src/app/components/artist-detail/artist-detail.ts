@@ -2,14 +2,16 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
+  effect,
   inject,
   PLATFORM_ID,
   signal,
 } from '@angular/core';
 import { DecimalPipe, Location, isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { combineLatest } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowLeft,
@@ -22,10 +24,10 @@ import {
   heroSquare3Stack3d,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
-import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { NavidromeService } from '../../services/navidrome.service';
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
-import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
+import { RewindRange } from '../../shell/rewind-range';
 import { SectionRegistry } from '../../shell/section-registry';
 import {
   MONTH_SHORT,
@@ -65,6 +67,8 @@ export class ArtistDetail {
   private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly registry = inject(SectionRegistry);
+  private readonly rewindRange = inject(RewindRange);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly canGoBack = signal(false);
 
   readonly artistId = signal<string>('');
@@ -73,22 +77,9 @@ export class ArtistDetail {
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<TabKey>('overview');
 
-  readonly range = signal<StatRange>({ kind: 'all-time' });
-
-  readonly rangeLabel = computed(() => {
-    const r = this.range();
-    if (r.kind === 'all-time') return 'All Time';
-    if (r.kind === 'year') return r.year;
-    return formatRangeLabel(r.from, r.to);
-  });
-
-  readonly dashboardQueryParams = computed<Record<string, string>>(() => {
-    const r = this.range();
-    if (r.kind === 'year') return { year: r.year };
-    if (r.kind === 'custom') return { from: r.from, to: r.to };
-    const out: Record<string, string> = { range: 'all-time' };
-    return out;
-  });
+  /** The range is the Shell's; this page reads it and reloads when it moves. */
+  readonly range = this.rewindRange.current;
+  readonly rangeLabel = this.rewindRange.label;
 
   // Derived heatmap: 7-day rows, Sunday-top, filling the selected range.
   // Empty days are rendered as 0-play cells so the most recent date is always on the right.
@@ -265,15 +256,16 @@ export class ArtistDetail {
   });
 
   constructor() {
-    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
-      this.artistId.set(params.get('id') ?? '');
-      const year = query.get('year');
-      const from = query.get('from');
-      const to = query.get('to');
-      if (from && to) this.range.set({ kind: 'custom', from, to });
-      else if (year) this.range.set({ kind: 'year', year });
-      else this.range.set({ kind: 'all-time' });
-      this.load();
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.artistId.set(params.get('id') ?? ''));
+
+    // One load path: whatever moves the artist or the range, the fetch follows.
+    effect(() => {
+      const id = this.artistId();
+      const range = this.range();
+      if (!id || !this.rewindRange.ready()) return;
+      this.load(id, range);
     });
 
     afterNextRender(() => {
@@ -285,12 +277,11 @@ export class ArtistDetail {
     });
   }
 
-  load(): void {
-    const id = this.artistId();
+  load(id = this.artistId(), range = this.range()): void {
     if (!id) return;
     this.loading.set(true);
     this.error.set(null);
-    this.navidrome.getArtist(id, this.range()).subscribe({
+    this.navidrome.getArtist(id, range).subscribe({
       next: (d) => {
         this.data.set(d);
         this.loading.set(false);
@@ -306,13 +297,17 @@ export class ArtistDetail {
     this.activeTab.set(tab);
   }
 
+  openRangePanel(): void {
+    this.rewindRange.togglePanel();
+  }
+
   /** Back where the user came from, or to the owning section when the page was deep-linked. */
   goBack(): void {
     if (this.canGoBack()) {
       this.location.back();
     } else {
       this.router.navigate([this.registry.routeFor(this.router.url)], {
-        queryParams: this.dashboardQueryParams(),
+        queryParams: this.rewindRange.toParams(),
       });
     }
   }
@@ -328,7 +323,7 @@ export class ArtistDetail {
   heatmapColor(cell: { plays: number; inRange: boolean }): string {
     if (!cell.inRange) return 'bg-transparent';
     const max = this.heatmapMax();
-    if (cell.plays === 0 || max === 0) return 'bg-slate-200 dark:bg-slate-800';
+    if (cell.plays === 0 || max === 0) return 'bg-fill';
     const pct = cell.plays / max;
     if (pct > 0.75) return 'bg-rose-500';
     if (pct > 0.5) return 'bg-rose-400';

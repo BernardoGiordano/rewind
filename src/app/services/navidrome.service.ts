@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import type { StatRange } from '../models/range';
 import type { ArtistDetail, StatType } from '../models/stats';
 
 @Injectable({ providedIn: 'root' })
@@ -44,8 +45,3 @@ export class NavidromeService {
     return this.http.get<ArtistDetail>(`/api/artist/${encodeURIComponent(artistId)}${params}`);
   }
 }
-
-export type StatRange =
-  | { kind: 'all-time' }
-  | { kind: 'year'; year: string }
-  | { kind: 'custom'; from: string; to: string };

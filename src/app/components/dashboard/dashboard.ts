@@ -37,10 +37,12 @@ import {
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { NavidromeService } from '../../services/navidrome.service';
+import { type StatRange, rangeSlug } from '../../models/range';
 import { LayoutModeService } from '../../shell/layout-mode';
+import { RangeChips } from '../../shell/range-chips';
+import { RewindRange } from '../../shell/rewind-range';
 import { ShellService } from '../../shell/shell.service';
-import { DateRangePicker } from '../date-range-picker/date-range-picker';
 import {
   type DayOfWeek,
   type FavoriteDecade,
@@ -61,7 +63,6 @@ import {
 import { CardsPortrait } from '../cards-portrait/cards-portrait';
 import { CardsSquare } from '../cards-square/cards-square';
 import { CardsLandscape } from '../cards-landscape/cards-landscape';
-import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
 import { StatNavigator } from './stat-navigator';
 import { STAT_PARAM } from './stat-traversal';
 import { StatSheet } from './stat-sheet';
@@ -75,7 +76,7 @@ const SWIPE_THRESHOLD_PX = 48;
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker, StatSheet],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, RangeChips, StatSheet],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -108,6 +109,7 @@ export class Dashboard {
   private readonly route = inject(ActivatedRoute);
   private readonly shell = inject(ShellService);
   private readonly nav = inject(StatNavigator);
+  private readonly range = inject(RewindRange);
   private readonly layout = inject(LayoutModeService);
 
   /** Dashboard-only controls the Shell renders inside its compact menu. */
@@ -119,18 +121,7 @@ export class Dashboard {
 
   openArtist(artistId: string | null | undefined): void {
     if (!artistId) return;
-    const queryParams = this.artistQueryParams();
-    this.router.navigate(['/artist', artistId], { queryParams });
-  }
-
-  private artistQueryParams(): Record<string, string> {
-    const y = this.selectedYear();
-    if (y === 'all-time') return {};
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? { from: r.from, to: r.to } : {};
-    }
-    return { year: y };
+    this.router.navigate(['/artist', artistId], { queryParams: this.range.toParams() });
   }
 
   readonly squareCard = viewChild(CardsSquare);
@@ -153,27 +144,15 @@ export class Dashboard {
   readonly autoplay = this.nav.autoplay;
   readonly autoplayPaused = this.nav.paused;
 
-  readonly years = signal<string[]>([]);
-  readonly selectedYear = signal<string>('all-time');
-  readonly customRange = signal<{ from: string; to: string } | null>(null);
-  readonly customPickerOpen = signal(false);
+  readonly rangeLabel = this.range.label;
+
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  /** Data loads once the browser has resolved the stored range, not during SSR. */
+  /** Data loads once the range is settled and the selection restored, not during SSR. */
   private readonly ready = signal(false);
 
   private swipeStart: { x: number; y: number } | null = null;
-
-  readonly rangeLabel = computed(() => {
-    const y = this.selectedYear();
-    if (y === 'all-time') return 'All Time';
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? formatRangeLabel(r.from, r.to) : 'Custom';
-    }
-    return y;
-  });
 
   readonly selectedDef = computed(() => this.nav.definition() ?? undefined);
 
@@ -236,39 +215,41 @@ export class Dashboard {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
-  private currentRange(): StatRange {
-    const y = this.selectedYear();
-    if (y === 'all-time') return { kind: 'all-time' };
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? { kind: 'custom', from: r.from, to: r.to } : { kind: 'all-time' };
-    }
-    return { kind: 'year', year: y };
-  }
-
   constructor() {
     // One load path: whatever moves the selection or the range, the fetch follows.
     effect(() => {
       const type = this.nav.current();
-      const range = this.currentRange();
+      const range = this.range.current();
       if (!this.ready()) return;
       this.fetchStat(type, range);
     });
 
+    // The navigator restores its selection once the range that filters the list is settled.
+    effect(() => {
+      if (!this.range.ready() || this.ready()) return;
+      this.nav.restore(this.route.snapshot.queryParamMap.get(STAT_PARAM));
+      this.ready.set(true);
+    });
+
     this.navidrome.historyChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.navidrome
-        .getYears()
-        .subscribe({ next: (years) => this.years.set(years), error: () => {} });
       this.reload();
     });
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationEnd && event.urlAfterRedirects.split('?')[0] === '/') {
-        this.shell.setRouteActions(this.shellActions() ?? null);
+        this.syncShell();
       }
     });
+    // A landscape card runs the full width, so the Shell's corner credit steps aside.
+    effect(() => {
+      const quiet = this.effectiveCardMode() !== 'landscape';
+      if (this.router.url.split('?')[0] === '/') {
+        this.shell.setQuietCorner(quiet);
+      }
+    });
+
     afterNextRender(() => {
-      this.shell.setRouteActions(this.shellActions() ?? null);
-      let urlSelectedYear = false;
+      this.syncShell();
+
       if (isPlatformBrowser(this.platformId)) {
         const storedCardMode = localStorage.getItem('rewind.cardMode');
         if (
@@ -288,53 +269,9 @@ export class Dashboard {
         if (storedSongsStats !== null) {
           this.songsStatsCollapsed.set(storedSongsStats === 'true');
         }
-
-        const storedRange = localStorage.getItem('rewind.customRange');
-        if (storedRange) {
-          try {
-            const parsed = JSON.parse(storedRange) as { from: string; to: string };
-            if (parsed?.from && parsed?.to) {
-              this.customRange.set(parsed);
-              this.selectedYear.set('custom');
-            }
-          } catch {
-            // ignore corrupt entry
-          }
-        }
-
-        // URL query params take priority over stored state (e.g. returning from artist detail)
-        const qp = this.route.snapshot.queryParamMap;
-        const urlFrom = qp.get('from');
-        const urlTo = qp.get('to');
-        const urlYear = qp.get('year');
-        if (urlFrom && urlTo) {
-          this.customRange.set({ from: urlFrom, to: urlTo });
-          this.selectedYear.set('custom');
-          urlSelectedYear = true;
-        } else if (urlYear) {
-          this.selectedYear.set(urlYear);
-          urlSelectedYear = true;
-        } else if (qp.get('range') === 'all-time') {
-          this.selectedYear.set('all-time');
-          urlSelectedYear = true;
-        }
       }
+
       this.navidrome.loadConfig();
-      const start = () => {
-        this.nav.setAllTime(this.selectedYear() === 'all-time');
-        this.nav.restore(this.route.snapshot.queryParamMap.get(STAT_PARAM));
-        this.ready.set(true);
-      };
-      this.navidrome.getYears().subscribe({
-        next: (years) => {
-          this.years.set(years);
-          if (!urlSelectedYear && years.length > 0 && this.selectedYear() === 'all-time') {
-            this.selectedYear.set(years[0]);
-          }
-          start();
-        },
-        error: () => start(),
-      });
     });
   }
 
@@ -343,6 +280,12 @@ export class Dashboard {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.cardMode', mode);
     }
+  }
+
+  /** Hands the Shell everything this route contributes to the chrome. */
+  private syncShell(): void {
+    this.shell.setRouteActions(this.shellActions() ?? null);
+    this.shell.setQuietCorner(this.effectiveCardMode() !== 'landscape');
   }
 
   toggleSidebar(): void {
@@ -430,7 +373,7 @@ export class Dashboard {
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.customPickerOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
+    if (this.range.overlayOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
     if (this.drawerOpen()) return;
 
     const target = event.target as HTMLElement | null;
@@ -446,46 +389,9 @@ export class Dashboard {
     else this.nav.next();
   }
 
-  selectYear(year: string): void {
-    this.selectedYear.set(year);
-    this.nav.setAllTime(year === 'all-time');
-    this.closeDrawer();
-  }
-
-  toggleCustomPicker(): void {
-    this.customPickerOpen.update((v) => !v);
-  }
-
-  closeCustomPicker(): void {
-    this.customPickerOpen.set(false);
-  }
-
-  onCustomRangeSelected(range: { from: string; to: string }): void {
-    this.customRange.set(range);
-    this.selectedYear.set('custom');
-    this.nav.setAllTime(false);
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('rewind.customRange', JSON.stringify(range));
-    }
-    this.customPickerOpen.set(false);
-  }
-
-  onCustomRangeCleared(): void {
-    this.customRange.set(null);
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('rewind.customRange');
-    }
-    if (this.selectedYear() === 'custom') {
-      const years = this.years();
-      const year = years.length > 0 ? years[0] : 'all-time';
-      this.selectedYear.set(year);
-      this.nav.setAllTime(year === 'all-time');
-    }
-  }
-
   /** Re-runs the current request, for retry after an error and for fresh scrobbles. */
   reload(): void {
-    this.fetchStat(this.nav.current(), this.currentRange());
+    this.fetchStat(this.nav.current(), this.range.current());
   }
 
   private fetchStat(type: StatType, range: StatRange): void {
@@ -524,7 +430,7 @@ export class Dashboard {
     this.exporting.set(false);
 
     const link = document.createElement('a');
-    link.download = `navidrome-rewind-${this.nav.current()}-${this.selectedYear()}.png`;
+    link.download = `navidrome-rewind-${this.nav.current()}-${rangeSlug(this.range.current())}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   }
@@ -575,66 +481,4 @@ export class Dashboard {
         break;
     }
   }
-}
-
-function sameDate(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-export function formatRangeLabel(fromIso: string, toIso: string): string {
-  const from = parseIsoDate(fromIso);
-  const to = parseIsoDate(toIso);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const currentYear = today.getFullYear();
-
-  // Last week: rolling 7-day window ending today or yesterday
-  const sevenAgo = new Date(today);
-  sevenAgo.setDate(today.getDate() - 7);
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const eightAgo = new Date(today);
-  eightAgo.setDate(today.getDate() - 8);
-  if (
-    (sameDate(from, sevenAgo) && sameDate(to, today)) ||
-    (sameDate(from, eightAgo) && sameDate(to, yesterday))
-  ) {
-    return 'Last Week';
-  }
-
-  // Last month (entire previous calendar month)
-  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  if (sameDate(from, lastMonthStart) && sameDate(to, lastMonthEnd)) return 'Last Month';
-
-  // Any full calendar month
-  if (
-    from.getDate() === 1 &&
-    from.getFullYear() === to.getFullYear() &&
-    from.getMonth() === to.getMonth()
-  ) {
-    const monthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
-    if (sameDate(to, monthEnd)) {
-      const year = from.getFullYear();
-      return year === currentYear
-        ? MONTH_FULL[from.getMonth()]
-        : `${MONTH_FULL[from.getMonth()]} ${year}`;
-    }
-  }
-
-  const sameYear = from.getFullYear() === to.getFullYear();
-  const short = (d: Date) => `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
-  const withYear = (d: Date) => `${short(d)}, ${d.getFullYear()}`;
-
-  if (sameYear) {
-    const year = from.getFullYear();
-    if (year === currentYear) return `${short(from)} – ${short(to)}`;
-    return `${short(from)} – ${short(to)}, ${year}`;
-  }
-  return `${withYear(from)} – ${withYear(to)}`;
 }

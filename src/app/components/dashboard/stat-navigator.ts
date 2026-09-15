@@ -1,8 +1,17 @@
 import { isPlatformBrowser } from '@angular/common';
-import { DestroyRef, Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import {
+  DestroyRef,
+  Injectable,
+  PLATFORM_ID,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { STAT_DEFINITIONS, type StatType } from '../../models/stats';
+import { RewindRange } from '../../shell/rewind-range';
 import { STAT_PARAM, isStatType, statsForRange, stepStat } from './stat-traversal';
 
 /** How long a card stays on screen while autoplay runs. */
@@ -25,9 +34,10 @@ const HOST_PATH = '/';
 export class StatNavigator {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly router = inject(Router);
+  private readonly range = inject(RewindRange);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly allTime = signal(true);
+  private readonly allTime = computed(() => this.range.current().kind === 'all-time');
   private readonly _current = signal<StatType>('summary');
   private readonly _autoplay = signal(false);
   private readonly _paused = signal(false);
@@ -59,6 +69,13 @@ export class StatNavigator {
       }
     });
 
+    // A range change can hide the stat on screen; step to the first one it still shows.
+    effect(() => {
+      const list = this.list();
+      if (list.some((d) => d.type === this._current())) return;
+      this.commit(list[0]?.type ?? 'summary');
+    });
+
     this.destroyRef.onDestroy(() => this.clearTimer());
   }
 
@@ -71,13 +88,6 @@ export class StatNavigator {
     }
 
     if (localStorage.getItem(AUTOPLAY_KEY) !== 'false') this.startAutoplay();
-  }
-
-  /** Narrows the list to what the range can show, moving off a stat the range hides. */
-  setAllTime(allTime: boolean): void {
-    this.allTime.set(allTime);
-    if (this.list().some((d) => d.type === this._current())) return;
-    this.commit(this.list()[0]?.type ?? 'summary');
   }
 
   select(type: StatType): void {
