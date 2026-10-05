@@ -12,7 +12,7 @@
               <p class="text-white/60 text-base font-bold uppercase tracking-[0.25em] mb-2">
                 Hours Listened
               </p>
-              <p class="text-[12rem] leading-none font-black text-white tracking-tight">
+              <p class="text-[12em] leading-none font-black text-white tracking-tight">
                 {{ formatNum(d.total_hours) }}
               </p>
               <p class="text-white/70 text-2xl font-semibold mt-6">
@@ -71,8 +71,12 @@
               (click)="openArtist(song.artist_id, $event)"
               (keydown.enter)="openArtist(song.artist_id, $event)"
             >
-              <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
-                <app-cover [id]="song.album_id" [size]="600" />
+              <div class="flex-1 min-h-0 flex items-center justify-center [container-type:size]">
+                <div
+                  class="w-[min(100cqw,100cqh)] aspect-square rounded-2xl overflow-hidden bg-white/10 shadow-2xl"
+                >
+                  <app-cover [id]="song.album_id" [size]="600" />
+                </div>
               </div>
               <div class="mt-4 shrink-0">
                 <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
@@ -129,9 +133,7 @@
                 </tr>
               </thead>
             </table>
-            <div
-              class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-            >
+            <div class="flex-1 card-scroll">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-10" />
@@ -202,9 +204,9 @@
               (click)="openArtist(artist.artist_id, $event)"
               (keydown.enter)="openArtist(artist.artist_id, $event)"
             >
-              <div class="flex-1 flex items-center justify-center min-h-0">
+              <div class="flex-1 min-h-0 flex items-center justify-center [container-type:size]">
                 <div
-                  class="aspect-square h-full max-h-full rounded-full overflow-hidden bg-white/10 shadow-2xl"
+                  class="w-[min(100cqw,100cqh)] aspect-square rounded-full overflow-hidden bg-white/10 shadow-2xl"
                 >
                   <app-cover [id]="artist.artist_id" [size]="600" />
                 </div>
@@ -263,9 +265,7 @@
                 </tr>
               </thead>
             </table>
-            <div
-              class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-            >
+            <div class="flex-1 card-scroll">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-10" />
@@ -338,8 +338,12 @@
               (click)="openArtist(album.artist_id, $event)"
               (keydown.enter)="openArtist(album.artist_id, $event)"
             >
-              <div class="flex-1 rounded-2xl overflow-hidden bg-white/10 shadow-2xl min-h-0">
-                <app-cover [id]="album.album_id" [size]="600" />
+              <div class="flex-1 min-h-0 flex items-center justify-center [container-type:size]">
+                <div
+                  class="w-[min(100cqw,100cqh)] aspect-square rounded-2xl overflow-hidden bg-white/10 shadow-2xl"
+                >
+                  <app-cover [id]="album.album_id" [size]="600" />
+                </div>
               </div>
               <div class="mt-4 shrink-0">
                 <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
@@ -396,9 +400,7 @@
                 </tr>
               </thead>
             </table>
-            <div
-              class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-            >
+            <div class="flex-1 card-scroll">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
                   <col class="w-10" />
@@ -493,9 +495,7 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-10" />
@@ -556,7 +556,7 @@
         </div>
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex-1 flex items-end gap-1.5 min-h-0">
-            @for (hour of listeningClock(); track hour.hour) {
+            @for (hour of clock(); track hour.hour) {
               <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0">
                 <span class="text-white/60 text-xs font-mono mb-1 tabular-nums leading-none">{{
                   hour.plays > 0 ? hour.plays : ''
@@ -577,7 +577,7 @@
             }
           </div>
           <div class="flex gap-1.5 mt-3 pt-3 border-t border-white/10 shrink-0">
-            @for (hour of listeningClock(); track hour.hour) {
+            @for (hour of clock(); track hour.hour) {
               <span class="flex-1 text-center text-white/50 text-xs font-mono tabular-nums">{{
                 padHour(hour.hour)
               }}</span>
@@ -637,9 +637,7 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-16" />
@@ -652,8 +650,8 @@
               <tbody>
                 @for (m of monthlyTrends(); track m.month) {
                   <tr>
-                    <td class="text-white/70 text-base font-bold py-2">
-                      {{ formatMonth(m.month) }}
+                    <td class="text-white/70 text-base font-bold py-2 whitespace-nowrap">
+                      {{ monthLabel(m.month, monthlyTrends()) }}
                     </td>
                     <td class="pr-4 py-2">
                       <div class="h-8 bg-white/10 rounded-lg overflow-hidden">
@@ -725,7 +723,7 @@
               <p class="text-white/50 text-sm font-black uppercase tracking-[0.25em] mb-3">
                 Longest Streak
               </p>
-              <p class="text-[10rem] leading-none font-black text-white tabular-nums">
+              <p class="text-[10em] leading-none font-black text-white tabular-nums">
                 {{ streaks()[0].streak_days }}
               </p>
               <p class="text-white/70 text-2xl font-semibold mt-4">consecutive days</p>
@@ -762,9 +760,7 @@
                     </tr>
                   </thead>
                 </table>
-                <div
-                  class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-                >
+                <div class="flex-1 card-scroll">
                   <table class="w-full table-fixed border-collapse">
                     <colgroup>
                       <col class="w-10" />
@@ -841,9 +837,7 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-10" />
@@ -920,9 +914,7 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col />
@@ -931,10 +923,17 @@
               </colgroup>
               <tbody>
                 @for (entry of onRepeat(); track entry.the_date + entry.title) {
-                  <tr>
+                  <tr
+                    class="cursor-pointer transition-colors hover:bg-white/10 group"
+                    (click)="openArtist(entry.artist_id, $event)"
+                  >
                     <td class="max-w-0 pr-4 py-1.5">
                       <p class="text-white font-semibold text-sm truncate">{{ entry.title }}</p>
-                      <p class="text-white/50 text-xs truncate">{{ entry.artist }}</p>
+                      <p
+                        class="text-white/50 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
+                      >
+                        {{ entry.artist }}
+                      </p>
                     </td>
                     <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
                       {{ entry.plays_that_day }}x
@@ -959,7 +958,7 @@
         <div class="flex-1 flex flex-col min-h-0">
           <table class="w-full table-fixed border-collapse shrink-0">
             <colgroup>
-              <col class="w-14" />
+              <col class="w-16" />
               <col class="w-20" />
               <col />
               <col class="w-16" />
@@ -985,12 +984,10 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
-                <col class="w-14" />
+                <col class="w-16" />
                 <col class="w-20" />
                 <col />
                 <col class="w-16" />
@@ -1001,8 +998,10 @@
                     class="cursor-pointer transition-colors hover:bg-white/10 group"
                     (click)="openArtist(s.artist_id, $event)"
                   >
-                    <td class="text-white/60 text-sm font-black uppercase tracking-wider py-2">
-                      {{ formatMonth(s.month) }}
+                    <td
+                      class="text-white/60 text-sm font-black uppercase tracking-wider py-2 whitespace-nowrap"
+                    >
+                      {{ monthLabel(s.month, songOfMonth()) }}
                     </td>
                     <td class="py-2">
                       <div
@@ -1075,9 +1074,7 @@
               </tr>
             </thead>
           </table>
-          <div
-            class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-          >
+          <div class="flex-1 card-scroll">
             <table class="w-full table-fixed border-collapse">
               <colgroup>
                 <col class="w-20" />
@@ -1208,9 +1205,7 @@
                       </tr>
                     </thead>
                   </table>
-                  <div
-                    class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-                  >
+                  <div class="flex-1 card-scroll">
                     <table class="w-full table-fixed border-collapse">
                       <colgroup>
                         <col class="w-8" />
@@ -1287,9 +1282,7 @@
                       </tr>
                     </thead>
                   </table>
-                  <div
-                    class="flex-1 overflow-x-hidden overflow-y-auto min-h-0 [mask-image:linear-gradient(to_bottom,transparent,black_16px,black_calc(100%_-_32px),transparent)]"
-                  >
+                  <div class="flex-1 card-scroll">
                     <table class="w-full table-fixed border-collapse">
                       <colgroup>
                         <col class="w-8" />

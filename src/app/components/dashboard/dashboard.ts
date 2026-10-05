@@ -425,6 +425,11 @@ export class Dashboard {
       useCORS: true,
       backgroundColor: null,
       ignoreElements: (element) => element.classList.contains('export-ignore'),
+      onclone: (doc) => {
+        doc.querySelectorAll<HTMLElement>('.export-show').forEach((node) => {
+          node.style.opacity = '1';
+        });
+      },
     });
 
     this.exporting.set(false);

@@ -1,6 +1,6 @@
 <div
   #cardElement
-  class="w-full h-full medium-up:w-auto medium-up:h-[calc(100vh-68px-4rem)] medium-up:aspect-[9/16] min-w-0"
+  class="w-full h-full medium-up:w-auto medium-up:h-[min(100cqh-68px-4rem,(100cqw-6rem)*16/9)] medium-up:aspect-[9/16] min-w-0"
 >
   @switch (selectedStat()) {
     @case ('summary') {
@@ -51,39 +51,50 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Top Songs
         </h2>
-        <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (song of topSongs() | slice: 0 : 5; track song.title; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="song.album_id" [size]="300" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
-                    #1 Song
-                  </p>
-                  <p class="text-white font-black text-3xl leading-tight truncate">
-                    {{ song.title }}
-                  </p>
-                  <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
-                  <p class="text-white/40 text-lg mt-2 font-medium">{{ song.plays }} plays</p>
-                </div>
+        @if (topSongs()[0]; as song) {
+          <div
+            class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+            role="button"
+            tabindex="0"
+            (click)="openArtist(song.artist_id, $event)"
+            (keydown.enter)="openArtist(song.artist_id, $event)"
+          >
+            <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+              <app-cover [id]="song.album_id" [size]="300" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
+                #1 Song
+              </p>
+              <p class="text-white font-black text-3xl leading-tight truncate">{{ song.title }}</p>
+              <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
+              <p class="text-white/40 text-lg mt-2 font-medium">{{ song.plays }} plays</p>
+            </div>
+          </div>
+        }
+        <div class="flex-1 card-scroll flex flex-col gap-1 mt-4 -mx-2">
+          @for (song of topSongs() | slice: 1; track $index; let i = $index) {
+            <div
+              class="flex items-center gap-4 rounded-xl px-2 py-1.5 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(song.artist_id, $event)"
+              (keydown.enter)="openArtist(song.artist_id, $event)"
+            >
+              <span class="text-white/30 text-xl font-black w-8 text-right shrink-0 tabular-nums">{{
+                i + 2
+              }}</span>
+              <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                <app-cover [id]="song.album_id" [size]="200" />
               </div>
-            } @else {
-              <div class="flex items-center gap-4">
-                <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{
-                  i + 1
-                }}</span>
-                <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                  <app-cover [id]="song.album_id" [size]="200" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
-                  <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
-                </div>
-                <span class="text-white/40 text-lg font-medium shrink-0">{{ song.plays }}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
+                <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
               </div>
-            }
+              <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums">{{
+                song.plays
+              }}</span>
+            </div>
           }
         </div>
       </app-card-shell>
@@ -98,43 +109,56 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Top Artists
         </h2>
-        <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (artist of topArtists() | slice: 0 : 5; track artist.artist; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="artist.artist_id" [size]="300" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
-                    #1 Artist
-                  </p>
-                  <p class="text-white font-black text-3xl leading-tight truncate">
-                    {{ artist.artist }}
-                  </p>
-                  <p class="text-white/70 text-xl truncate mt-1">
-                    {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
-                  </p>
-                  <p class="text-white/40 text-lg mt-2 font-medium">{{ artist.plays }} plays</p>
-                </div>
+        @if (topArtists()[0]; as artist) {
+          <div
+            class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+            role="button"
+            tabindex="0"
+            (click)="openArtist(artist.artist_id, $event)"
+            (keydown.enter)="openArtist(artist.artist_id, $event)"
+          >
+            <div class="w-32 h-32 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
+              <app-cover [id]="artist.artist_id" [size]="300" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
+                #1 Artist
+              </p>
+              <p class="text-white font-black text-3xl leading-tight truncate">
+                {{ artist.artist }}
+              </p>
+              <p class="text-white/70 text-xl truncate mt-1">
+                {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
+              </p>
+              <p class="text-white/40 text-lg mt-2 font-medium">{{ artist.plays }} plays</p>
+            </div>
+          </div>
+        }
+        <div class="flex-1 card-scroll flex flex-col gap-1 mt-4 -mx-2">
+          @for (artist of topArtists() | slice: 1; track $index; let i = $index) {
+            <div
+              class="flex items-center gap-4 rounded-xl px-2 py-1.5 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(artist.artist_id, $event)"
+              (keydown.enter)="openArtist(artist.artist_id, $event)"
+            >
+              <span class="text-white/30 text-xl font-black w-8 text-right shrink-0 tabular-nums">{{
+                i + 2
+              }}</span>
+              <div class="w-16 h-16 rounded-full shrink-0 overflow-hidden bg-white/10">
+                <app-cover [id]="artist.artist_id" [size]="200" />
               </div>
-            } @else {
-              <div class="flex items-center gap-4">
-                <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{
-                  i + 1
-                }}</span>
-                <div class="w-16 h-16 rounded-full shrink-0 overflow-hidden bg-white/10">
-                  <app-cover [id]="artist.artist_id" [size]="200" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white font-semibold text-xl truncate">{{ artist.artist }}</p>
-                  <p class="text-white/50 text-lg truncate">
-                    {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
-                  </p>
-                </div>
-                <span class="text-white/40 text-lg font-medium shrink-0">{{ artist.plays }}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-white font-semibold text-xl truncate">{{ artist.artist }}</p>
+                <p class="text-white/50 text-lg truncate">
+                  {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
+                </p>
               </div>
-            }
+              <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums">{{
+                artist.plays
+              }}</span>
+            </div>
           }
         </div>
       </app-card-shell>
@@ -149,39 +173,52 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Top Albums
         </h2>
-        <div class="flex-1 flex flex-col gap-5 overflow-hidden">
-          @for (album of topAlbums() | slice: 0 : 5; track album.album; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="album.album_id" [size]="300" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
-                    #1 Album
-                  </p>
-                  <p class="text-white font-black text-3xl leading-tight truncate">
-                    {{ album.album }}
-                  </p>
-                  <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
-                  <p class="text-white/40 text-lg mt-2 font-medium">{{ album.plays }} plays</p>
-                </div>
+        @if (topAlbums()[0]; as album) {
+          <div
+            class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+            role="button"
+            tabindex="0"
+            (click)="openArtist(album.artist_id, $event)"
+            (keydown.enter)="openArtist(album.artist_id, $event)"
+          >
+            <div class="w-32 h-32 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+              <app-cover [id]="album.album_id" [size]="300" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
+                #1 Album
+              </p>
+              <p class="text-white font-black text-3xl leading-tight truncate">
+                {{ album.album }}
+              </p>
+              <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
+              <p class="text-white/40 text-lg mt-2 font-medium">{{ album.plays }} plays</p>
+            </div>
+          </div>
+        }
+        <div class="flex-1 card-scroll flex flex-col gap-1 mt-4 -mx-2">
+          @for (album of topAlbums() | slice: 1; track $index; let i = $index) {
+            <div
+              class="flex items-center gap-4 rounded-xl px-2 py-1.5 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(album.artist_id, $event)"
+              (keydown.enter)="openArtist(album.artist_id, $event)"
+            >
+              <span class="text-white/30 text-xl font-black w-8 text-right shrink-0 tabular-nums">{{
+                i + 2
+              }}</span>
+              <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                <app-cover [id]="album.album_id" [size]="200" />
               </div>
-            } @else {
-              <div class="flex items-center gap-4">
-                <span class="text-white/30 text-xl font-black w-8 text-right shrink-0">{{
-                  i + 1
-                }}</span>
-                <div class="w-16 h-16 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                  <app-cover [id]="album.album_id" [size]="200" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
-                  <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
-                </div>
-                <span class="text-white/40 text-lg font-medium shrink-0">{{ album.plays }}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
+                <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
               </div>
-            }
+              <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums">{{
+                album.plays
+              }}</span>
+            </div>
           }
         </div>
       </app-card-shell>
@@ -192,15 +229,17 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Top Genres
         </h2>
-        <div class="flex-1 flex flex-col gap-4">
-          @for (genre of topGenres() | slice: 0 : 5; track genre.genre; let i = $index) {
-            <div class="bg-white/10 rounded-2xl p-5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <span class="text-white/40 text-2xl font-black">{{ i + 1 }}</span>
-                  <p class="text-white font-semibold text-xl">{{ genre.genre }}</p>
+        <div class="flex-1 card-scroll flex flex-col gap-4">
+          @for (genre of topGenres(); track genre.genre; let i = $index) {
+            <div class="bg-white/10 rounded-2xl p-5 shrink-0">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                  <span class="text-white/40 text-2xl font-black tabular-nums">{{ i + 1 }}</span>
+                  <p class="text-white font-semibold text-xl truncate">{{ genre.genre }}</p>
                 </div>
-                <span class="text-white/50 text-base font-medium">{{ genre.plays }} plays</span>
+                <span class="text-white/50 text-base font-medium shrink-0"
+                  >{{ genre.plays }} plays</span
+                >
               </div>
               <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
                 <div
@@ -219,8 +258,8 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Listening Clock
         </h2>
-        <div class="flex-1 flex flex-col justify-center gap-1.5">
-          @for (hour of listeningClock(); track hour.hour) {
+        <div class="flex-1 flex flex-col justify-center gap-1.5 min-h-0">
+          @for (hour of clock(); track hour.hour) {
             <div class="flex items-center gap-3">
               <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0">{{
                 padHour(hour.hour)
@@ -231,7 +270,9 @@
                   [style.width.%]="clockBarWidth(hour.plays)"
                 ></div>
               </div>
-              <span class="text-white/30 text-sm w-10 text-right shrink-0">{{ hour.plays }}</span>
+              <span class="text-white/30 text-sm w-10 text-right shrink-0 tabular-nums">{{
+                hour.plays
+              }}</span>
             </div>
           }
         </div>
@@ -243,18 +284,27 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Monthly Trends
         </h2>
-        <div class="flex-1 flex flex-col gap-3">
+        <div class="flex-1 card-scroll flex flex-col gap-3">
           @for (m of monthlyTrends(); track m.month) {
-            <div class="bg-white/10 rounded-xl p-4">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-white font-semibold text-lg">{{ formatMonth(m.month) }}</span>
-                <span class="text-white/50 text-base">{{ m.plays }} plays</span>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-white/70 text-base font-bold w-14 shrink-0 whitespace-nowrap">{{
+                monthLabel(m.month, monthlyTrends())
+              }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="h-4 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-white/40 rounded-full"
+                    [style.width.%]="monthBarWidth(m.plays)"
+                  ></div>
+                </div>
+                <p class="text-white/40 text-xs mt-1 truncate">
+                  {{ m.unique_songs }} songs &middot; {{ m.unique_artists }} artists &middot;
+                  {{ m.hours }}h
+                </p>
               </div>
-              <div class="flex gap-3 text-white/40 text-sm">
-                <span>{{ m.unique_songs }} songs</span>
-                <span>{{ m.unique_artists }} artists</span>
-                <span>{{ m.hours }}h</span>
-              </div>
+              <span class="text-white font-bold text-base w-12 text-right shrink-0 tabular-nums">{{
+                m.plays
+              }}</span>
             </div>
           }
         </div>
@@ -291,32 +341,34 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Listening Streak
         </h2>
-        <div class="flex-1 flex flex-col justify-center">
-          @if (streaks().length > 0) {
-            <div class="text-center mb-8">
-              <p class="text-8xl font-black text-white">{{ streaks()[0].streak_days }}</p>
+        @if (streaks()[0]; as best) {
+          <div class="flex-1 flex flex-col min-h-0" [class.justify-center]="streaks().length === 1">
+            <div class="text-center shrink-0 mt-4 mb-8">
+              <p class="text-8xl font-black text-white tabular-nums">{{ best.streak_days }}</p>
               <p class="text-white/60 text-lg font-medium mt-2">consecutive days</p>
               <p class="text-white/40 text-base mt-1">
-                {{ streaks()[0].streak_start }} — {{ streaks()[0].streak_end }}
+                {{ best.streak_start }} — {{ best.streak_end }}
               </p>
             </div>
             @if (streaks().length > 1) {
-              <div class="space-y-3">
-                <p class="text-white/50 text-base font-semibold uppercase tracking-wider">
-                  Other streaks
-                </p>
-                @for (s of streaks().slice(1); track s.streak_start) {
-                  <div class="flex items-center justify-between bg-white/10 rounded-xl px-5 py-3">
-                    <span class="text-white/70 text-lg">{{ s.streak_days }} days</span>
-                    <span class="text-white/40 text-base"
+              <p class="text-white/50 text-base font-semibold uppercase tracking-wider mb-3">
+                Other streaks
+              </p>
+              <div class="flex-1 card-scroll flex flex-col gap-2">
+                @for (s of streaks() | slice: 1; track s.streak_start) {
+                  <div
+                    class="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-5 py-3 shrink-0"
+                  >
+                    <span class="text-white/70 text-lg tabular-nums">{{ s.streak_days }} days</span>
+                    <span class="text-white/40 text-base tabular-nums truncate"
                       >{{ s.streak_start }} — {{ s.streak_end }}</span
                     >
                   </div>
                 }
               </div>
             }
-          }
-        </div>
+          </div>
+        }
       </app-card-shell>
     }
 
@@ -329,22 +381,31 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">
           Late Night Vibes
         </h2>
-        <p class="text-white/40 text-base mb-5">Songs you listened to between midnight and 5 AM</p>
-        <div class="flex-1 flex flex-col gap-4">
-          @for (track of lateNight(); track track.title; let i = $index) {
-            <div class="flex items-center gap-4">
-              <span class="text-white/40 text-2xl font-black w-8 text-right shrink-0">{{
-                i + 1
-              }}</span>
+        <p class="text-white/40 text-base mb-5 shrink-0">
+          Songs you listened to between midnight and 5 AM
+        </p>
+        <div class="flex-1 card-scroll flex flex-col gap-1 -mx-2">
+          @for (song of lateNight(); track $index; let i = $index) {
+            <div
+              class="flex items-center gap-4 rounded-xl px-2 py-1.5 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(song.artist_id, $event)"
+              (keydown.enter)="openArtist(song.artist_id, $event)"
+            >
+              <span
+                class="text-white/40 text-2xl font-black w-8 text-right shrink-0 tabular-nums"
+                >{{ i + 1 }}</span
+              >
               <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                <app-cover [id]="track.album_id" />
+                <app-cover [id]="song.album_id" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-white font-semibold text-lg truncate">{{ track.title }}</p>
-                <p class="text-white/60 text-base truncate">{{ track.artist }}</p>
+                <p class="text-white font-semibold text-lg truncate">{{ song.title }}</p>
+                <p class="text-white/60 text-base truncate">{{ song.artist }}</p>
               </div>
-              <span class="text-white/50 text-base font-medium shrink-0"
-                >{{ track.late_night_plays }}x</span
+              <span class="text-white/50 text-base font-medium shrink-0 tabular-nums"
+                >{{ song.late_night_plays }}x</span
               >
             </div>
           }
@@ -357,23 +418,27 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">
           On Repeat
         </h2>
-        <p class="text-white/40 text-base mb-5">Songs you played 3+ times in a single day</p>
-        <div class="flex-1 flex flex-col gap-3 overflow-y-auto">
-          @for (
-            entry of onRepeat() | slice: 0 : 6;
-            track entry.the_date + entry.title;
-            let i = $index
-          ) {
-            <div class="bg-white/10 rounded-xl px-4 py-3">
-              <div class="flex items-center justify-between">
-                <div class="min-w-0 flex-1">
-                  <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
-                  <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
-                </div>
-                <div class="text-right shrink-0 ml-3">
-                  <p class="text-white/80 text-lg font-bold">{{ entry.plays_that_day }}x</p>
-                  <p class="text-white/40 text-sm">{{ entry.the_date }}</p>
-                </div>
+        <p class="text-white/40 text-base mb-5 shrink-0">
+          Songs you played 3+ times in a single day
+        </p>
+        <div class="flex-1 card-scroll flex flex-col gap-3">
+          @for (entry of onRepeat(); track entry.the_date + entry.title) {
+            <div
+              class="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(entry.artist_id, $event)"
+              (keydown.enter)="openArtist(entry.artist_id, $event)"
+            >
+              <div class="min-w-0 flex-1">
+                <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
+                <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
+              </div>
+              <div class="text-right shrink-0 ml-3">
+                <p class="text-white/80 text-lg font-bold tabular-nums">
+                  {{ entry.plays_that_day }}x
+                </p>
+                <p class="text-white/40 text-sm tabular-nums">{{ entry.the_date }}</p>
               </div>
             </div>
           }
@@ -386,20 +451,29 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Song of the Month
         </h2>
-        <div class="flex-1 flex flex-col gap-3">
+        <div class="flex-1 card-scroll flex flex-col -mx-2">
           @for (s of songOfMonth(); track s.month) {
-            <div class="flex items-center gap-4 bg-white/10 rounded-xl px-4 py-3">
-              <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
+            <div
+              class="flex items-center gap-3 rounded-xl px-2 py-1 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(s.artist_id, $event)"
+              (keydown.enter)="openArtist(s.artist_id, $event)"
+            >
+              <span
+                class="text-white/60 text-sm font-black uppercase tracking-wider w-14 shrink-0 whitespace-nowrap"
+                >{{ monthLabel(s.month, songOfMonth()) }}</span
+              >
+              <div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-white/10">
                 <app-cover [id]="s.album_id" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-white font-semibold text-lg truncate">{{ s.title }}</p>
-                <p class="text-white/60 text-base truncate">{{ s.artist }}</p>
+                <p class="text-white font-semibold text-sm truncate">{{ s.title }}</p>
+                <p class="text-white/50 text-xs truncate">{{ s.artist }}</p>
               </div>
-              <div class="text-right shrink-0">
-                <p class="text-white/80 text-base font-bold">{{ formatMonth(s.month) }}</p>
-                <p class="text-white/40 text-sm">{{ s.plays }} plays</p>
-              </div>
+              <span class="text-white/40 text-xs font-medium shrink-0 tabular-nums"
+                >{{ s.plays }} plays</span
+              >
             </div>
           }
         </div>
@@ -411,23 +485,26 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
           Favorite Decades
         </h2>
-        <div class="flex-1 flex flex-col gap-4">
-          @for (dec of favoriteDecades() | slice: 0 : 5; track dec.decade; let i = $index) {
-            <div class="bg-white/10 rounded-2xl p-4">
-              <div class="flex items-center justify-between">
-                <p class="text-white font-black text-2xl">{{ dec.decade }}s</p>
-                <span class="text-white/50 text-sm font-medium">{{ dec.total_plays }} plays</span>
+        <div class="flex-1 card-scroll flex flex-col gap-5">
+          @for (dec of favoriteDecades(); track dec.decade) {
+            <div class="flex items-center gap-4 shrink-0">
+              <p class="text-white font-black text-2xl w-20 shrink-0 tabular-nums">
+                {{ dec.decade }}s
+              </p>
+              <div class="flex-1 min-w-0">
+                <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-white/40 rounded-full"
+                    [style.width.%]="decadeBarWidth(dec.total_plays)"
+                  ></div>
+                </div>
+                <p class="text-white/40 text-sm mt-1.5 truncate">
+                  {{ dec.unique_artists }} artists &middot; {{ dec.total_hours }}h listened
+                </p>
               </div>
-              <div class="flex gap-3 text-white/40 text-sm mt-1">
-                <span>{{ dec.unique_artists }} artists</span>
-                <span>{{ dec.total_hours }}h listened</span>
-              </div>
-              <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-white/40 rounded-full"
-                  [style.width.%]="decadeBarWidth(dec.total_plays)"
-                ></div>
-              </div>
+              <span class="text-white/60 text-base font-semibold shrink-0 tabular-nums">{{
+                dec.total_plays
+              }}</span>
             </div>
           }
         </div>
@@ -444,14 +521,18 @@
           <!-- Top artist image -->
           @if (d.top_artist) {
             <div
-              class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/10 shrink-0"
+              class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/10 shrink-0 cursor-pointer"
               style="max-height: 36%"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(d.top_artist.artist_id, $event)"
+              (keydown.enter)="openArtist(d.top_artist.artist_id, $event)"
             >
               <app-cover [id]="d.top_artist.artist_id" [size]="600" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div class="absolute bottom-0 left-0 p-4">
+              <div class="absolute bottom-0 left-0 right-0 p-4">
                 <p class="text-white/60 text-sm font-bold uppercase tracking-widest">#1 Artist</p>
-                <p class="text-white font-black text-3xl leading-tight">
+                <p class="text-white font-black text-3xl leading-tight truncate">
                   {{ d.top_artist.artist }}
                 </p>
               </div>
@@ -459,17 +540,23 @@
           }
 
           <!-- Two-column lists -->
-          <div class="flex gap-4 flex-1 mt-4 min-h-0 overflow-hidden">
+          <div class="flex gap-4 flex-1 mt-4 min-h-0">
             <!-- Top Artists -->
-            <div class="flex-1 flex flex-col min-w-0">
-              <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">
+            <div class="flex-1 flex flex-col min-w-0 min-h-0">
+              <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2 shrink-0">
                 Top Artists
               </p>
-              <div class="flex flex-col gap-2">
-                @for (artist of d.top_artists | slice: 0 : 5; track artist.artist; let i = $index) {
-                  <div class="flex items-start gap-2 min-w-0">
+              <div class="flex-1 card-scroll flex flex-col -mx-1">
+                @for (artist of d.top_artists; track $index; let i = $index) {
+                  <div
+                    class="flex items-start gap-2 min-w-0 rounded-lg px-1 py-1 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                    role="button"
+                    tabindex="0"
+                    (click)="openArtist(artist.artist_id, $event)"
+                    (keydown.enter)="openArtist(artist.artist_id, $event)"
+                  >
                     <span
-                      class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]"
+                      class="text-white/30 text-sm font-black w-5 text-right shrink-0 tabular-nums"
                       >{{ i + 1 }}</span
                     >
                     <div class="min-w-0">
@@ -483,15 +570,21 @@
               </div>
             </div>
             <!-- Top Songs -->
-            <div class="flex-1 flex flex-col min-w-0">
-              <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">
+            <div class="flex-1 flex flex-col min-w-0 min-h-0">
+              <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-2 shrink-0">
                 Top Songs
               </p>
-              <div class="flex flex-col gap-2">
-                @for (song of d.top_songs | slice: 0 : 5; track song.title; let i = $index) {
-                  <div class="flex items-start gap-2 min-w-0">
+              <div class="flex-1 card-scroll flex flex-col -mx-1">
+                @for (song of d.top_songs; track $index; let i = $index) {
+                  <div
+                    class="flex items-start gap-2 min-w-0 rounded-lg px-1 py-1 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                    role="button"
+                    tabindex="0"
+                    (click)="openArtist(song.artist_id, $event)"
+                    (keydown.enter)="openArtist(song.artist_id, $event)"
+                  >
                     <span
-                      class="text-white/30 text-sm font-black w-5 text-right shrink-0 leading-[1.25rem]"
+                      class="text-white/30 text-sm font-black w-5 text-right shrink-0 tabular-nums"
                       >{{ i + 1 }}</span
                     >
                     <div class="min-w-0">
@@ -505,13 +598,13 @@
           </div>
 
           <!-- Bottom stats: total minutes + top genre -->
-          <div class="flex gap-4 mt-4">
-            <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
+          <div class="flex gap-4 mt-4 shrink-0">
+            <div class="flex-1 min-w-0 bg-white/10 rounded-2xl p-4 text-center">
               <p class="text-2xl font-black text-white">{{ formatNum(d.total_minutes) }}</p>
               <p class="text-white/60 text-xs font-medium mt-1">minutes listened</p>
             </div>
-            <div class="flex-1 bg-white/10 rounded-2xl p-4 text-center">
-              <p class="text-2xl font-black text-white">{{ d.top_genre }}</p>
+            <div class="flex-1 min-w-0 bg-white/10 rounded-2xl p-4 text-center">
+              <p class="text-2xl font-black text-white truncate">{{ d.top_genre }}</p>
               <p class="text-white/60 text-xs font-medium mt-1">top genre</p>
             </div>
           </div>

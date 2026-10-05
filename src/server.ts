@@ -835,7 +835,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
     db,
     `
     SELECT date(s.submission_time, 'unixepoch') AS the_date,
-      mf.title, mf.artist, COUNT(*) AS plays_that_day
+      mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?

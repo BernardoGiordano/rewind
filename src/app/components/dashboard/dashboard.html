@@ -262,8 +262,8 @@
         </div>
       </div>
     } @else {
-      <!-- Card area -->
-      <div class="flex-1 flex items-center justify-center">
+      <!-- Card area. A size container, so cards fit both its width and its height. -->
+      <div class="flex-1 flex items-center justify-center [container-type:size]">
         <!-- Outer wrapper: full-bleed at compact, sized from medium up -->
         <div
           class="w-full h-full medium-up:h-auto medium-up:max-w-full"
@@ -275,7 +275,7 @@
         >
           <!-- Inner wrapper: relative anchor for absolute overlays, touch target for swipe -->
           <div
-            class="relative w-full h-full touch-pan-y"
+            class="relative w-full h-full touch-pan-y group/card"
             (pointerdown)="onCardPointerDown($event)"
             (pointerup)="onCardPointerUp($event)"
             (pointercancel)="onCardPointerCancel()"
@@ -323,6 +323,7 @@
                   [songOfMonth]="songOfMonth()"
                   [favoriteDecades]="favoriteDecades()"
                   [recapData]="recapData()"
+                  (artistClick)="openArtist($event)"
                 ></app-cards-square>
               }
               @default {
@@ -344,6 +345,7 @@
                   [songOfMonth]="songOfMonth()"
                   [favoriteDecades]="favoriteDecades()"
                   [recapData]="recapData()"
+                  (artistClick)="openArtist($event)"
                 ></app-cards-portrait>
               }
             }
@@ -370,57 +372,50 @@
               </div>
             }
 
-            <!-- Pointer adapter: edge arrows. Touch uses the swipe on the card instead. -->
+            <!-- Pointer adapter: edge arrows. Only the round buttons take clicks, so the
+                 rows and lists under the card edges stay usable. Touch swipes instead. -->
             <button
               type="button"
               (click)="prevStat()"
-              class="export-ignore cursor-pointer absolute left-0 top-0 h-full w-16 z-10 hidden medium-up:flex items-center justify-start pl-3 group"
+              class="export-ignore cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
               aria-label="Previous stat"
             >
-              <div
-                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
+              <svg
+                class="w-4 h-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+                aria-hidden="true"
               >
-                <svg
-                  class="w-4 h-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                  />
-                </svg>
-              </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
             </button>
 
             <button
               type="button"
               (click)="nextStat()"
-              class="export-ignore cursor-pointer absolute right-0 top-0 h-full w-16 z-10 hidden medium-up:flex items-center justify-end pr-3 group"
+              class="export-ignore cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
               aria-label="Next stat"
             >
-              <div
-                class="w-8 h-8 rounded-full bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
+              <svg
+                class="w-4 h-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+                aria-hidden="true"
               >
-                <svg
-                  class="w-4 h-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                />
+              </svg>
             </button>
 
             <!-- Compact adapter: current stat, tap to open the sheet -->
