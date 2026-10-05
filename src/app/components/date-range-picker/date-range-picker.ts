@@ -2,19 +2,21 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroChevronLeft, heroChevronRight } from '@ng-icons/heroicons/outline';
+import {
+  heroChevronDoubleLeft,
+  heroChevronDoubleRight,
+  heroChevronLeft,
+  heroChevronRight,
+} from '@ng-icons/heroicons/outline';
+import { MONTH_FULL, MONTH_SHORT, parseIsoDate, toIsoDate } from '../../utils/format';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 interface DayCell {
   iso: string;
@@ -27,170 +29,228 @@ interface DayCell {
   disabled: boolean;
 }
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function toIso(y: number, m: number, d: number): string {
-  return `${y}-${pad(m + 1)}-${pad(d)}`;
-}
-
-function parseIso(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
+/**
+ * An inline range calendar. Two clicks mark the ends, a third starts over, and
+ * nothing leaves the component until the user applies the selection.
+ */
 @Component({
   selector: 'app-date-range-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'block select-none' },
   imports: [NgIcon],
-  providers: [provideIcons({ heroChevronLeft, heroChevronRight })],
+  providers: [
+    provideIcons({
+      heroChevronDoubleLeft,
+      heroChevronDoubleRight,
+      heroChevronLeft,
+      heroChevronRight,
+    }),
+  ],
   template: `
-    <div class="w-72 p-3 select-none">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-3">
-        <button
-          type="button"
-          (click)="prevMonth()"
-          class="cursor-pointer p-1 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
-          aria-label="Previous month"
-        >
-          <ng-icon name="heroChevronLeft" class="w-4 h-4" aria-hidden="true" />
-        </button>
-        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-          {{ monthLabel() }}
-        </span>
-        <button
-          type="button"
-          (click)="nextMonth()"
-          class="cursor-pointer p-1 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
-          aria-label="Next month"
-        >
-          <ng-icon name="heroChevronRight" class="w-4 h-4" aria-hidden="true" />
-        </button>
-      </div>
+    <!-- Month navigation -->
+    <div class="flex items-center gap-0.5 mb-2">
+      <button
+        type="button"
+        (click)="shiftMonths(-12)"
+        class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+        aria-label="Previous year"
+        title="Previous year"
+      >
+        <ng-icon name="heroChevronDoubleLeft" class="w-3.5 h-3.5" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        (click)="shiftMonths(-1)"
+        class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+        aria-label="Previous month"
+        title="Previous month"
+      >
+        <ng-icon name="heroChevronLeft" class="w-3.5 h-3.5" aria-hidden="true" />
+      </button>
+      <span class="flex-1 text-center text-sm font-semibold text-ink" aria-live="polite">
+        {{ monthLabel() }}
+      </span>
+      <button
+        type="button"
+        (click)="shiftMonths(1)"
+        [disabled]="atLatestMonth()"
+        class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
+        aria-label="Next month"
+        title="Next month"
+      >
+        <ng-icon name="heroChevronRight" class="w-3.5 h-3.5" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        (click)="shiftMonths(12)"
+        [disabled]="atLatestMonth()"
+        class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
+        aria-label="Next year"
+        title="Next year"
+      >
+        <ng-icon name="heroChevronDoubleRight" class="w-3.5 h-3.5" aria-hidden="true" />
+      </button>
+    </div>
 
-      <!-- Weekday header -->
-      <div class="grid grid-cols-7 gap-0.5 mb-1">
-        @for (w of weekdays; track w) {
-          <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center py-1">{{ w }}</div>
-        }
-      </div>
+    <!-- Weekdays -->
+    <div class="grid grid-cols-7 mb-1" aria-hidden="true">
+      @for (w of weekdays; track w) {
+        <div
+          class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint text-center py-1"
+        >
+          {{ w }}
+        </div>
+      }
+    </div>
 
-      <!-- Days grid -->
-      <div class="grid grid-cols-7 gap-0.5">
-        @for (cell of cells(); track cell.iso) {
+    <!-- Days. No column gap, so a selected range reads as one band. -->
+    <div class="grid grid-cols-7 gap-y-1" (mouseleave)="hoverIso.set(null)">
+      @for (cell of cells(); track cell.iso) {
+        <div class="h-8" [class]="bandClass(cell)">
           <button
             type="button"
-            (click)="onCellClick(cell)"
-            (mouseenter)="onCellHover(cell)"
+            (click)="pick(cell)"
+            (mouseenter)="hover(cell)"
             [disabled]="cell.disabled"
-            class="relative h-8 text-xs font-medium rounded-md transition-colors"
-            [class]="cellClass(cell)"
+            [attr.aria-label]="formatDate(cell.iso)"
+            [attr.aria-pressed]="cell.isStart || cell.isEnd"
+            class="relative w-full h-full rounded-md text-xs font-medium tabular-nums transition-colors"
+            [class]="dayClass(cell)"
           >
-            <span class="relative z-10">{{ cell.day }}</span>
-          </button>
-        }
-      </div>
-
-      <!-- Footer -->
-      <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-        <span class="text-slate-500 dark:text-slate-400">
-          @if (pendingStart()) {
-            @if (hoverIso(); as h) {
-              {{ formatShort(pendingStart()!) }} – {{ formatShort(h) }}
-            } @else {
-              Pick end date
+            {{ cell.day }}
+            @if (cell.isToday) {
+              <span
+                class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                [class]="cell.isStart || cell.isEnd ? 'bg-on-selected' : 'bg-accent'"
+                aria-hidden="true"
+              ></span>
             }
-          } @else {
-            Pick start date
-          }
-        </span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Ends of the selection. The one the next click sets is outlined. -->
+    <div class="mt-3 grid grid-cols-2 gap-2">
+      @for (end of ends(); track end.label) {
+        <div
+          class="rounded-lg px-3 py-2 border transition-colors"
+          [class]="end.next ? 'border-ink-muted bg-surface-raised' : 'border-edge-raised bg-fill'"
+        >
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint leading-none">
+            {{ end.label }}
+          </p>
+          <p
+            class="mt-1 text-sm font-medium tabular-nums truncate"
+            [class]="end.value ? 'text-ink' : 'text-ink-faint'"
+          >
+            {{ end.value ? formatDate(end.value) : 'Pick a day' }}
+          </p>
+        </div>
+      }
+    </div>
+
+    <div class="mt-3 flex items-center justify-end gap-2">
+      @if (start()) {
         <button
           type="button"
-          (click)="clear()"
-          class="cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          (click)="reset()"
+          class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
         >
-          Clear
+          Reset
         </button>
-      </div>
+      }
+      <button
+        type="button"
+        (click)="apply()"
+        [disabled]="!canApply()"
+        class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-selected text-on-selected hover:opacity-90 disabled:opacity-30 disabled:cursor-default transition-opacity"
+      >
+        Apply range
+      </button>
     </div>
   `,
 })
 export class DateRangePicker {
+  /** The range already in force, shown until the user starts a new one. */
   readonly initialFrom = input<string | null>(null);
   readonly initialTo = input<string | null>(null);
 
   readonly rangeSelected = output<{ from: string; to: string }>();
-  readonly cleared = output<void>();
 
   readonly weekdays = WEEKDAYS;
 
-  private readonly today = new Date();
-  private readonly todayIso = toIso(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+  private readonly todayIso = toIsoDate(new Date());
 
-  readonly viewYear = signal(this.today.getFullYear());
-  readonly viewMonth = signal(this.today.getMonth());
+  readonly viewYear = signal(new Date().getFullYear());
+  readonly viewMonth = signal(new Date().getMonth());
 
-  readonly pendingStart = signal<string | null>(null);
-  readonly committedStart = signal<string | null>(null);
-  readonly committedEnd = signal<string | null>(null);
+  readonly start = signal<string | null>(null);
+  readonly end = signal<string | null>(null);
   readonly hoverIso = signal<string | null>(null);
 
   constructor() {
-    queueMicrotask(() => {
-      const f = this.initialFrom();
-      const t = this.initialTo();
-      if (f && t) {
-        this.committedStart.set(f);
-        this.committedEnd.set(t);
-        const d = parseIso(f);
-        this.viewYear.set(d.getFullYear());
-        this.viewMonth.set(d.getMonth());
-      }
+    effect(() => {
+      const from = this.initialFrom();
+      const to = this.initialTo();
+      if (!from || !to) return;
+      this.start.set(from);
+      this.end.set(to);
+      this.showMonthOf(to);
     });
   }
 
-  readonly monthLabel = computed(() => `${MONTH_NAMES[this.viewMonth()]} ${this.viewYear()}`);
+  readonly monthLabel = computed(() => `${MONTH_FULL[this.viewMonth()]} ${this.viewYear()}`);
+
+  readonly atLatestMonth = computed(() => {
+    const today = new Date();
+    return (
+      this.viewYear() > today.getFullYear() ||
+      (this.viewYear() === today.getFullYear() && this.viewMonth() >= today.getMonth())
+    );
+  });
+
+  readonly canApply = computed(() => {
+    const from = this.start();
+    const to = this.end();
+    return !!from && !!to && (from !== this.initialFrom() || to !== this.initialTo());
+  });
+
+  readonly ends = computed(() => {
+    const awaitingEnd = !!this.start() && !this.end();
+    return [
+      { label: 'From', value: this.start(), next: !awaitingEnd },
+      { label: 'To', value: this.end(), next: awaitingEnd },
+    ];
+  });
+
+  /** The span to paint: the committed range, or the start stretched to the hovered day. */
+  private readonly span = computed<[string, string] | null>(() => {
+    const from = this.start();
+    if (!from) return null;
+    const to = this.end() ?? this.hoverIso() ?? from;
+    return from <= to ? [from, to] : [to, from];
+  });
 
   readonly cells = computed<DayCell[]>(() => {
     const y = this.viewYear();
     const m = this.viewMonth();
-    const first = new Date(y, m, 1);
-    // Monday = 0 .. Sunday = 6
-    const firstDow = (first.getDay() + 6) % 7;
-    const start = new Date(y, m, 1 - firstDow);
 
-    const pendingS = this.pendingStart();
-    const cs = this.committedStart();
-    const ce = this.committedEnd();
-    const hover = this.hoverIso();
-
-    let rangeStart: string | null = null;
-    let rangeEnd: string | null = null;
-    if (pendingS) {
-      const a = pendingS;
-      const b = hover ?? pendingS;
-      rangeStart = a < b ? a : b;
-      rangeEnd = a < b ? b : a;
-    } else if (cs && ce) {
-      rangeStart = cs;
-      rangeEnd = ce;
-    }
+    // Weeks start on Monday.
+    const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
+    const span = this.span();
 
     const cells: DayCell[] = [];
     for (let i = 0; i < 42; i++) {
-      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-      const iso = toIso(d.getFullYear(), d.getMonth(), d.getDate());
-      const inMonth = d.getMonth() === m;
-      const inRange = !!(rangeStart && rangeEnd && iso >= rangeStart && iso <= rangeEnd);
+      const date = new Date(y, m, 1 - firstDow + i);
+      const iso = toIsoDate(date);
       cells.push({
         iso,
-        day: d.getDate(),
-        inMonth,
-        isStart: iso === rangeStart,
-        isEnd: iso === rangeEnd,
-        inRange,
+        day: date.getDate(),
+        inMonth: date.getMonth() === m,
+        isStart: iso === span?.[0],
+        isEnd: iso === span?.[1],
+        inRange: !!span && iso >= span[0] && iso <= span[1],
         isToday: iso === this.todayIso,
         disabled: iso > this.todayIso,
       });
@@ -198,79 +258,72 @@ export class DateRangePicker {
     return cells;
   });
 
-  cellClass(cell: DayCell): string {
-    const classes: string[] = ['cursor-pointer'];
-    if (cell.disabled) {
-      return 'text-slate-300 dark:text-slate-600 cursor-not-allowed';
-    }
-    if (cell.isStart || cell.isEnd) {
-      classes.push('bg-slate-900 dark:bg-white text-white dark:text-slate-900');
-    } else if (cell.inRange) {
-      classes.push('bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white');
-    } else if (cell.inMonth) {
-      classes.push('text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700');
-    } else {
-      classes.push('text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700');
-    }
-    if (cell.isToday && !cell.isStart && !cell.isEnd) {
-      classes.push('ring-1 ring-slate-400 dark:ring-slate-500');
-    }
-    return classes.join(' ');
+  /** The tinted band behind a range, rounded only where it starts and stops. */
+  bandClass(cell: DayCell): string {
+    if (!cell.inRange || (cell.isStart && cell.isEnd)) return '';
+    if (cell.isStart) return 'bg-fill-strong rounded-l-md';
+    if (cell.isEnd) return 'bg-fill-strong rounded-r-md';
+    return 'bg-fill-strong';
   }
 
-  onCellClick(cell: DayCell): void {
+  dayClass(cell: DayCell): string {
+    if (cell.disabled) return 'text-ink-faint/40 cursor-default';
+    if (cell.isStart || cell.isEnd) return 'cursor-pointer bg-selected text-on-selected';
+    if (cell.inRange) return 'cursor-pointer text-ink hover:bg-fill-raised';
+    if (cell.inMonth) return 'cursor-pointer text-ink-soft hover:bg-fill-strong';
+    return 'cursor-pointer text-ink-faint hover:bg-fill-strong';
+  }
+
+  pick(cell: DayCell): void {
     if (cell.disabled) return;
-    const pending = this.pendingStart();
-    if (!pending) {
-      this.pendingStart.set(cell.iso);
-      this.committedStart.set(null);
-      this.committedEnd.set(null);
+    const from = this.start();
+    if (!from || this.end()) {
+      this.start.set(cell.iso);
+      this.end.set(null);
       return;
     }
-    const from = pending < cell.iso ? pending : cell.iso;
-    const to = pending < cell.iso ? cell.iso : pending;
-    this.pendingStart.set(null);
-    this.hoverIso.set(null);
-    this.committedStart.set(from);
-    this.committedEnd.set(to);
-    this.rangeSelected.emit({ from, to });
-  }
-
-  onCellHover(cell: DayCell): void {
-    if (!this.pendingStart() || cell.disabled) return;
-    this.hoverIso.set(cell.iso);
-  }
-
-  prevMonth(): void {
-    const m = this.viewMonth();
-    if (m === 0) {
-      this.viewMonth.set(11);
-      this.viewYear.update((y) => y - 1);
+    if (cell.iso < from) {
+      this.start.set(cell.iso);
+      this.end.set(from);
     } else {
-      this.viewMonth.set(m - 1);
+      this.end.set(cell.iso);
     }
-  }
-
-  nextMonth(): void {
-    const m = this.viewMonth();
-    if (m === 11) {
-      this.viewMonth.set(0);
-      this.viewYear.update((y) => y + 1);
-    } else {
-      this.viewMonth.set(m + 1);
-    }
-  }
-
-  clear(): void {
-    this.pendingStart.set(null);
-    this.committedStart.set(null);
-    this.committedEnd.set(null);
     this.hoverIso.set(null);
-    this.cleared.emit();
   }
 
-  formatShort(iso: string): string {
-    const d = parseIso(iso);
-    return `${MONTH_NAMES[d.getMonth()].slice(0, 3)} ${d.getDate()}`;
+  hover(cell: DayCell): void {
+    if (this.start() && !this.end() && !cell.disabled) this.hoverIso.set(cell.iso);
+  }
+
+  shiftMonths(delta: number): void {
+    const target = new Date(this.viewYear(), this.viewMonth() + delta, 1);
+    const today = new Date();
+    const latest = new Date(today.getFullYear(), today.getMonth(), 1);
+    const clamped = target > latest ? latest : target;
+    this.viewYear.set(clamped.getFullYear());
+    this.viewMonth.set(clamped.getMonth());
+  }
+
+  reset(): void {
+    this.start.set(null);
+    this.end.set(null);
+    this.hoverIso.set(null);
+  }
+
+  apply(): void {
+    const from = this.start();
+    const to = this.end();
+    if (from && to) this.rangeSelected.emit({ from, to });
+  }
+
+  formatDate(iso: string): string {
+    const d = parseIsoDate(iso);
+    return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+  private showMonthOf(iso: string): void {
+    const d = parseIsoDate(iso);
+    this.viewYear.set(d.getFullYear());
+    this.viewMonth.set(d.getMonth());
   }
 }

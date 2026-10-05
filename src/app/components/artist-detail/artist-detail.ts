@@ -2,14 +2,16 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
+  effect,
   inject,
   PLATFORM_ID,
   signal,
 } from '@angular/core';
 import { DecimalPipe, Location, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowLeft,
@@ -18,23 +20,32 @@ import {
   heroClock,
   heroFire,
   heroMusicalNote,
+  heroRectangleStack,
   heroSquare3Stack3d,
   heroTrophy,
 } from '@ng-icons/heroicons/outline';
-import { NavidromeService, type StatRange } from '../../services/navidrome.service';
+import { NavidromeService } from '../../services/navidrome.service';
 import type { ArtistDetail as ArtistDetailData } from '../../models/stats';
-import { formatRangeLabel } from '../dashboard/dashboard';
 import { CoverComponent } from '../cover';
-import { MONTH_SHORT, formatYearMonthWithYear, padHour, parseIsoDate, toIsoDate } from '../../utils/format';
+import { RewindRange } from '../../shell/rewind-range';
+import { SectionRegistry } from '../../shell/section-registry';
+import {
+  MONTH_SHORT,
+  formatYearMonthWithYear,
+  padHour,
+  parseIsoDate,
+  toIsoDate,
+} from '../../utils/format';
 
 type TabKey = 'overview' | 'patterns' | 'activity';
 
 @Component({
   selector: 'app-artist-detail',
+  host: { class: 'block h-full' },
   templateUrl: './artist-detail.html',
   styleUrl: './artist-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, NgIcon, CoverComponent],
+  imports: [DecimalPipe, NgIcon, CoverComponent, RouterLink],
   providers: [
     provideIcons({
       heroArrowLeft,
@@ -45,6 +56,7 @@ type TabKey = 'overview' | 'patterns' | 'activity';
       heroChartBar,
       heroFire,
       heroTrophy,
+      heroRectangleStack,
     }),
   ],
 })
@@ -54,6 +66,9 @@ export class ArtistDetail {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly registry = inject(SectionRegistry);
+  private readonly rewindRange = inject(RewindRange);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly canGoBack = signal(false);
 
   readonly artistId = signal<string>('');
@@ -61,24 +76,10 @@ export class ArtistDetail {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<TabKey>('overview');
-  readonly darkMode = signal(false);
 
-  readonly range = signal<StatRange>({ kind: 'all-time' });
-
-  readonly rangeLabel = computed(() => {
-    const r = this.range();
-    if (r.kind === 'all-time') return 'All Time';
-    if (r.kind === 'year') return r.year;
-    return formatRangeLabel(r.from, r.to);
-  });
-
-  readonly dashboardQueryParams = computed<Record<string, string>>(() => {
-    const r = this.range();
-    if (r.kind === 'year') return { year: r.year };
-    if (r.kind === 'custom') return { from: r.from, to: r.to };
-    const out: Record<string, string> = { range: 'all-time' };
-    return out;
-  });
+  /** The range is the Shell's; this page reads it and reloads when it moves. */
+  readonly range = this.rewindRange.current;
+  readonly rangeLabel = this.rewindRange.label;
 
   // Derived heatmap: 7-day rows, Sunday-top, filling the selected range.
   // Empty days are rendered as 0-play cells so the most recent date is always on the right.
@@ -164,7 +165,10 @@ export class ArtistDetail {
       let monthCell = cells[w * 7];
       for (let dOff = 0; dOff < 7; dOff++) {
         const c = cells[w * 7 + dOff];
-        if (c?.inRange) { monthCell = c; break; }
+        if (c?.inRange) {
+          monthCell = c;
+          break;
+        }
       }
       if (!monthCell) continue;
       const month = parseIsoDate(monthCell.date).getMonth();
@@ -252,41 +256,32 @@ export class ArtistDetail {
   });
 
   constructor() {
-    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(
-      ([params, query]) => {
-        this.artistId.set(params.get('id') ?? '');
-        const year = query.get('year');
-        const from = query.get('from');
-        const to = query.get('to');
-        if (from && to) this.range.set({ kind: 'custom', from, to });
-        else if (year) this.range.set({ kind: 'year', year });
-        else this.range.set({ kind: 'all-time' });
-        this.load();
-      },
-    );
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.artistId.set(params.get('id') ?? ''));
+
+    // One load path: whatever moves the artist or the range, the fetch follows.
+    effect(() => {
+      const id = this.artistId();
+      const range = this.range();
+      if (!id || !this.rewindRange.ready()) return;
+      this.load(id, range);
+    });
 
     afterNextRender(() => {
       if (isPlatformBrowser(this.platformId)) {
         const navId = (window.history.state as { navigationId?: number } | null)?.navigationId;
         this.canGoBack.set(typeof navId === 'number' && navId > 1);
-
-        const storedTheme = localStorage.getItem('rewind.theme');
-        const prefersDark = storedTheme
-          ? storedTheme === 'dark'
-          : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.darkMode.set(prefersDark);
-        document.documentElement.classList.toggle('dark', prefersDark);
       }
       this.navidrome.loadConfig();
     });
   }
 
-  load(): void {
-    const id = this.artistId();
+  load(id = this.artistId(), range = this.range()): void {
     if (!id) return;
     this.loading.set(true);
     this.error.set(null);
-    this.navidrome.getArtist(id, this.range()).subscribe({
+    this.navidrome.getArtist(id, range).subscribe({
       next: (d) => {
         this.data.set(d);
         this.loading.set(false);
@@ -302,11 +297,18 @@ export class ArtistDetail {
     this.activeTab.set(tab);
   }
 
+  openRangePanel(): void {
+    this.rewindRange.togglePanel();
+  }
+
+  /** Back where the user came from, or to the owning section when the page was deep-linked. */
   goBack(): void {
     if (this.canGoBack()) {
       this.location.back();
     } else {
-      this.router.navigate(['/'], { queryParams: this.dashboardQueryParams() });
+      this.router.navigate([this.registry.routeFor(this.router.url)], {
+        queryParams: this.rewindRange.toParams(),
+      });
     }
   }
 
@@ -321,7 +323,7 @@ export class ArtistDetail {
   heatmapColor(cell: { plays: number; inRange: boolean }): string {
     if (!cell.inRange) return 'bg-transparent';
     const max = this.heatmapMax();
-    if (cell.plays === 0 || max === 0) return 'bg-slate-200 dark:bg-slate-800';
+    if (cell.plays === 0 || max === 0) return 'bg-fill';
     const pct = cell.plays / max;
     if (pct > 0.75) return 'bg-rose-500';
     if (pct > 0.5) return 'bg-rose-400';
@@ -348,14 +350,4 @@ export class ArtistDetail {
   }
 
   readonly padHour = padHour;
-
-  toggleDarkMode(): void {
-    const next = !this.darkMode();
-    this.darkMode.set(next);
-    if (isPlatformBrowser(this.platformId)) {
-      document.documentElement.classList.toggle('dark', next);
-      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
-    }
-  }
 }
-

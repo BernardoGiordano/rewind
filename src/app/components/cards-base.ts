@@ -1,4 +1,4 @@
-import { Directive, computed, effect, ElementRef, inject, input, signal } from '@angular/core';
+import { Directive, computed, effect, ElementRef, inject, input, output, signal } from '@angular/core';
 import { DominantColorService } from '../services/dominant-color.service';
 import { NavidromeService } from '../services/navidrome.service';
 import {
@@ -19,7 +19,7 @@ import {
   type TopGenre,
   type TopSong,
 } from '../models/stats';
-import { formatNum, formatYearMonth, padHour } from '../utils/format';
+import { formatNum, formatYearMonth, formatYearMonthWithYear, padHour } from '../utils/format';
 
 @Directive()
 export abstract class CardsBase {
@@ -45,10 +45,23 @@ export abstract class CardsBase {
   readonly favoriteDecades = input.required<FavoriteDecade[]>();
   readonly recapData = input.required<RecapData | null>();
 
+  /** Emits the artist behind a row the user picked, so the host can open its page. */
+  readonly artistClick = output<string>();
+
+  /** All 24 hours, so a quiet hour shows as an empty bar instead of a missing one. */
+  readonly clock = computed<ListeningClock[]>(() => {
+    const byHour = new Map(this.listeningClock().map((h) => [h.hour, h]));
+    return Array.from(
+      { length: 24 },
+      (_, hour) => byHour.get(hour) ?? { hour, plays: 0, total_hours: 0 },
+    );
+  });
+
   readonly maxGenrePlays = computed(() => Math.max(...this.topGenres().map((g) => g.plays), 1));
   readonly maxClockPlays = computed(() => Math.max(...this.listeningClock().map((c) => c.plays), 1));
   readonly maxDayPlays = computed(() => Math.max(...this.dayOfWeek().map((d) => d.plays), 1));
   readonly maxDecadePlays = computed(() => Math.max(...this.favoriteDecades().map((d) => d.total_plays), 1));
+  readonly maxMonthPlays = computed(() => Math.max(...this.monthlyTrends().map((m) => m.plays), 1));
 
   readonly dynamicGradientStyle = signal<string | null>(null);
   readonly coverArtAvailable = this.navidrome.coverArtAvailable;
@@ -83,13 +96,25 @@ export abstract class CardsBase {
     });
   }
 
+  openArtist(artistId: string | null | undefined, event?: Event): void {
+    if (!artistId) return;
+    event?.stopPropagation();
+    this.artistClick.emit(artistId);
+  }
+
   coverUrl(id: string, size = 150): string {
     return this.navidrome.coverUrl(id, size);
   }
 
   readonly formatNum = formatNum;
   readonly padHour = padHour;
-  readonly formatMonth = formatYearMonth;
+
+  /** "Jan", or "Jan 25" once the list runs across more than one calendar year. */
+  monthLabel(yearMonth: string, months: readonly { month: string }[]): string {
+    const year = months[0]?.month.slice(0, 4);
+    const multiYear = months.some((m) => m.month.slice(0, 4) !== year);
+    return multiYear ? formatYearMonthWithYear(yearMonth) : formatYearMonth(yearMonth);
+  }
 
   genreBarWidth(plays: number): number {
     return (plays / this.maxGenrePlays()) * 100;
@@ -105,5 +130,9 @@ export abstract class CardsBase {
 
   decadeBarWidth(plays: number): number {
     return (plays / this.maxDecadePlays()) * 100;
+  }
+
+  monthBarWidth(plays: number): number {
+    return (plays / this.maxMonthPlays()) * 100;
   }
 }

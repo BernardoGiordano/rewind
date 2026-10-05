@@ -78,6 +78,7 @@ export interface OnRepeatEntry {
   the_date: string;
   title: string;
   artist: string;
+  artist_id: string;
   plays_that_day: number;
 }
 

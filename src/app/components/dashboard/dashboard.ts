@@ -4,17 +4,19 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   HostListener,
   inject,
   PLATFORM_ID,
   signal,
+  TemplateRef,
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowPath,
-  heroArrowRightOnRectangle,
   heroCalendarDays,
   heroChartBar,
   heroChevronDown,
@@ -32,14 +34,14 @@ import {
   heroRadio,
   heroSparkles,
   heroSquare3Stack3d,
-  heroSun,
   heroTrophy,
-  heroUserCircle,
 } from '@ng-icons/heroicons/outline';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NavidromeService, type StatRange } from '../../services/navidrome.service';
-import { AuthService } from '../../services/auth.service';
-import { DateRangePicker } from '../date-range-picker/date-range-picker';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavidromeService } from '../../services/navidrome.service';
+import { type StatRange, rangeSlug } from '../../models/range';
+import { LayoutModeService } from '../../shell/layout-mode';
+import { RewindRange } from '../../shell/rewind-range';
+import { ShellService } from '../../shell/shell.service';
 import {
   type DayOfWeek,
   type FavoriteDecade,
@@ -51,7 +53,6 @@ import {
   type OnRepeatEntry,
   type RecapData,
   type SongOfMonth,
-  STAT_DEFINITIONS,
   type StatType,
   type TopAlbum,
   type TopArtist,
@@ -61,14 +62,29 @@ import {
 import { CardsPortrait } from '../cards-portrait/cards-portrait';
 import { CardsSquare } from '../cards-square/cards-square';
 import { CardsLandscape } from '../cards-landscape/cards-landscape';
-import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
+import { StatNavigator } from './stat-navigator';
+import { STAT_PARAM } from './stat-traversal';
+import { StatSheet } from './stat-sheet';
+
+/** Horizontal travel that counts as a swipe rather than a tap. */
+const SWIPE_THRESHOLD_PX = 48;
+
+type CardMode = 'portrait' | 'square' | 'landscape';
+
+/** Each card aspect with the outline its rail button draws, as SVG rect x, y, width, height. */
+const CARD_MODES: readonly { id: CardMode; label: string; rect: readonly number[] }[] = [
+  { id: 'portrait', label: 'Portrait', rect: [7, 3, 10, 18] },
+  { id: 'square', label: 'Square', rect: [5, 5, 14, 14] },
+  { id: 'landscape', label: 'Landscape', rect: [3, 6, 18, 12] },
+];
 
 @Component({
   selector: 'app-dashboard',
+  host: { class: 'block h-full' },
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, DateRangePicker],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, StatSheet],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -86,13 +102,10 @@ import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../../utils/format';
       heroRadio,
       heroPlay,
       heroPause,
-      heroSun,
       heroHeart,
       heroChevronDown,
       heroChevronLeft,
       heroChevronRight,
-      heroUserCircle,
-      heroArrowRightOnRectangle,
     }),
   ],
 })
@@ -102,77 +115,100 @@ export class Dashboard {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly auth = inject(AuthService);
+  private readonly shell = inject(ShellService);
+  private readonly nav = inject(StatNavigator);
+  private readonly range = inject(RewindRange);
+  private readonly layout = inject(LayoutModeService);
 
-  readonly currentUser = this.auth.user;
-  readonly canLogout = this.auth.canLogout;
+  /** Dashboard-only controls the Shell renders inside its chrome. */
+  readonly shellActions = viewChild<TemplateRef<unknown>>('shellActions');
+  readonly railTools = viewChild<TemplateRef<unknown>>('railTools');
+  readonly railControls = viewChild<TemplateRef<unknown>>('railControls');
 
-  logout(): void {
-    this.mobileMenuOpen.set(false);
-    this.auth.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login']),
-    });
+  closeShellMenu(): void {
+    this.shell.closeMenu();
   }
 
   openArtist(artistId: string | null | undefined): void {
     if (!artistId) return;
-    const queryParams = this.artistQueryParams();
-    this.router.navigate(['/artist', artistId], { queryParams });
-  }
-
-  private artistQueryParams(): Record<string, string> {
-    const y = this.selectedYear();
-    if (y === 'all-time') return {};
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? { from: r.from, to: r.to } : {};
-    }
-    return { year: y };
+    this.router.navigate(['/artist', artistId], { queryParams: this.range.toParams() });
   }
 
   readonly squareCard = viewChild(CardsSquare);
   readonly portraitCard = viewChild(CardsPortrait);
   readonly landscapeCard = viewChild(CardsLandscape);
 
-  readonly darkMode = signal(false);
-  readonly mobileMenuOpen = signal(false);
-  readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
-  readonly isSmallScreen = signal(false);
-  readonly storiesMode = signal(true);
+  readonly cardModes = CARD_MODES;
+  readonly cardMode = signal<CardMode>('portrait');
+
+  /** Expanded keeps the sidebar pinned and remembers it; medium opens the same panel as a drawer. */
   readonly sidebarCollapsed = signal(false);
+  readonly drawerOpen = signal(false);
   readonly songsStatsCollapsed = signal(false);
-  readonly storiesPaused = signal(false);
-  readonly storiesIndex = signal(0);
+  readonly statSheetOpen = signal(false);
   readonly exporting = signal(false);
 
-  private storiesTimeout: ReturnType<typeof setTimeout> | null = null;
+  // Stat selection, ordering, autoplay and URL sync live in the navigator.
+  readonly stats = this.nav.list;
+  readonly selectedStat = this.nav.current;
+  readonly statIndex = this.nav.index;
+  readonly autoplay = this.nav.autoplay;
+  readonly autoplayPaused = this.nav.paused;
 
-  readonly years = signal<string[]>([]);
-  readonly selectedYear = signal<string>('all-time');
-  readonly customRange = signal<{ from: string; to: string } | null>(null);
-  readonly customPickerOpen = signal(false);
-  readonly selectedStat = signal<StatType>('summary');
+  readonly rangeLabel = this.range.label;
+
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly rangeLabel = computed(() => {
-    const y = this.selectedYear();
-    if (y === 'all-time') return 'All Time';
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? formatRangeLabel(r.from, r.to) : 'Custom';
-    }
-    return y;
+  /** Data loads once the range is settled and the selection restored, not during SSR. */
+  private readonly ready = signal(false);
+
+  private swipeStart: { x: number; y: number } | null = null;
+
+  readonly selectedDef = computed(() => this.nav.definition() ?? undefined);
+
+  /** A compact viewport has no room for anything but the portrait card. */
+  readonly effectiveCardMode = computed(() =>
+    this.layout.isCompact() ? 'portrait' : this.cardMode(),
+  );
+
+  /**
+   * Sidebar width per layout mode. `sidebarCollapsed` drives the expanded
+   * classes and `drawerOpen` the medium ones, so the server renders the
+   * sidebar pinned at expanded and the drawer closed at medium without
+   * knowing the viewport.
+   */
+  readonly sidebarClasses = computed(() => {
+    const expanded = this.sidebarCollapsed()
+      ? 'expanded:w-0 expanded:border-r-0 expanded:blur-sm'
+      : 'expanded:w-72 wide:w-80';
+    const medium = this.drawerOpen()
+      ? 'medium:w-72 medium:shadow-xl'
+      : 'medium:w-0 medium:border-r-0';
+    return `${expanded} ${medium}`;
   });
 
-  readonly selectedDef = computed(() =>
-    STAT_DEFINITIONS.find((d) => d.type === this.selectedStat()),
+  /** Expanded pushes the card aside; medium overlays it, so only expanded gets a margin. */
+  readonly mainClasses = computed(() =>
+    this.sidebarCollapsed() ? 'expanded:ml-0' : 'expanded:ml-72 wide:ml-80',
   );
 
-  readonly effectiveCardMode = computed(() =>
-    this.isSmallScreen() ? 'portrait' : this.cardMode(),
+  /**
+   * Whether the panel is on screen right now. Only the handle's label and icon
+   * read it, so a correction on hydration costs nothing but an icon flip.
+   */
+  readonly sidebarShowing = computed(() =>
+    this.layout.isExpanded() ? !this.sidebarCollapsed() : this.drawerOpen(),
   );
+
+  /** The collapse handle rides the sidebar's right edge in whichever mode is showing it. */
+  readonly sidebarToggleClasses = computed(() => {
+    const expanded = this.sidebarCollapsed()
+      ? 'expanded:left-16'
+      : 'expanded:left-[22rem] wide:left-[24rem]';
+    const medium = this.drawerOpen() ? 'medium:left-[22rem]' : 'medium:left-16';
+    return `${expanded} ${medium}`;
+  });
 
   // Stat data signals
   readonly summaryData = signal<ListeningSummary | null>(null);
@@ -190,32 +226,42 @@ export class Dashboard {
   readonly favoriteDecades = signal<FavoriteDecade[]>([]);
   readonly recapData = signal<RecapData | null>(null);
 
-  readonly visibleStats = computed(() => {
-    const year = this.selectedYear();
-    return STAT_DEFINITIONS.filter((d) => !d.yearOnly || year !== 'all-time');
-  });
-
-  private currentRange(): StatRange {
-    const y = this.selectedYear();
-    if (y === 'all-time') return { kind: 'all-time' };
-    if (y === 'custom') {
-      const r = this.customRange();
-      return r ? { kind: 'custom', from: r.from, to: r.to } : { kind: 'all-time' };
-    }
-    return { kind: 'year', year: y };
-  }
-
   constructor() {
-    afterNextRender(() => {
-      let urlSelectedYear = false;
-      if (isPlatformBrowser(this.platformId)) {
-        const storedTheme = localStorage.getItem('rewind.theme');
-        const prefersDark = storedTheme
-          ? storedTheme === 'dark'
-          : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.darkMode.set(prefersDark);
-        document.documentElement.classList.toggle('dark', prefersDark);
+    // One load path: whatever moves the selection or the range, the fetch follows.
+    effect(() => {
+      const type = this.nav.current();
+      const range = this.range.current();
+      if (!this.ready()) return;
+      this.fetchStat(type, range);
+    });
 
+    // The navigator restores its selection once the range that filters the list is settled.
+    effect(() => {
+      if (!this.range.ready() || this.ready()) return;
+      this.nav.restore(this.route.snapshot.queryParamMap.get(STAT_PARAM));
+      this.ready.set(true);
+    });
+
+    this.navidrome.historyChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.reload();
+    });
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationEnd && event.urlAfterRedirects.split('?')[0] === '/') {
+        this.syncShell();
+      }
+    });
+    // A landscape card runs the full width, so the Shell's corner credit steps aside.
+    effect(() => {
+      const quiet = this.effectiveCardMode() !== 'landscape';
+      if (this.router.url.split('?')[0] === '/') {
+        this.shell.setQuietCorner(quiet);
+      }
+    });
+
+    afterNextRender(() => {
+      this.syncShell();
+
+      if (isPlatformBrowser(this.platformId)) {
         const storedCardMode = localStorage.getItem('rewind.cardMode');
         if (
           storedCardMode === 'portrait' ||
@@ -223,11 +269,6 @@ export class Dashboard {
           storedCardMode === 'landscape'
         ) {
           this.cardMode.set(storedCardMode);
-        }
-
-        const storedStories = localStorage.getItem('rewind.storiesMode');
-        if (storedStories !== null) {
-          this.storiesMode.set(storedStories === 'true');
         }
 
         const storedSidebar = localStorage.getItem('rewind.sidebarCollapsed');
@@ -239,87 +280,43 @@ export class Dashboard {
         if (storedSongsStats !== null) {
           this.songsStatsCollapsed.set(storedSongsStats === 'true');
         }
-
-        const storedRange = localStorage.getItem('rewind.customRange');
-        if (storedRange) {
-          try {
-            const parsed = JSON.parse(storedRange) as { from: string; to: string };
-            if (parsed?.from && parsed?.to) {
-              this.customRange.set(parsed);
-              this.selectedYear.set('custom');
-            }
-          } catch {
-            // ignore corrupt entry
-          }
-        }
-
-        // URL query params take priority over stored state (e.g. returning from artist detail)
-        const qp = this.route.snapshot.queryParamMap;
-        const urlFrom = qp.get('from');
-        const urlTo = qp.get('to');
-        const urlYear = qp.get('year');
-        if (urlFrom && urlTo) {
-          this.customRange.set({ from: urlFrom, to: urlTo });
-          this.selectedYear.set('custom');
-          urlSelectedYear = true;
-        } else if (urlYear) {
-          this.selectedYear.set(urlYear);
-          urlSelectedYear = true;
-        } else if (qp.get('range') === 'all-time') {
-          this.selectedYear.set('all-time');
-          urlSelectedYear = true;
-        }
-
-        const smallScreen = window.matchMedia('(max-width: 1023px)');
-        this.isSmallScreen.set(smallScreen.matches);
-        smallScreen.addEventListener('change', (e) => this.isSmallScreen.set(e.matches));
       }
+
       this.navidrome.loadConfig();
-      const maybeStartStories = () => {
-        if (this.storiesMode()) {
-          this.startStories();
-        }
-      };
-      this.navidrome.getYears().subscribe({
-        next: (years) => {
-          this.years.set(years);
-          if (!urlSelectedYear && years.length > 0 && this.selectedYear() === 'all-time') {
-            this.selectedYear.set(years[0]);
-          }
-          this.loadData();
-          maybeStartStories();
-        },
-        error: () => {
-          this.loadData();
-          maybeStartStories();
-        },
-      });
     });
-
-    this.destroyRef.onDestroy(() => this.clearStoriesTimer());
   }
 
-  toggleMobileMenu(): void {
-    this.mobileMenuOpen.update((v) => !v);
-  }
-
-  closeMobileMenu(): void {
-    this.mobileMenuOpen.set(false);
-  }
-
-  selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
+  selectCardMode(mode: CardMode): void {
     this.cardMode.set(mode);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.cardMode', mode);
     }
   }
 
+  /** Hands the Shell everything this route contributes to the chrome. */
+  private syncShell(): void {
+    this.shell.setRouteChrome({
+      menu: this.shellActions(),
+      railTools: this.railTools(),
+      railControls: this.railControls(),
+    });
+    this.shell.setQuietCorner(this.effectiveCardMode() !== 'landscape');
+  }
+
   toggleSidebar(): void {
+    if (!this.layout.isExpanded()) {
+      this.drawerOpen.update((open) => !open);
+      return;
+    }
     const next = !this.sidebarCollapsed();
     this.sidebarCollapsed.set(next);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.sidebarCollapsed', String(next));
     }
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen.set(false);
   }
 
   toggleSongsStats(): void {
@@ -330,38 +327,69 @@ export class Dashboard {
     }
   }
 
-  toggleDarkMode(): void {
-    const next = !this.darkMode();
-    this.darkMode.set(next);
-    if (isPlatformBrowser(this.platformId)) {
-      document.documentElement.classList.toggle('dark', next);
-      localStorage.setItem('rewind.theme', next ? 'dark' : 'light');
-    }
+  openStatSheet(): void {
+    this.statSheetOpen.set(true);
   }
 
-  toggleStoriesMode(): void {
-    this.mobileMenuOpen.set(false);
-    if (this.storiesMode()) {
-      this.stopStories();
-    } else {
-      this.startStories();
-    }
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('rewind.storiesMode', String(this.storiesMode()));
-    }
+  closeStatSheet(): void {
+    this.statSheetOpen.set(false);
   }
 
-  storiesNext(): void {
-    if (!this.storiesMode()) return;
-    this.storiesPaused.set(false);
-    this.advanceStories();
+  selectStat(type: StatType): void {
+    this.nav.select(type);
+    this.closeDrawer();
+  }
+
+  nextStat(): void {
+    this.nav.next();
+  }
+
+  prevStat(): void {
+    this.nav.prev();
+  }
+
+  toggleAutoplay(): void {
+    this.shell.closeMenu();
+    this.nav.toggleAutoplay();
+  }
+
+  toggleAutoplayPause(): void {
+    this.nav.togglePause();
+  }
+
+  // Touch adapter: a horizontal drag across the card steps to the neighbouring stat.
+  onCardPointerDown(event: PointerEvent): void {
+    this.swipeStart = event.pointerType === 'touch' ? { x: event.clientX, y: event.clientY } : null;
+  }
+
+  onCardPointerUp(event: PointerEvent): void {
+    const start = this.swipeStart;
+    this.swipeStart = null;
+    if (!start) return;
+
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) <= Math.abs(dy)) return;
+
+    if (dx < 0) this.nav.next();
+    else this.nav.prev();
+  }
+
+  onCardPointerCancel(): void {
+    this.swipeStart = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeDrawer();
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.customPickerOpen() || this.mobileMenuOpen()) return;
+    if (this.range.panelOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
+    if (this.drawerOpen()) return;
 
     const target = event.target as HTMLElement | null;
     if (target) {
@@ -371,142 +399,17 @@ export class Dashboard {
       }
     }
 
-    const stats = this.visibleStats();
-    if (stats.length === 0) return;
-
     event.preventDefault();
-    const currentIdx = stats.findIndex((s) => s.type === this.selectedStat());
-    const baseIdx = currentIdx >= 0 ? currentIdx : 0;
-    const nextIdx =
-      event.key === 'ArrowLeft'
-        ? (baseIdx - 1 + stats.length) % stats.length
-        : (baseIdx + 1) % stats.length;
-
-    this.storiesIndex.set(nextIdx);
-    this.selectStat(stats[nextIdx].type);
-    this.storiesPaused.set(false);
-    if (this.storiesMode()) this.runStoriesTimer();
+    if (event.key === 'ArrowLeft') this.nav.prev();
+    else this.nav.next();
   }
 
-  storiesPrev(): void {
-    const stats = this.visibleStats();
-    const prev = Math.max(0, this.storiesIndex() - 1);
-    this.storiesIndex.set(prev);
-    this.selectStat(stats[prev].type);
-    this.storiesPaused.set(false);
-    if (this.storiesMode()) {
-      this.runStoriesTimer();
-    }
+  /** Re-runs the current request, for retry after an error and for fresh scrobbles. */
+  reload(): void {
+    this.fetchStat(this.nav.current(), this.range.current());
   }
 
-  toggleStoriesPause(): void {
-    if (this.storiesPaused()) {
-      this.storiesPaused.set(false);
-      this.runStoriesTimer();
-    } else {
-      this.storiesPaused.set(true);
-      this.clearStoriesTimer();
-    }
-  }
-
-  startStories(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const stats = this.visibleStats();
-    const currentType = this.selectedStat();
-    const idx = stats.findIndex((s) => s.type === currentType);
-    this.storiesIndex.set(idx >= 0 ? idx : 0);
-    this.storiesMode.set(true);
-    this.storiesPaused.set(false);
-    this.runStoriesTimer();
-  }
-
-  private stopStories(): void {
-    this.storiesMode.set(false);
-    this.storiesPaused.set(false);
-    this.clearStoriesTimer();
-  }
-
-  private clearStoriesTimer(): void {
-    if (this.storiesTimeout !== null) {
-      clearTimeout(this.storiesTimeout);
-      this.storiesTimeout = null;
-    }
-  }
-
-  private runStoriesTimer(): void {
-    this.clearStoriesTimer();
-    this.storiesTimeout = setTimeout(() => {
-      this.advanceStories();
-    }, 10000);
-  }
-
-  private advanceStories(): void {
-    const stats = this.visibleStats();
-    const next = (this.storiesIndex() + 1) % stats.length;
-    this.storiesIndex.set(next);
-    this.selectStat(stats[next].type);
-    this.runStoriesTimer();
-  }
-
-  selectYear(year: string): void {
-    this.selectedYear.set(year);
-    const stat = this.selectedStat();
-    const def = STAT_DEFINITIONS.find((d) => d.type === stat);
-    if (def?.yearOnly && year === 'all-time') {
-      this.selectedStat.set('summary');
-    }
-    this.loadData();
-  }
-
-  toggleCustomPicker(): void {
-    this.customPickerOpen.update((v) => !v);
-  }
-
-  closeCustomPicker(): void {
-    this.customPickerOpen.set(false);
-  }
-
-  onCustomRangeSelected(range: { from: string; to: string }): void {
-    this.customRange.set(range);
-    this.selectedYear.set('custom');
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('rewind.customRange', JSON.stringify(range));
-    }
-    this.customPickerOpen.set(false);
-    this.loadData();
-  }
-
-  onCustomRangeCleared(): void {
-    this.customRange.set(null);
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('rewind.customRange');
-    }
-    if (this.selectedYear() === 'custom') {
-      const years = this.years();
-      this.selectedYear.set(years.length > 0 ? years[0] : 'all-time');
-      this.loadData();
-    }
-  }
-
-  selectStat(type: StatType): void {
-    this.selectedStat.set(type);
-    // If stories mode is active and the user clicks a sidebar item, sync the index & restart timer
-    if (this.storiesMode()) {
-      const stats = this.visibleStats();
-      const idx = stats.findIndex((s) => s.type === type);
-      if (idx >= 0 && idx !== this.storiesIndex()) {
-        this.storiesIndex.set(idx);
-        this.storiesPaused.set(false);
-        this.runStoriesTimer();
-      }
-    }
-    this.loadData();
-  }
-
-  loadData(): void {
-    const type = this.selectedStat();
-    const range = this.currentRange();
-
+  private fetchStat(type: StatType, range: StatRange): void {
     this.loading.set(true);
     this.error.set(null);
 
@@ -537,12 +440,17 @@ export class Dashboard {
       useCORS: true,
       backgroundColor: null,
       ignoreElements: (element) => element.classList.contains('export-ignore'),
+      onclone: (doc) => {
+        doc.querySelectorAll<HTMLElement>('.export-show').forEach((node) => {
+          node.style.opacity = '1';
+        });
+      },
     });
 
     this.exporting.set(false);
 
     const link = document.createElement('a');
-    link.download = `navidrome-rewind-${this.selectedStat()}-${this.selectedYear()}.png`;
+    link.download = `navidrome-rewind-${this.nav.current()}-${rangeSlug(this.range.current())}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   }
@@ -593,64 +501,4 @@ export class Dashboard {
         break;
     }
   }
-}
-
-function sameDate(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear()
-    && a.getMonth() === b.getMonth()
-    && a.getDate() === b.getDate();
-}
-
-export function formatRangeLabel(fromIso: string, toIso: string): string {
-  const from = parseIsoDate(fromIso);
-  const to = parseIsoDate(toIso);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const currentYear = today.getFullYear();
-
-  // Last week: rolling 7-day window ending today or yesterday
-  const sevenAgo = new Date(today);
-  sevenAgo.setDate(today.getDate() - 7);
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const eightAgo = new Date(today);
-  eightAgo.setDate(today.getDate() - 8);
-  if (
-    (sameDate(from, sevenAgo) && sameDate(to, today)) ||
-    (sameDate(from, eightAgo) && sameDate(to, yesterday))
-  ) {
-    return 'Last Week';
-  }
-
-  // Last month (entire previous calendar month)
-  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  if (sameDate(from, lastMonthStart) && sameDate(to, lastMonthEnd)) return 'Last Month';
-
-  // Any full calendar month
-  if (
-    from.getDate() === 1 &&
-    from.getFullYear() === to.getFullYear() &&
-    from.getMonth() === to.getMonth()
-  ) {
-    const monthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
-    if (sameDate(to, monthEnd)) {
-      const year = from.getFullYear();
-      return year === currentYear
-        ? MONTH_FULL[from.getMonth()]
-        : `${MONTH_FULL[from.getMonth()]} ${year}`;
-    }
-  }
-
-  const sameYear = from.getFullYear() === to.getFullYear();
-  const short = (d: Date) => `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
-  const withYear = (d: Date) => `${short(d)}, ${d.getFullYear()}`;
-
-  if (sameYear) {
-    const year = from.getFullYear();
-    if (year === currentYear) return `${short(from)} – ${short(to)}`;
-    return `${short(from)} – ${short(to)}, ${year}`;
-  }
-  return `${withYear(from)} – ${withYear(to)}`;
 }

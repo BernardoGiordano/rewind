@@ -12,8 +12,8 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
       [class]="containerClass()"
       [style.background-image]="gradientStyle() || null"
     >
-      <div class="px-8 pt-8 flex items-center justify-between shrink-0">
-        <span class="text-white/60 text-sm font-mono tracking-[0.2em] uppercase">Navidrome Rewind</span>
+      <!-- The top-left corner stays empty, where story viewers overlay the poster's name. -->
+      <div class="px-8 pt-8 flex items-center justify-end shrink-0">
         <span class="text-white/80 text-sm font-mono bg-white/10 px-3 py-1 rounded-full">{{ yearLabel() }}</span>
       </div>
 
@@ -21,7 +21,8 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
         <ng-content />
       </div>
 
-      <div class="px-8 pb-6 shrink-0">
+      <!-- The compact stat pill sits over this credit, so it hides on screen there. Exports restore it. -->
+      <div class="export-show px-8 pb-6 shrink-0 compact:opacity-0">
         <div class="flex items-center gap-2 text-white/40">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
@@ -41,7 +42,7 @@ export class CardShellComponent {
   containerClass = computed(() => {
     const base =
       'w-full h-full overflow-hidden relative flex flex-col ' +
-      (this.noRound() ? '' : 'lg:rounded-xl ');
+      (this.noRound() ? '' : 'medium-up:rounded-xl ');
     if (this.gradientStyle()) return base;
     return base + 'bg-gradient-to-br ' + this.gradient();
   });

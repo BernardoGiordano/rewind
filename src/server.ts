@@ -7,6 +7,7 @@ import {
 import type { Database } from 'better-sqlite3';
 import BetterSqlite3 from 'better-sqlite3';
 import express from 'express';
+import { libraryRouter } from './server/library';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -343,6 +344,8 @@ function buildSubsonicAuthParams(user: string, apiKey: string): URLSearchParams 
 function isCoverArtAvailable(): boolean {
   return !!getNavidromeUrl();
 }
+
+app.use('/api/library', libraryRouter({ getDb, requireAuth, getUrl: getNavidromeUrl, authParams: buildSubsonicAuthParams }));
 
 // --- /api/config ---
 
@@ -832,7 +835,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
     db,
     `
     SELECT date(s.submission_time, 'unixepoch') AS the_date,
-      mf.title, mf.artist, COUNT(*) AS plays_that_day
+      mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?

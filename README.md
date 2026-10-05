@@ -16,6 +16,16 @@ A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.nav
 
 Rewind gives you a stories-style slideshow (think Instagram stories) that go through your personal stats: top songs, artists, albums, and genres, a listening clock that shows when you listen most, monthly trends, day-of-week breakdowns, your longest listening streaks, late-night favorites, songs you had on repeat, a "song of the month" for each month, and your favorite decades. Each card can be exported as a shareable image for your social media profiles.
 
+## Library and manual scrobbles
+
+Open **Library** to browse artists, albums, and songs, including music with no recorded listens.
+
+Choose **Add scrobble** on a song or **Scrobble album** on an album. The date defaults to today in your browser's timezone and can be changed. For an album, select when you finished listening: Rewind previews a start time for each song in disc/track order using its duration. Confirm the preview to submit the listens to Navidrome.
+
+Manual submissions require `NAVIDROME_URL`, valid user credentials, and Navidrome's scrobble history enabled. The mounted database must be the live database belonging to that Navidrome instance. Rewind keeps it read-only and submits through the Subsonic endpoint. Navidrome may also forward these listens to external scrobbling services configured for the user/player; those services apply their own historical-date rules.
+
+Rewind checks the local history before reporting success. If only some records can be verified, the result is uncertain: check your listening history before trying again. There is no automatic retry or undo. Albums are limited to 1,000 available tracks per submission; missing files are excluded.
+
 ## Requirements
 
 - A running [Navidrome](https://www.navidrome.org/) instance with native scrobbling support (v0.59.0+)

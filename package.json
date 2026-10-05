@@ -1,12 +1,14 @@
 {
   "name": "rewind",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:server": "vitest run tests/library.test.ts",
+    "test:unit": "vitest run tests/",
     "serve:ssr:rewind": "node --env-file=.env dist/rewind/server/server.mjs",
     "dev": "npm run build && npm run serve:ssr:rewind"
   },

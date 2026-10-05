@@ -1,15 +1,19 @@
 <div
   #cardElement
-  class="w-full h-full lg:h-[calc(100vh-68px-4rem)] lg:aspect-square lg:max-w-[calc(100vh-68px-4rem)] min-w-0"
+  class="w-full h-full medium-up:w-auto medium-up:h-[min(100cqh-68px-4rem,100cqw-6rem)] medium-up:aspect-square min-w-0"
 >
   @switch (selectedStat()) {
     @case ('summary') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
         @if (summaryData(); as d) {
-          <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Your Year in Music</h2>
+          <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+            Your Year in Music
+          </h2>
           <div class="flex-1 flex flex-col justify-center gap-8">
             <div class="text-center">
-              <p class="text-[8rem] leading-none font-black text-white">{{ formatNum(d.total_hours) }}</p>
+              <p class="text-[8em] leading-none font-black text-white">
+                {{ formatNum(d.total_hours) }}
+              </p>
               <p class="text-white/60 text-xl font-medium mt-2">hours listened</p>
             </div>
             <div class="grid grid-cols-4 gap-4">
@@ -31,7 +35,9 @@
               </div>
             </div>
             <div class="text-center">
-              <p class="text-2xl font-semibold text-white/80">That's {{ formatNum(d.total_days) }} days of music!</p>
+              <p class="text-2xl font-semibold text-white/80">
+                That's {{ formatNum(d.total_days) }} days of music!
+              </p>
             </div>
           </div>
         }
@@ -39,39 +45,64 @@
     }
 
     @case ('top-songs') {
-      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Songs</h2>
-        <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
-          @for (song of topSongs() | slice: 0:11; track song.title; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="song.album_id" [size]="400" />
+      <app-card-shell
+        [gradient]="currentGradient()"
+        [gradientStyle]="dynamicGradientStyle()"
+        [yearLabel]="yearLabel()"
+      >
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">
+          Top Songs
+        </h2>
+        <div class="flex-1 flex flex-col gap-4 min-h-0">
+          @if (topSongs()[0]; as song) {
+            <div
+              class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(song.artist_id, $event)"
+              (keydown.enter)="openArtist(song.artist_id, $event)"
+            >
+              <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                <app-cover [id]="song.album_id" [size]="400" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">
+                  #1 Song
+                </p>
+                <p class="text-white font-black text-4xl leading-tight truncate">
+                  {{ song.title }}
+                </p>
+                <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
+                <p class="text-white/40 text-base mt-2 font-medium">{{ song.plays }} plays</p>
+              </div>
+            </div>
+          }
+          <div
+            class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-4 gap-y-1 flex-1 min-h-0 overflow-hidden -mx-2"
+          >
+            @for (song of topSongs() | slice: 1 : 11; track $index; let i = $index) {
+              <div
+                class="flex items-center gap-3 min-w-0 min-h-0 rounded-xl px-2 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                role="button"
+                tabindex="0"
+                (click)="openArtist(song.artist_id, $event)"
+                (keydown.enter)="openArtist(song.artist_id, $event)"
+              >
+                <span
+                  class="text-white/30 text-lg font-black w-6 text-right shrink-0 tabular-nums"
+                  >{{ i + 2 }}</span
+                >
+                <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                  <app-cover [id]="song.album_id" [size]="200" />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Song</p>
-                  <p class="text-white font-black text-4xl leading-tight truncate">{{ song.title }}</p>
-                  <p class="text-white/70 text-xl truncate mt-1">{{ song.artist }}</p>
-                  <p class="text-white/40 text-base mt-2 font-medium">{{ song.plays }} plays</p>
+                  <p class="text-white font-semibold text-base truncate">{{ song.title }}</p>
+                  <p class="text-white/50 text-sm truncate">{{ song.artist }}</p>
                 </div>
+                <span class="text-white/40 text-sm font-medium shrink-0 tabular-nums">{{
+                  song.plays
+                }}</span>
               </div>
-            }
-          }
-          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
-            @for (song of topSongs() | slice: 0:11; track song.title; let i = $index) {
-              @if (i > 0) {
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                  <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                    <app-cover [id]="song.album_id" [size]="200" />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-white font-semibold text-base truncate">{{ song.title }}</p>
-                    <p class="text-white/50 text-sm truncate">{{ song.artist }}</p>
-                  </div>
-                  <span class="text-white/40 text-sm font-medium shrink-0">{{ song.plays }}</span>
-                </div>
-              }
             }
           </div>
         </div>
@@ -79,39 +110,68 @@
     }
 
     @case ('top-artists') {
-      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Artists</h2>
-        <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
-          @for (artist of topArtists() | slice: 0:11; track artist.artist; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-36 h-36 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="artist.artist_id" [size]="400" />
+      <app-card-shell
+        [gradient]="currentGradient()"
+        [gradientStyle]="dynamicGradientStyle()"
+        [yearLabel]="yearLabel()"
+      >
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">
+          Top Artists
+        </h2>
+        <div class="flex-1 flex flex-col gap-4 min-h-0">
+          @if (topArtists()[0]; as artist) {
+            <div
+              class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(artist.artist_id, $event)"
+              (keydown.enter)="openArtist(artist.artist_id, $event)"
+            >
+              <div class="w-36 h-36 rounded-full shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                <app-cover [id]="artist.artist_id" [size]="400" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">
+                  #1 Artist
+                </p>
+                <p class="text-white font-black text-4xl leading-tight truncate">
+                  {{ artist.artist }}
+                </p>
+                <p class="text-white/70 text-xl truncate mt-1">
+                  {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
+                </p>
+                <p class="text-white/40 text-base mt-2 font-medium">{{ artist.plays }} plays</p>
+              </div>
+            </div>
+          }
+          <div
+            class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-4 gap-y-1 flex-1 min-h-0 overflow-hidden -mx-2"
+          >
+            @for (artist of topArtists() | slice: 1 : 11; track $index; let i = $index) {
+              <div
+                class="flex items-center gap-3 min-w-0 min-h-0 rounded-xl px-2 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                role="button"
+                tabindex="0"
+                (click)="openArtist(artist.artist_id, $event)"
+                (keydown.enter)="openArtist(artist.artist_id, $event)"
+              >
+                <span
+                  class="text-white/30 text-lg font-black w-6 text-right shrink-0 tabular-nums"
+                  >{{ i + 2 }}</span
+                >
+                <div class="w-12 h-12 rounded-full shrink-0 overflow-hidden bg-white/10">
+                  <app-cover [id]="artist.artist_id" [size]="200" />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Artist</p>
-                  <p class="text-white font-black text-4xl leading-tight truncate">{{ artist.artist }}</p>
-                  <p class="text-white/70 text-xl truncate mt-1">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                  <p class="text-white/40 text-base mt-2 font-medium">{{ artist.plays }} plays</p>
+                  <p class="text-white font-semibold text-base truncate">{{ artist.artist }}</p>
+                  <p class="text-white/50 text-sm truncate">
+                    {{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h
+                  </p>
                 </div>
+                <span class="text-white/40 text-sm font-medium shrink-0 tabular-nums">{{
+                  artist.plays
+                }}</span>
               </div>
-            }
-          }
-          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
-            @for (artist of topArtists() | slice: 0:11; track artist.artist; let i = $index) {
-              @if (i > 0) {
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                  <div class="w-12 h-12 rounded-full shrink-0 overflow-hidden bg-white/10">
-                    <app-cover [id]="artist.artist_id" [size]="200" />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-white font-semibold text-base truncate">{{ artist.artist }}</p>
-                    <p class="text-white/50 text-sm truncate">{{ artist.unique_tracks }} tracks &middot; {{ artist.total_hours }}h</p>
-                  </div>
-                  <span class="text-white/40 text-sm font-medium shrink-0">{{ artist.plays }}</span>
-                </div>
-              }
             }
           </div>
         </div>
@@ -119,39 +179,64 @@
     }
 
     @case ('top-albums') {
-      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">Top Albums</h2>
-        <div class="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
-          @for (album of topAlbums() | slice: 0:11; track album.album; let i = $index) {
-            @if (i === 0) {
-              <div class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0">
-                <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
-                  <app-cover [id]="album.album_id" [size]="400" />
+      <app-card-shell
+        [gradient]="currentGradient()"
+        [gradientStyle]="dynamicGradientStyle()"
+        [yearLabel]="yearLabel()"
+      >
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-5">
+          Top Albums
+        </h2>
+        <div class="flex-1 flex flex-col gap-4 min-h-0">
+          @if (topAlbums()[0]; as album) {
+            <div
+              class="flex gap-5 items-center bg-white/10 rounded-2xl p-5 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(album.artist_id, $event)"
+              (keydown.enter)="openArtist(album.artist_id, $event)"
+            >
+              <div class="w-36 h-36 rounded-xl shrink-0 overflow-hidden bg-white/10 shadow-lg">
+                <app-cover [id]="album.album_id" [size]="400" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">
+                  #1 Album
+                </p>
+                <p class="text-white font-black text-4xl leading-tight truncate">
+                  {{ album.album }}
+                </p>
+                <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
+                <p class="text-white/40 text-base mt-2 font-medium">{{ album.plays }} plays</p>
+              </div>
+            </div>
+          }
+          <div
+            class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-4 gap-y-1 flex-1 min-h-0 overflow-hidden -mx-2"
+          >
+            @for (album of topAlbums() | slice: 1 : 11; track $index; let i = $index) {
+              <div
+                class="flex items-center gap-3 min-w-0 min-h-0 rounded-xl px-2 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                role="button"
+                tabindex="0"
+                (click)="openArtist(album.artist_id, $event)"
+                (keydown.enter)="openArtist(album.artist_id, $event)"
+              >
+                <span
+                  class="text-white/30 text-lg font-black w-6 text-right shrink-0 tabular-nums"
+                  >{{ i + 2 }}</span
+                >
+                <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
+                  <app-cover [id]="album.album_id" [size]="200" />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="text-white/50 text-sm font-black uppercase tracking-[0.2em] mb-1">#1 Album</p>
-                  <p class="text-white font-black text-4xl leading-tight truncate">{{ album.album }}</p>
-                  <p class="text-white/70 text-xl truncate mt-1">{{ album.album_artist }}</p>
-                  <p class="text-white/40 text-base mt-2 font-medium">{{ album.plays }} plays</p>
+                  <p class="text-white font-semibold text-base truncate">{{ album.album }}</p>
+                  <p class="text-white/50 text-sm truncate">{{ album.album_artist }}</p>
                 </div>
+                <span class="text-white/40 text-sm font-medium shrink-0 tabular-nums">{{
+                  album.plays
+                }}</span>
               </div>
-            }
-          }
-          <div class="grid grid-cols-2 grid-rows-5 grid-flow-col gap-x-6 gap-y-3 flex-1 min-h-0 overflow-hidden">
-            @for (album of topAlbums() | slice: 0:11; track album.album; let i = $index) {
-              @if (i > 0) {
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-white/30 text-lg font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
-                  <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                    <app-cover [id]="album.album_id" [size]="200" />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-white font-semibold text-base truncate">{{ album.album }}</p>
-                    <p class="text-white/50 text-sm truncate">{{ album.album_artist }}</p>
-                  </div>
-                  <span class="text-white/40 text-sm font-medium shrink-0">{{ album.plays }}</span>
-                </div>
-              }
             }
           </div>
         </div>
@@ -160,19 +245,28 @@
 
     @case ('top-genres') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Top Genres</h2>
-        <div class="flex-1 grid grid-cols-2 gap-4 content-start">
-          @for (genre of topGenres()  | slice: 0:10; track genre.genre; let i = $index) {
-            <div class="bg-white/10 rounded-2xl p-5">
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Top Genres
+        </h2>
+        <div class="flex-1 card-scroll grid grid-cols-2 gap-4 content-start">
+          @for (genre of topGenres(); track genre.genre; let i = $index) {
+            <div class="bg-white/10 rounded-2xl p-5 min-w-0">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-white/40 text-2xl font-black shrink-0">{{ i + 1 }}</span>
+                  <span class="text-white/40 text-2xl font-black shrink-0 tabular-nums">{{
+                    i + 1
+                  }}</span>
                   <p class="text-white font-semibold text-lg truncate">{{ genre.genre }}</p>
                 </div>
-                <span class="text-white/50 text-sm font-medium shrink-0">{{ genre.plays }}</span>
+                <span class="text-white/50 text-sm font-medium shrink-0 tabular-nums">{{
+                  genre.plays
+                }}</span>
               </div>
               <div class="mt-3 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                <div class="h-full bg-white/40 rounded-full" [style.width.%]="genreBarWidth(genre.plays)"></div>
+                <div
+                  class="h-full bg-white/40 rounded-full"
+                  [style.width.%]="genreBarWidth(genre.plays)"
+                ></div>
               </div>
             </div>
           }
@@ -182,13 +276,17 @@
 
     @case ('listening-clock') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">Listening Clock</h2>
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">
+          Listening Clock
+        </h2>
         <p class="text-white/40 text-base mb-6">Plays by hour of day</p>
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex-1 flex items-end gap-1.5 min-h-0">
-            @for (hour of listeningClock(); track hour.hour) {
-              <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0 group">
-                <span class="text-white/50 text-[0.6rem] font-mono mb-1 tabular-nums">{{ hour.plays }}</span>
+            @for (hour of clock(); track hour.hour) {
+              <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0">
+                <span class="text-white/50 text-[0.6em] font-mono mb-1 tabular-nums">{{
+                  hour.plays > 0 ? hour.plays : ''
+                }}</span>
                 <div
                   class="w-full bg-white/40 rounded-t-md transition-all"
                   [style.height.%]="clockBarWidth(hour.plays)"
@@ -198,8 +296,10 @@
             }
           </div>
           <div class="flex gap-1.5 mt-3 pt-3 border-t border-white/10">
-            @for (hour of listeningClock(); track hour.hour) {
-              <span class="flex-1 text-center text-white/50 text-xs font-mono tabular-nums">{{ padHour(hour.hour) }}</span>
+            @for (hour of clock(); track hour.hour) {
+              <span class="flex-1 text-center text-white/50 text-xs font-mono tabular-nums">{{
+                padHour(hour.hour)
+              }}</span>
             }
           </div>
         </div>
@@ -208,13 +308,19 @@
 
     @case ('monthly-trends') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Monthly Trends</h2>
-        <div class="flex-1 grid grid-cols-3 gap-3 content-start">
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Monthly Trends
+        </h2>
+        <div class="flex-1 card-scroll grid grid-cols-3 gap-3 content-start">
           @for (m of monthlyTrends(); track m.month) {
-            <div class="bg-white/10 rounded-xl p-4 flex flex-col gap-1">
-              <span class="text-white/60 text-sm font-bold uppercase tracking-wider">{{ formatMonth(m.month) }}</span>
-              <span class="text-white text-2xl font-black leading-tight">{{ m.plays }}</span>
-              <span class="text-white/40 text-xs">plays &middot; {{ m.hours }}h</span>
+            <div class="bg-white/10 rounded-xl p-4 flex flex-col gap-1 min-w-0">
+              <span class="text-white/60 text-sm font-bold uppercase tracking-wider">{{
+                monthLabel(m.month, monthlyTrends())
+              }}</span>
+              <span class="text-white text-2xl font-black leading-tight tabular-nums">{{
+                m.plays
+              }}</span>
+              <span class="text-white/40 text-xs truncate">plays &middot; {{ m.hours }}h</span>
             </div>
           }
         </div>
@@ -223,13 +329,20 @@
 
     @case ('day-of-week') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Day of the Week</h2>
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Day of the Week
+        </h2>
         <div class="flex-1 flex flex-col justify-center gap-5">
           @for (d of dayOfWeek(); track d.day) {
             <div class="flex items-center gap-5">
-              <span class="text-white/70 text-xl font-semibold w-20 shrink-0">{{ d.day.slice(0, 3) }}</span>
+              <span class="text-white/70 text-xl font-semibold w-20 shrink-0">{{
+                d.day.slice(0, 3)
+              }}</span>
               <div class="flex-1 h-10 bg-white/10 rounded-full overflow-hidden">
-                <div class="h-full bg-white/40 rounded-full flex items-center justify-end pr-4" [style.width.%]="dayBarWidth(d.plays)">
+                <div
+                  class="h-full bg-white/40 rounded-full flex items-center justify-end pr-4"
+                  [style.width.%]="dayBarWidth(d.plays)"
+                >
                   <span class="text-white/90 text-base font-semibold">{{ d.plays }}</span>
                 </div>
               </div>
@@ -241,48 +354,78 @@
 
     @case ('streak') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Listening Streak</h2>
-        <div class="flex-1 flex flex-col justify-center">
-          @if (streaks().length > 0) {
-            <div class="text-center mb-10">
-              <p class="text-[10rem] leading-none font-black text-white">{{ streaks()[0].streak_days }}</p>
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Listening Streak
+        </h2>
+        @if (streaks()[0]; as best) {
+          <div class="flex-1 flex flex-col min-h-0" [class.justify-center]="streaks().length === 1">
+            <div class="text-center shrink-0 mb-8">
+              <p class="text-[10em] leading-none font-black text-white tabular-nums">
+                {{ best.streak_days }}
+              </p>
               <p class="text-white/60 text-xl font-medium mt-4">consecutive days</p>
-              <p class="text-white/40 text-base mt-2">{{ streaks()[0].streak_start }} — {{ streaks()[0].streak_end }}</p>
+              <p class="text-white/40 text-base mt-2">
+                {{ best.streak_start }} — {{ best.streak_end }}
+              </p>
             </div>
             @if (streaks().length > 1) {
-              <div>
-                <p class="text-white/50 text-sm font-semibold uppercase tracking-wider mb-3">Other streaks</p>
-                <div class="grid grid-cols-2 gap-3">
-                  @for (s of streaks().slice(1); track s.streak_start) {
-                    <div class="flex items-center justify-between bg-white/10 rounded-xl px-5 py-3">
-                      <span class="text-white/80 text-base font-semibold">{{ s.streak_days }} days</span>
-                      <span class="text-white/40 text-sm">{{ s.streak_start }} — {{ s.streak_end }}</span>
-                    </div>
-                  }
-                </div>
+              <p class="text-white/50 text-sm font-semibold uppercase tracking-wider mb-3 shrink-0">
+                Other streaks
+              </p>
+              <div class="flex-1 card-scroll grid grid-cols-2 gap-3 content-start">
+                @for (s of streaks() | slice: 1; track s.streak_start) {
+                  <div
+                    class="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-5 py-3 min-w-0"
+                  >
+                    <span class="text-white/80 text-base font-semibold tabular-nums shrink-0"
+                      >{{ s.streak_days }} days</span
+                    >
+                    <span class="text-white/40 text-sm tabular-nums truncate"
+                      >{{ s.streak_start }} — {{ s.streak_end }}</span
+                    >
+                  </div>
+                }
               </div>
             }
-          }
-        </div>
+          </div>
+        }
       </app-card-shell>
     }
 
     @case ('late-night') {
-      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">Late Night Vibes</h2>
-        <p class="text-white/40 text-base mb-6">Songs you listened to between midnight and 5 AM</p>
-        <div class="flex-1 grid grid-cols-2 gap-x-6 gap-y-4 content-start">
-          @for (track of lateNight(); track track.title; let i = $index) {
-            <div class="flex items-center gap-4 min-w-0">
-              <span class="text-white/40 text-xl font-black w-6 text-right shrink-0">{{ i + 1 }}</span>
+      <app-card-shell
+        [gradient]="currentGradient()"
+        [gradientStyle]="dynamicGradientStyle()"
+        [yearLabel]="yearLabel()"
+      >
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">
+          Late Night Vibes
+        </h2>
+        <p class="text-white/40 text-base mb-6 shrink-0">
+          Songs you listened to between midnight and 5 AM
+        </p>
+        <div class="flex-1 card-scroll grid grid-cols-2 gap-x-4 gap-y-1 content-start -mx-2">
+          @for (song of lateNight(); track $index; let i = $index) {
+            <div
+              class="flex items-center gap-4 min-w-0 rounded-xl px-2 py-1.5 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(song.artist_id, $event)"
+              (keydown.enter)="openArtist(song.artist_id, $event)"
+            >
+              <span class="text-white/40 text-xl font-black w-8 text-right shrink-0 tabular-nums">{{
+                i + 1
+              }}</span>
               <div class="w-14 h-14 rounded-lg shrink-0 overflow-hidden bg-white/10">
-                <app-cover [id]="track.album_id" />
+                <app-cover [id]="song.album_id" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-white font-semibold text-base truncate">{{ track.title }}</p>
-                <p class="text-white/60 text-sm truncate">{{ track.artist }}</p>
+                <p class="text-white font-semibold text-base truncate">{{ song.title }}</p>
+                <p class="text-white/60 text-sm truncate">{{ song.artist }}</p>
               </div>
-              <span class="text-white/50 text-sm font-medium shrink-0">{{ track.late_night_plays }}x</span>
+              <span class="text-white/50 text-sm font-medium shrink-0 tabular-nums"
+                >{{ song.late_night_plays }}x</span
+              >
             </div>
           }
         </div>
@@ -291,20 +434,30 @@
 
     @case ('on-repeat') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">On Repeat</h2>
-        <p class="text-white/40 text-base mb-6">Songs you played 3+ times in a single day</p>
-        <div class="flex-1 grid grid-cols-2 gap-x-4 gap-y-3 content-start overflow-hidden">
-          @for (entry of onRepeat()  | slice: 0:14; track entry.the_date + entry.title; let i = $index) {
-            <div class="bg-white/10 rounded-xl px-4 py-3 min-w-0">
-              <div class="flex items-center justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <p class="text-white font-semibold text-base truncate">{{ entry.title }}</p>
-                  <p class="text-white/60 text-sm truncate">{{ entry.artist }}</p>
-                </div>
-                <div class="text-right shrink-0">
-                  <p class="text-white/80 text-base font-bold">{{ entry.plays_that_day }}x</p>
-                  <p class="text-white/40 text-xs">{{ entry.the_date }}</p>
-                </div>
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-2">
+          On Repeat
+        </h2>
+        <p class="text-white/40 text-base mb-6 shrink-0">
+          Songs you played 3+ times in a single day
+        </p>
+        <div class="flex-1 card-scroll grid grid-cols-2 gap-x-4 gap-y-3 content-start">
+          @for (entry of onRepeat(); track entry.the_date + entry.title) {
+            <div
+              class="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-4 py-3 min-w-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(entry.artist_id, $event)"
+              (keydown.enter)="openArtist(entry.artist_id, $event)"
+            >
+              <div class="min-w-0 flex-1">
+                <p class="text-white font-semibold text-base truncate">{{ entry.title }}</p>
+                <p class="text-white/60 text-sm truncate">{{ entry.artist }}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-white/80 text-base font-bold tabular-nums">
+                  {{ entry.plays_that_day }}x
+                </p>
+                <p class="text-white/40 text-xs tabular-nums">{{ entry.the_date }}</p>
               </div>
             </div>
           }
@@ -314,11 +467,22 @@
 
     @case ('song-of-month') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Song of the Month</h2>
-        <div class="flex-1 grid grid-cols-2 gap-3 content-start">
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Song of the Month
+        </h2>
+        <div class="flex-1 card-scroll grid grid-cols-2 gap-3 content-start">
           @for (s of songOfMonth(); track s.month) {
-            <div class="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2.5 min-w-0">
-              <span class="text-white/60 text-xs font-black uppercase tracking-wider w-9 shrink-0">{{ formatMonth(s.month) }}</span>
+            <div
+              class="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2.5 min-w-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+              role="button"
+              tabindex="0"
+              (click)="openArtist(s.artist_id, $event)"
+              (keydown.enter)="openArtist(s.artist_id, $event)"
+            >
+              <span
+                class="text-white/60 text-xs font-black uppercase tracking-wider w-12 shrink-0 whitespace-nowrap"
+                >{{ monthLabel(s.month, songOfMonth()) }}</span
+              >
               <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
                 <app-cover [id]="s.album_id" [size]="200" />
               </div>
@@ -326,7 +490,9 @@
                 <p class="text-white font-semibold text-sm truncate">{{ s.title }}</p>
                 <p class="text-white/50 text-xs truncate">{{ s.artist }}</p>
               </div>
-              <span class="text-white/40 text-xs font-medium shrink-0">{{ s.plays }}</span>
+              <span class="text-white/40 text-xs font-medium shrink-0 tabular-nums">{{
+                s.plays
+              }}</span>
             </div>
           }
         </div>
@@ -335,20 +501,27 @@
 
     @case ('favorite-decades') {
       <app-card-shell [gradient]="currentGradient()" [yearLabel]="yearLabel()">
-        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">Favorite Decades</h2>
-        <div class="flex-1 grid grid-cols-2 gap-4 content-start">
-          @for (dec of favoriteDecades()  | slice: 0:8; track dec.decade; let i = $index) {
-            <div class="bg-white/10 rounded-2xl p-5">
-              <div class="flex items-center justify-between">
-                <p class="text-white font-black text-3xl">{{ dec.decade }}s</p>
-                <span class="text-white/50 text-sm font-medium">{{ dec.total_plays }} plays</span>
+        <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
+          Favorite Decades
+        </h2>
+        <div class="flex-1 card-scroll grid grid-cols-2 gap-4 content-start">
+          @for (dec of favoriteDecades(); track dec.decade) {
+            <div class="bg-white/10 rounded-2xl p-5 min-w-0">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-white font-black text-3xl tabular-nums">{{ dec.decade }}s</p>
+                <span class="text-white/50 text-sm font-medium tabular-nums"
+                  >{{ dec.total_plays }} plays</span
+                >
               </div>
               <div class="flex gap-3 text-white/40 text-xs mt-1">
                 <span>{{ dec.unique_artists }} artists</span>
                 <span>{{ dec.total_hours }}h listened</span>
               </div>
               <div class="mt-3 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                <div class="h-full bg-white/40 rounded-full" [style.width.%]="decadeBarWidth(dec.total_plays)"></div>
+                <div
+                  class="h-full bg-white/40 rounded-full"
+                  [style.width.%]="decadeBarWidth(dec.total_plays)"
+                ></div>
               </div>
             </div>
           }
@@ -357,17 +530,31 @@
     }
 
     @case ('recap') {
-      <app-card-shell [gradient]="currentGradient()" [gradientStyle]="dynamicGradientStyle()" [yearLabel]="yearLabel()">
+      <app-card-shell
+        [gradient]="currentGradient()"
+        [gradientStyle]="dynamicGradientStyle()"
+        [yearLabel]="yearLabel()"
+      >
         @if (recapData(); as d) {
           <div class="flex-1 flex gap-5 min-h-0">
             <!-- Left: top artist hero -->
             @if (d.top_artist) {
-              <div class="relative w-1/2 rounded-2xl overflow-hidden bg-white/10 shrink-0">
-                <app-cover [id]="d.top_artist.artist_id" [size]="800" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-5">
+              <div
+                class="relative w-1/2 rounded-2xl overflow-hidden bg-white/10 shrink-0 cursor-pointer"
+                role="button"
+                tabindex="0"
+                (click)="openArtist(d.top_artist.artist_id, $event)"
+                (keydown.enter)="openArtist(d.top_artist.artist_id, $event)"
+              >
+                <app-pan-cover [id]="d.top_artist.artist_id" [size]="800" />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"
+                ></div>
+                <div class="absolute bottom-0 left-0 right-0 p-5 pointer-events-none">
                   <p class="text-white/70 text-xs font-bold uppercase tracking-widest">#1 Artist</p>
-                  <p class="text-white font-black text-3xl leading-tight">{{ d.top_artist.artist }}</p>
+                  <p class="text-white font-black text-3xl leading-tight truncate">
+                    {{ d.top_artist.artist }}
+                  </p>
                   <p class="text-white/70 text-sm mt-1">{{ d.top_artist.total_hours }}h listened</p>
                 </div>
               </div>
@@ -376,30 +563,54 @@
             <!-- Right: two-column lists -->
             <div class="flex-1 flex gap-4 min-w-0 min-h-0">
               <!-- Top Artists -->
-              <div class="flex-1 flex flex-col min-w-0">
-                <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3">Top Artists</p>
-                <div class="flex flex-col gap-2">
-                  @for (artist of d.top_artists | slice: 0:10; track artist.artist; let i = $index) {
-                    <div class="flex items-start gap-2 min-w-0">
-                      <span class="text-white/30 text-xs font-black w-4 text-right shrink-0 leading-[1.1rem]">{{ i + 1 }}</span>
+              <div class="flex-1 flex flex-col min-w-0 min-h-0">
+                <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">
+                  Top Artists
+                </p>
+                <div class="flex-1 card-scroll flex flex-col -mx-1">
+                  @for (artist of d.top_artists; track $index; let i = $index) {
+                    <div
+                      class="flex items-start gap-2 min-w-0 rounded-lg px-1 py-1 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                      role="button"
+                      tabindex="0"
+                      (click)="openArtist(artist.artist_id, $event)"
+                      (keydown.enter)="openArtist(artist.artist_id, $event)"
+                    >
+                      <span
+                        class="text-white/30 text-xs font-black w-5 text-right shrink-0 tabular-nums"
+                        >{{ i + 1 }}</span
+                      >
                       <div class="min-w-0 flex-1">
                         <p class="text-white text-xs font-semibold truncate">{{ artist.artist }}</p>
-                        <p class="text-white/40 text-[0.65rem] truncate">{{ artist.total_hours }}h</p>
+                        <p class="text-white/40 text-[0.65em] truncate">
+                          {{ artist.total_hours }}h
+                        </p>
                       </div>
                     </div>
                   }
                 </div>
               </div>
               <!-- Top Songs -->
-              <div class="flex-1 flex flex-col min-w-0">
-                <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3">Top Songs</p>
-                <div class="flex flex-col gap-2">
-                  @for (song of d.top_songs | slice: 0:10; track song.title; let i = $index) {
-                    <div class="flex items-start gap-2 min-w-0">
-                      <span class="text-white/30 text-xs font-black w-4 text-right shrink-0 leading-[1.1rem]">{{ i + 1 }}</span>
+              <div class="flex-1 flex flex-col min-w-0 min-h-0">
+                <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">
+                  Top Songs
+                </p>
+                <div class="flex-1 card-scroll flex flex-col -mx-1">
+                  @for (song of d.top_songs; track $index; let i = $index) {
+                    <div
+                      class="flex items-start gap-2 min-w-0 rounded-lg px-1 py-1 shrink-0 cursor-pointer transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                      role="button"
+                      tabindex="0"
+                      (click)="openArtist(song.artist_id, $event)"
+                      (keydown.enter)="openArtist(song.artist_id, $event)"
+                    >
+                      <span
+                        class="text-white/30 text-xs font-black w-5 text-right shrink-0 tabular-nums"
+                        >{{ i + 1 }}</span
+                      >
                       <div class="min-w-0 flex-1">
                         <p class="text-white text-xs font-semibold truncate">{{ song.title }}</p>
-                        <p class="text-white/40 text-[0.65rem] truncate">{{ song.artist }}</p>
+                        <p class="text-white/40 text-[0.65em] truncate">{{ song.artist }}</p>
                       </div>
                     </div>
                   }
@@ -410,11 +621,11 @@
 
           <!-- Bottom stats row -->
           <div class="grid grid-cols-2 gap-3 mt-5 shrink-0">
-            <div class="bg-white/10 rounded-2xl p-4 text-center">
+            <div class="bg-white/10 rounded-2xl p-4 text-center min-w-0">
               <p class="text-3xl font-black text-white">{{ formatNum(d.total_minutes) }}</p>
               <p class="text-white/60 text-xs font-medium mt-1">minutes listened</p>
             </div>
-            <div class="bg-white/10 rounded-2xl p-4 text-center">
+            <div class="bg-white/10 rounded-2xl p-4 text-center min-w-0">
               <p class="text-3xl font-black text-white truncate">{{ d.top_genre }}</p>
               <p class="text-white/60 text-xs font-medium mt-1">top genre</p>
             </div>

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import type { StatRange } from '../models/range';
 import type { ArtistDetail, StatType } from '../models/stats';
 
 @Injectable({ providedIn: 'root' })
@@ -8,6 +9,7 @@ export class NavidromeService {
   private readonly http = inject(HttpClient);
 
   readonly coverArtAvailable = signal(false);
+  readonly historyChanged = new Subject<void>();
 
   loadConfig(): void {
     this.http.get<{ coverArtAvailable: boolean }>('/api/config').subscribe({
@@ -43,8 +45,3 @@ export class NavidromeService {
     return this.http.get<ArtistDetail>(`/api/artist/${encodeURIComponent(artistId)}${params}`);
   }
 }
-
-export type StatRange =
-  | { kind: 'all-time' }
-  | { kind: 'year'; year: string }
-  | { kind: 'custom'; from: string; to: string };
