@@ -6,6 +6,7 @@ import {
   DestroyRef,
   HostListener,
   inject,
+  signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -15,6 +16,7 @@ import {
   heroArrowRightOnRectangle,
   heroCalendarDays,
   heroChartPie,
+  heroChevronRight,
   heroHeart,
   heroMoon,
   heroRectangleStack,
@@ -23,9 +25,8 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
-import { DateRangePicker } from '../components/date-range-picker/date-range-picker';
 import { Byline } from './byline';
-import { RangeChips } from './range-chips';
+import { PeriodPanel } from './period-panel';
 import { RewindRange } from './rewind-range';
 import { SectionRegistry } from './section-registry';
 import { ShellService } from './shell.service';
@@ -39,15 +40,7 @@ import { ShellService } from './shell.service';
   templateUrl: './shell.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    NgIcon,
-    NgTemplateOutlet,
-    Byline,
-    RangeChips,
-    DateRangePicker,
-  ],
+  imports: [RouterOutlet, RouterLink, NgIcon, NgTemplateOutlet, Byline, PeriodPanel],
   providers: [
     provideIcons({
       heroChartPie,
@@ -57,6 +50,7 @@ import { ShellService } from './shell.service';
       heroMoon,
       heroUserCircle,
       heroArrowRightOnRectangle,
+      heroChevronRight,
       heroHeart,
     }),
   ],
@@ -77,27 +71,27 @@ export class Shell {
   readonly currentUser = this.auth.user;
   readonly canLogout = this.auth.canLogout;
   readonly menuOpen = this.shell.menuOpen;
-  readonly routeActions = this.shell.routeActions;
+  readonly chrome = this.shell.routeChrome;
   readonly quietCorner = this.shell.quietCorner;
+  readonly accountOpen = signal(false);
+
+  /** One letter stands in for the user on the rail. */
+  readonly initial = computed(() => this.currentUser()?.username.charAt(0).toUpperCase() ?? '');
 
   /** The range control only appears for sections whose data the range applies to. */
   readonly showRange = computed(() => this.registry.active()?.usesRange === true);
   readonly rangeLabel = this.range.label;
   readonly rangeShortLabel = this.range.shortLabel;
   readonly rangePanelOpen = this.range.panelOpen;
-  readonly rangePickerOpen = this.range.pickerOpen;
-  readonly customRange = computed(() => {
-    const current = this.range.current();
-    return current.kind === 'custom' ? current : null;
-  });
 
   constructor() {
     // Leaving a route drops its contributed controls; the next route registers its own.
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) {
-        this.shell.setRouteActions(null);
+        this.shell.setRouteChrome({});
         this.shell.setQuietCorner(false);
         this.shell.closeMenu();
+        this.accountOpen.set(false);
         this.range.closePanel();
       }
     });
@@ -108,6 +102,7 @@ export class Shell {
 
   toggleRangePanel(): void {
     this.shell.closeMenu();
+    this.accountOpen.set(false);
     this.range.togglePanel();
   }
 
@@ -115,17 +110,13 @@ export class Shell {
     this.range.closePanel();
   }
 
-  closeRangePicker(): void {
-    this.range.closePicker();
+  toggleAccount(): void {
+    this.range.closePanel();
+    this.accountOpen.update((open) => !open);
   }
 
-  onCustomRangeSelected(selected: { from: string; to: string }): void {
-    this.range.set({ kind: 'custom', from: selected.from, to: selected.to });
-    this.range.closePicker();
-  }
-
-  onCustomRangeCleared(): void {
-    this.range.clearCustomRange();
+  closeAccount(): void {
+    this.accountOpen.set(false);
   }
 
   toggleMenu(): void {
@@ -142,6 +133,7 @@ export class Shell {
 
   logout(): void {
     this.shell.closeMenu();
+    this.accountOpen.set(false);
     this.auth.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => this.router.navigate(['/login']),
@@ -151,7 +143,7 @@ export class Shell {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.shell.closeMenu();
+    this.accountOpen.set(false);
     this.range.closePanel();
-    this.range.closePicker();
   }
 }

@@ -19,21 +19,21 @@ export interface Section {
 
 export const SECTIONS: readonly Section[] = [
   {
-    id: 'rewind',
-    label: 'Rewind',
-    icon: 'heroChartPie',
-    route: '/',
-    owns: ['/artist'],
-    usesRange: true,
-    order: 10,
-  },
-  {
     id: 'library',
     label: 'Library',
     icon: 'heroRectangleStack',
     route: '/library',
     owns: [],
     usesRange: false,
+    order: 10,
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: 'heroChartPie',
+    route: '/',
+    owns: ['/artist'],
+    usesRange: true,
     order: 20,
   },
 ];

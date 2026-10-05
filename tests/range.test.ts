@@ -7,6 +7,7 @@ import {
   paramsMatch,
   rangeFromParams,
   rangeLabel,
+  rangePresets,
   rangeShortLabel,
   rangeSlug,
   rangeToParams,
@@ -157,5 +158,32 @@ describe('rangeSlug', () => {
     expect(rangeSlug(ALL_TIME)).toBe('all-time');
     expect(rangeSlug(YEAR)).toBe('2024');
     expect(rangeSlug(CUSTOM)).toBe('2024-03-01_2024-03-31');
+  });
+});
+
+describe('rangePresets', () => {
+  const today = new Date(2026, 2, 15);
+
+  it('resolves each window against today', () => {
+    const ranges = Object.fromEntries(rangePresets(today).map((p) => [p.label, p.range]));
+    expect(ranges['All time']).toEqual(ALL_TIME);
+    expect(ranges['Last week']).toEqual({ kind: 'custom', from: '2026-03-08', to: '2026-03-15' });
+    expect(ranges['Last 30 days']).toEqual({
+      kind: 'custom',
+      from: '2026-02-13',
+      to: '2026-03-15',
+    });
+    expect(ranges['Last month']).toEqual({ kind: 'custom', from: '2026-02-01', to: '2026-02-28' });
+  });
+
+  it('labels each window the way the rest of the app names it', () => {
+    const labels = rangePresets(today).map((p) => rangeLabel(p.range, today));
+    expect(labels).toEqual(['All Time', 'Last Week', 'Feb 13 – Mar 15', 'Last Month']);
+  });
+
+  it('reaches back across a year boundary in January', () => {
+    const january = new Date(2026, 0, 10);
+    const lastMonth = rangePresets(january).find((p) => p.label === 'Last month')!.range;
+    expect(lastMonth).toEqual({ kind: 'custom', from: '2025-12-01', to: '2025-12-31' });
   });
 });

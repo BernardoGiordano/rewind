@@ -3,10 +3,11 @@ import { DecimalPipe, SlicePipe } from '@angular/common';
 import { CardShellComponent } from '../card-shell';
 import { CardsBase } from '../cards-base';
 import { CoverComponent } from '../cover';
+import { PanCoverComponent } from '../pan-cover';
 
 @Component({
   selector: 'app-cards-landscape',
-  imports: [CardShellComponent, CoverComponent, SlicePipe, DecimalPipe],
+  imports: [CardShellComponent, CoverComponent, PanCoverComponent, SlicePipe, DecimalPipe],
   templateUrl: './cards-landscape.html',
 })
 export class CardsLandscape extends CardsBase {

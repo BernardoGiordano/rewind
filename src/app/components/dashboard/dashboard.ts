@@ -40,7 +40,6 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NavidromeService } from '../../services/navidrome.service';
 import { type StatRange, rangeSlug } from '../../models/range';
 import { LayoutModeService } from '../../shell/layout-mode';
-import { RangeChips } from '../../shell/range-chips';
 import { RewindRange } from '../../shell/rewind-range';
 import { ShellService } from '../../shell/shell.service';
 import {
@@ -70,13 +69,22 @@ import { StatSheet } from './stat-sheet';
 /** Horizontal travel that counts as a swipe rather than a tap. */
 const SWIPE_THRESHOLD_PX = 48;
 
+type CardMode = 'portrait' | 'square' | 'landscape';
+
+/** Each card aspect with the outline its rail button draws, as SVG rect x, y, width, height. */
+const CARD_MODES: readonly { id: CardMode; label: string; rect: readonly number[] }[] = [
+  { id: 'portrait', label: 'Portrait', rect: [7, 3, 10, 18] },
+  { id: 'square', label: 'Square', rect: [5, 5, 14, 14] },
+  { id: 'landscape', label: 'Landscape', rect: [3, 6, 18, 12] },
+];
+
 @Component({
   selector: 'app-dashboard',
   host: { class: 'block h-full' },
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, RangeChips, StatSheet],
+  imports: [NgIcon, CardsPortrait, CardsSquare, CardsLandscape, StatSheet],
   providers: [
     provideIcons({
       heroMusicalNote,
@@ -112,8 +120,10 @@ export class Dashboard {
   private readonly range = inject(RewindRange);
   private readonly layout = inject(LayoutModeService);
 
-  /** Dashboard-only controls the Shell renders inside its compact menu. */
+  /** Dashboard-only controls the Shell renders inside its chrome. */
   readonly shellActions = viewChild<TemplateRef<unknown>>('shellActions');
+  readonly railTools = viewChild<TemplateRef<unknown>>('railTools');
+  readonly railControls = viewChild<TemplateRef<unknown>>('railControls');
 
   closeShellMenu(): void {
     this.shell.closeMenu();
@@ -128,7 +138,8 @@ export class Dashboard {
   readonly portraitCard = viewChild(CardsPortrait);
   readonly landscapeCard = viewChild(CardsLandscape);
 
-  readonly cardMode = signal<'portrait' | 'square' | 'landscape'>('portrait');
+  readonly cardModes = CARD_MODES;
+  readonly cardMode = signal<CardMode>('portrait');
 
   /** Expanded keeps the sidebar pinned and remembers it; medium opens the same panel as a drawer. */
   readonly sidebarCollapsed = signal(false);
@@ -275,7 +286,7 @@ export class Dashboard {
     });
   }
 
-  selectCardMode(mode: 'portrait' | 'square' | 'landscape'): void {
+  selectCardMode(mode: CardMode): void {
     this.cardMode.set(mode);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('rewind.cardMode', mode);
@@ -284,7 +295,11 @@ export class Dashboard {
 
   /** Hands the Shell everything this route contributes to the chrome. */
   private syncShell(): void {
-    this.shell.setRouteActions(this.shellActions() ?? null);
+    this.shell.setRouteChrome({
+      menu: this.shellActions(),
+      railTools: this.railTools(),
+      railControls: this.railControls(),
+    });
     this.shell.setQuietCorner(this.effectiveCardMode() !== 'landscape');
   }
 
@@ -373,7 +388,7 @@ export class Dashboard {
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.range.overlayOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
+    if (this.range.panelOpen() || this.statSheetOpen() || this.shell.menuOpen()) return;
     if (this.drawerOpen()) return;
 
     const target = event.target as HTMLElement | null;

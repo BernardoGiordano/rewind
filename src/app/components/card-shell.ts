@@ -12,8 +12,8 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
       [class]="containerClass()"
       [style.background-image]="gradientStyle() || null"
     >
-      <div class="px-8 pt-8 flex items-center justify-between shrink-0">
-        <span class="text-white/60 text-sm font-mono tracking-[0.2em] uppercase">Navidrome Rewind</span>
+      <!-- The top-left corner stays empty, where story viewers overlay the poster's name. -->
+      <div class="px-8 pt-8 flex items-center justify-end shrink-0">
         <span class="text-white/80 text-sm font-mono bg-white/10 px-3 py-1 rounded-full">{{ yearLabel() }}</span>
       </div>
 

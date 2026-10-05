@@ -2,7 +2,7 @@
   <!-- Sticky tabs -->
   <div class="sticky top-0 z-20">
     <div class="bg-surface border-b border-edge">
-      <div class="mx-auto px-4 medium-up:px-6 expanded:px-8" [class]="measure()">
+      <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
         <nav class="flex gap-6" role="tablist" aria-label="Library views">
           @for (t of tabs; track t.key) {
             <button
@@ -27,8 +27,8 @@
 
   <!-- Hero -->
   <div
-    class="mx-auto px-4 medium-up:px-6 expanded:px-8 transition-[padding] duration-200"
-    [class]="measure() + (heroCollapsed() ? ' pt-4 pb-3' : ' pt-8 pb-6')"
+    class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 transition-[padding] duration-200"
+    [class]="heroCollapsed() ? 'pt-4 pb-3' : 'pt-8 pb-6'"
   >
     @if (focus(); as f) {
       <!-- Drill-down: the selected artist or album -->
@@ -145,7 +145,7 @@
   </div>
 
   <!-- Results -->
-  <div class="mx-auto px-4 medium-up:px-6 expanded:px-8 pb-16" [class]="measure()">
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 pb-16">
     @if (error()) {
       <div class="rounded-xl bg-surface-sunken p-8 text-center" role="alert">
         <p class="text-red-500 font-medium">{{ error() }}</p>

@@ -546,11 +546,11 @@
                 (click)="openArtist(d.top_artist.artist_id, $event)"
                 (keydown.enter)="openArtist(d.top_artist.artist_id, $event)"
               >
-                <app-cover [id]="d.top_artist.artist_id" [size]="800" />
+                <app-pan-cover [id]="d.top_artist.artist_id" [size]="800" />
                 <div
-                  class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                  class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"
                 ></div>
-                <div class="absolute bottom-0 left-0 right-0 p-5">
+                <div class="absolute bottom-0 left-0 right-0 p-5 pointer-events-none">
                   <p class="text-white/70 text-xs font-bold uppercase tracking-widest">#1 Artist</p>
                   <p class="text-white font-black text-3xl leading-tight truncate">
                     {{ d.top_artist.artist }}

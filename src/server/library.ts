@@ -65,7 +65,9 @@ function describeContext(
   if (artistId) {
     const row = db
       .prepare(
-        `SELECT MAX(mf.artist) AS name, COALESCE(
+        `SELECT CASE WHEN COUNT(*) > 0 THEN COALESCE(
+             (SELECT a.name FROM artist a WHERE a.id = @artist), MAX(mf.artist)) END AS name,
+           COALESCE(
            (SELECT a.id FROM artist a WHERE a.id = @artist AND a.large_image_url <> ''),
            MIN(mf.album_id)) AS cover_id
          FROM media_file mf
@@ -121,9 +123,13 @@ export function libraryRouter(deps: Dependencies): express.Router {
       const artistCover = `COALESCE(
         (SELECT a.id FROM artist a WHERE a.id = mf.artist_id AND a.large_image_url <> ''),
         MIN(mf.album_id)) AS cover_id`;
+      // A track's artist credit can carry guests ("X feat. Y"); the artist row holds
+      // the main name, as in the listening stats.
+      const artistName = `COALESCE((SELECT a.name FROM artist a WHERE a.id = mf.artist_id),
+        MAX(mf.artist)) AS title`;
       const select =
         kind === 'artists'
-          ? `mf.artist_id AS id, MAX(mf.artist) AS title, COUNT(*) AS songs,
+          ? `mf.artist_id AS id, ${artistName}, COUNT(*) AS songs,
              COUNT(DISTINCT mf.album_id) AS albums, SUM(mf.duration) AS duration,
              SUM(COALESCE(p.n, 0)) AS plays, MIN(mf.order_artist_name) AS sort_key,
              ${artistCover}`

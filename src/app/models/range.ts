@@ -1,4 +1,4 @@
-import { MONTH_FULL, MONTH_SHORT, parseIsoDate } from '../utils/format';
+import { MONTH_FULL, MONTH_SHORT, parseIsoDate, toIsoDate } from '../utils/format';
 
 /** The window of listening history a range-aware section reads. */
 export type StatRange =
@@ -77,6 +77,30 @@ export function rangeShortLabel(range: StatRange): string {
   if (range.kind === 'all-time') return 'All';
   if (range.kind === 'year') return range.year;
   return 'Custom';
+}
+
+/** A one-click window the period panel offers next to the years. */
+export interface RangePreset {
+  label: string;
+  range: StatRange;
+}
+
+/** The relative windows people reach for, resolved against `today`. */
+export function rangePresets(today = startOfToday()): RangePreset[] {
+  const custom = (from: Date, to: Date): StatRange => ({
+    kind: 'custom',
+    from: toIsoDate(from),
+    to: toIsoDate(to),
+  });
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  return [
+    { label: 'All time', range: ALL_TIME },
+    { label: 'Last week', range: custom(shiftDays(today, -7), today) },
+    { label: 'Last 30 days', range: custom(shiftDays(today, -30), today) },
+    { label: 'Last month', range: custom(new Date(year, month - 1, 1), new Date(year, month, 0)) },
+  ];
 }
 
 /** Filename-safe form of the range, for exported cards. */

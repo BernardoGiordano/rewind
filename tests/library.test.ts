@@ -31,13 +31,14 @@ beforeEach(async () => {
       album_id TEXT, album_artist TEXT, album_artist_id TEXT, duration REAL, disc_number INTEGER,
       track_number INTEGER, missing INTEGER, library_id INTEGER, year INTEGER,
       order_artist_name TEXT, order_album_name TEXT);
-    CREATE TABLE artist (id TEXT, large_image_url TEXT);
+    CREATE TABLE artist (id TEXT, name TEXT, large_image_url TEXT);
     CREATE TABLE scrobbles (user_id TEXT, media_file_id TEXT, submission_time INTEGER);
-    INSERT INTO artist VALUES ('artist', ''), ('private', 'https://example.test/private.jpg');
+    INSERT INTO artist VALUES ('artist', 'Artist', ''),
+      ('private', 'Private', 'https://example.test/private.jpg');
     INSERT INTO user VALUES ('listener', 0), ('other', 0);
     INSERT INTO user_library VALUES ('listener', 1), ('other', 2);
     INSERT INTO media_file VALUES
-      ('b', 'Second', 'Artist', 'artist', 'Album', 'album', 'Artist', 'artist', 120, 2, 1, 0, 1, 1999, 'artist', 'album'),
+      ('b', 'Second', 'Artist feat. Guest', 'artist', 'Album', 'album', 'Artist', 'artist', 120, 2, 1, 0, 1, 1999, 'artist', 'album'),
       ('a', 'First', 'Artist', 'artist', 'Album', 'album', 'Artist', 'artist', 180, 1, 1, 0, 1, 1999, 'artist', 'album'),
       ('secret', 'Hidden', 'Private', 'private', 'Private', 'private', 'Private', 'private', 30, 1, 1, 0, 2, 2001, 'private', 'private'),
       ('missing', 'Gone', 'Artist', 'artist', 'Album', 'album', 'Artist', 'artist', 30, 1, 2, 1, 1, 1999, 'artist', 'album');
@@ -120,7 +121,10 @@ describe('library and manual scrobbles', () => {
       ['a', 0],
       ['b', 0],
     ]);
-    expect((await (await fetch(base + '/api/library?kind=artists')).json()).total).toBe(1);
+    const artists = await (await fetch(base + '/api/library?kind=artists')).json();
+    expect(artists.total).toBe(1);
+    // A guest credit on one track does not rename the artist.
+    expect(artists.items[0].title).toBe('Artist');
     expect((await (await fetch(base + '/api/library?kind=albums')).json()).items[0].songs).toBe(2);
   });
   it('names the drill-down context from ids alone and hides inaccessible ones', async () => {

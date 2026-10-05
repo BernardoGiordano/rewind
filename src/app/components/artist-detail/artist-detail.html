@@ -22,71 +22,78 @@
   </div>
 } @else if (data(); as d) {
   <div class="h-full overflow-y-auto bg-surface text-ink-body">
-    <!-- Sticky header: nav + tabs combined to avoid gap -->
-    <div class="sticky top-0 z-20">
-      <!-- Top nav -->
-      <div class="backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-edge">
-        <div
-          class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 py-3 flex items-center justify-between gap-4"
+    <!-- Sticky bar: back, tabs and page actions in one row -->
+    <div
+      class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-edge"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 flex items-stretch gap-3 medium-up:gap-5"
+      >
+        <button
+          type="button"
+          (click)="goBack()"
+          aria-label="Back"
+          title="Back"
+          class="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors cursor-pointer"
         >
-          <button
-            type="button"
-            (click)="goBack()"
-            class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors cursor-pointer"
-          >
-            <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
-            Back
-          </button>
-          <div class="flex items-center gap-4">
-            <a
-              routerLink="/library"
-              [queryParams]="{ kind: 'albums', artist: artistId(), title: d.artist }"
-              class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors"
-            >
-              <ng-icon name="heroRectangleStack" class="w-4 h-4" aria-hidden="true" />
-              Browse music
-            </a>
+          <ng-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true" />
+          <span class="compact:hidden">Back</span>
+        </button>
+
+        <div class="my-3 border-l border-edge" aria-hidden="true"></div>
+
+        <nav
+          class="flex-1 min-w-0 flex gap-4 medium-up:gap-6 overflow-x-auto [scrollbar-width:none]"
+          role="tablist"
+          aria-label="Artist views"
+        >
+          @for (
+            t of [
+              { key: 'overview', label: 'Overview' },
+              { key: 'patterns', label: 'Patterns' },
+              { key: 'activity', label: 'Activity' },
+            ];
+            track t.key
+          ) {
             <button
               type="button"
-              (click)="openRangePanel()"
-              [attr.aria-label]="'Change interval, currently ' + rangeLabel()"
-              class="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-ink-muted hover:text-ink transition-colors"
+              role="tab"
+              [attr.aria-selected]="activeTab() === t.key"
+              (click)="selectTab($any(t.key))"
+              class="cursor-pointer shrink-0 py-3 text-sm font-semibold transition-colors border-b-2"
+              [class]="
+                activeTab() === t.key
+                  ? 'border-accent text-ink'
+                  : 'border-transparent text-ink-muted hover:text-ink'
+              "
             >
-              <ng-icon name="heroCalendarDays" class="w-4 h-4" aria-hidden="true" />
-              {{ rangeLabel() }}
+              {{ t.label }}
             </button>
-          </div>
-        </div>
-      </div>
+          }
+        </nav>
 
-      <!-- Tabs -->
-      <div class="bg-surface border-b border-edge">
-        <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
-          <nav class="flex gap-6" role="tablist">
-            @for (
-              t of [
-                { key: 'overview', label: 'Overview' },
-                { key: 'patterns', label: 'Patterns' },
-                { key: 'activity', label: 'Activity' },
-              ];
-              track t.key
-            ) {
-              <button
-                type="button"
-                role="tab"
-                [attr.aria-selected]="activeTab() === t.key"
-                (click)="selectTab($any(t.key))"
-                class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
-                [class]="
-                  activeTab() === t.key
-                    ? 'border-accent text-ink'
-                    : 'border-transparent text-ink-muted hover:text-ink'
-                "
-              >
-                {{ t.label }}
-              </button>
-            }
-          </nav>
+        <div class="shrink-0 flex items-center gap-3 medium-up:gap-4">
+          <a
+            routerLink="/library"
+            [queryParams]="{ kind: 'albums', artist: artistId() }"
+            title="Browse music"
+            aria-label="Browse music"
+            class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+          >
+            <ng-icon name="heroRectangleStack" class="w-4 h-4" aria-hidden="true" />
+            <span class="hidden expanded:inline">Browse music</span>
+          </a>
+          <button
+            type="button"
+            (click)="openRangePanel()"
+            aria-haspopup="dialog"
+            [attr.aria-label]="'Change listening period, currently ' + rangeLabel()"
+            [title]="'Listening period · ' + rangeLabel()"
+            class="cursor-pointer inline-flex items-center gap-1.5 max-w-48 text-xs font-mono uppercase tracking-widest text-ink-muted hover:text-ink transition-colors"
+          >
+            <ng-icon name="heroCalendarDays" class="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span class="compact:hidden truncate">{{ rangeLabel() }}</span>
+          </button>
         </div>
       </div>
     </div>

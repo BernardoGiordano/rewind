@@ -1,16 +1,16 @@
 <div class="h-dvh flex flex-col medium-up:pl-16 bg-surface">
-  <!-- RAIL — brand, sections, chrome. Medium and expanded. -->
+  <!-- RAIL — brand, sections, route tools, then range, route controls, theme and account. -->
   <nav
-    class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center justify-between pt-12 pb-3 bg-surface-sunken border-r border-edge"
+    class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center pt-6 pb-3 bg-surface-sunken border-r border-edge"
     aria-label="Sections"
   >
     <a
       routerLink="/"
-      class="[writing-mode:vertical-rl] rotate-180 font-mono font-bold text-ink tracking-tight text-sm whitespace-nowrap"
+      class="shrink-0 [writing-mode:vertical-rl] rotate-180 font-mono font-bold text-ink tracking-tight text-sm whitespace-nowrap"
       >Navidrome Rewind</a
     >
 
-    <ul role="list" class="flex-1 flex flex-col items-center justify-center gap-1">
+    <ul role="list" class="mt-6 flex flex-col items-center gap-1">
       @for (s of sections; track s.id) {
         <li>
           <a
@@ -31,14 +31,22 @@
       }
     </ul>
 
+    @if (chrome().railTools; as tools) {
+      <div class="w-8 border-t border-edge my-3" aria-hidden="true"></div>
+      <ng-container [ngTemplateOutlet]="tools" />
+    }
+
+    <div class="flex-1 min-h-3" aria-hidden="true"></div>
+
     <div class="flex flex-col items-center gap-1">
       @if (showRange()) {
         <button
           type="button"
           (click)="toggleRangePanel()"
           [attr.aria-expanded]="rangePanelOpen()"
-          [attr.aria-label]="'Change interval, currently ' + rangeLabel()"
-          [title]="'Interval · ' + rangeLabel()"
+          aria-haspopup="dialog"
+          [attr.aria-label]="'Change listening period, currently ' + rangeLabel()"
+          [title]="'Listening period · ' + rangeLabel()"
           class="cursor-pointer flex flex-col items-center gap-0.5 w-12 py-1.5 rounded-xl transition-colors"
           [class]="
             rangePanelOpen()
@@ -51,7 +59,10 @@
             rangeShortLabel()
           }}</span>
         </button>
-        <div class="w-8 border-t border-edge my-1"></div>
+      }
+
+      @if (chrome().railControls; as controls) {
+        <ng-container [ngTemplateOutlet]="controls" />
       }
 
       <button
@@ -64,70 +75,73 @@
         <ng-icon [name]="darkMode() ? 'heroSun' : 'heroMoon'" class="w-5 h-5" aria-hidden="true" />
       </button>
 
-      <a
-        href="https://github.com/BernardoGiordano/rewind"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="GitHub"
-        aria-label="GitHub"
-        class="flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
-      >
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z"
-          />
-        </svg>
-      </a>
-
-      <a
-        href="https://www.paypal.com/paypalme/BernardoGiordano"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Donate"
-        aria-label="Donate"
-        class="flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-          />
-        </svg>
-      </a>
-
       @if (currentUser(); as u) {
-        <div class="w-8 border-t border-edge my-1"></div>
+        <div class="w-8 border-t border-edge my-1" aria-hidden="true"></div>
+        <button
+          type="button"
+          (click)="toggleAccount()"
+          [attr.aria-expanded]="accountOpen()"
+          aria-haspopup="dialog"
+          [attr.aria-label]="'Account, signed in as ' + u.username"
+          [title]="u.username"
+          class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
+          [class]="accountOpen() ? 'bg-fill-strong' : 'hover:bg-fill'"
+        >
+          <span
+            class="flex items-center justify-center w-7 h-7 rounded-full bg-selected text-on-selected text-xs font-bold"
+            aria-hidden="true"
+            >{{ initial() }}</span
+          >
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- ACCOUNT POPOVER — anchored to the foot of the rail -->
+  @if (accountOpen() && currentUser(); as u) {
+    <div
+      class="hidden medium-up:block fixed inset-0 z-50"
+      (click)="closeAccount()"
+      aria-hidden="true"
+    ></div>
+    <div
+      role="dialog"
+      aria-label="Account"
+      class="hidden medium-up:block fixed z-60 left-[4.5rem] bottom-3 w-64 rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised overflow-hidden"
+    >
+      <div class="flex items-center gap-3 px-4 py-3">
+        <span
+          class="flex items-center justify-center w-9 h-9 shrink-0 rounded-full bg-selected text-on-selected text-sm font-bold"
+          aria-hidden="true"
+          >{{ initial() }}</span
+        >
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint leading-none">
+            Signed in as
+          </p>
+          <p class="mt-1 text-sm font-semibold text-ink truncate" [title]="u.username">
+            {{ u.username }}
+          </p>
+        </div>
+      </div>
+      <div class="border-t border-edge-raised p-1">
         @if (canLogout()) {
           <button
             type="button"
             (click)="logout()"
-            [title]="'Sign out ' + u.username"
-            [attr.aria-label]="'Sign out ' + u.username"
-            class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
+            class="cursor-pointer w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-soft hover:bg-fill-raised hover:text-ink transition-colors text-left"
           >
-            <ng-icon name="heroArrowRightOnRectangle" class="w-5 h-5" aria-hidden="true" />
+            <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4 shrink-0" aria-hidden="true" />
+            Sign out
           </button>
         } @else {
-          <span
-            [title]="'Signed in as ' + u.username"
-            class="flex items-center justify-center w-10 h-10 text-ink-faint"
-          >
-            <ng-icon name="heroUserCircle" class="w-5 h-5" aria-hidden="true" />
-          </span>
+          <p class="px-3 py-2 text-xs text-ink-muted">
+            This server signs you in from its configuration, so there is no session to end.
+          </p>
         }
-      }
+      </div>
     </div>
-  </nav>
+  }
 
   <!-- COMPACT BAR — brand, sections, menu. Medium and expanded use the rail. -->
   <header
@@ -229,15 +243,27 @@
 
       @if (showRange()) {
         <div role="separator" class="my-1 border-t border-edge-raised"></div>
-        <div class="px-4 py-3">
-          <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2"
-            >Interval</span
-          >
-          <app-range-chips (chosen)="closeMenu()" />
-        </div>
+        <button
+          type="button"
+          role="menuitem"
+          (click)="toggleRangePanel()"
+          aria-haspopup="dialog"
+          class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
+        >
+          <ng-icon name="heroCalendarDays" class="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span class="flex-1 min-w-0">
+            <span class="block">Listening period</span>
+            <span class="block text-xs text-ink-muted truncate">{{ rangeLabel() }}</span>
+          </span>
+          <ng-icon
+            name="heroChevronRight"
+            class="w-4 h-4 shrink-0 text-ink-faint"
+            aria-hidden="true"
+          />
+        </button>
       }
 
-      @if (routeActions(); as actions) {
+      @if (chrome().menu; as actions) {
         <div role="separator" class="my-1 border-t border-edge-raised"></div>
         <ng-container [ngTemplateOutlet]="actions" />
       }
@@ -309,37 +335,20 @@
     </div>
   }
 
-  <!-- RANGE PANEL — anchored to the rail at medium-up, a centred sheet on compact. -->
+  <!-- PERIOD PANEL — a popover by the rail at medium-up, a bottom sheet on compact -->
   @if (rangePanelOpen()) {
-    <div class="fixed inset-0 z-50" (click)="closeRangePanel()" aria-hidden="true"></div>
+    <div
+      class="fixed inset-0 z-50 bg-black/40 medium-up:bg-transparent"
+      (click)="closeRangePanel()"
+      aria-hidden="true"
+    ></div>
     <div
       role="dialog"
-      aria-label="Interval"
-      class="fixed z-60 w-72 p-4 rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised left-1/2 -translate-x-1/2 top-16 medium-up:left-[4.5rem] medium-up:translate-x-0 medium-up:top-auto medium-up:bottom-3"
+      aria-modal="true"
+      aria-label="Listening period"
+      class="fixed z-60 inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[env(safe-area-inset-bottom)] medium-up:inset-x-auto medium-up:left-[4.5rem] medium-up:bottom-3 medium-up:max-h-[calc(100dvh-1.5rem)] medium-up:rounded-xl medium-up:pb-0 bg-surface-raised shadow-xl ring-1 ring-edge-raised"
     >
-      <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3"
-        >Interval</span
-      >
-      <app-range-chips (chosen)="closeRangePanel()" />
-    </div>
-  }
-
-  <!-- CUSTOM RANGE PICKER — every layout mode -->
-  @if (rangePickerOpen()) {
-    <div class="fixed inset-0 z-60 flex items-center justify-center p-4">
-      <div class="fixed inset-0 bg-black/40" (click)="closeRangePicker()" aria-hidden="true"></div>
-      <div
-        class="relative z-10 rounded-xl bg-surface-raised shadow-lg ring-1 ring-edge-raised"
-        role="dialog"
-        aria-label="Pick a custom date range"
-      >
-        <app-date-range-picker
-          [initialFrom]="customRange()?.from ?? null"
-          [initialTo]="customRange()?.to ?? null"
-          (rangeSelected)="onCustomRangeSelected($event)"
-          (cleared)="onCustomRangeCleared()"
-        />
-      </div>
+      <app-period-panel (closed)="closeRangePanel()" />
     </div>
   }
 

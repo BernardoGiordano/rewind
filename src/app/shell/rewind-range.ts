@@ -24,7 +24,7 @@ const CUSTOM_RANGE_KEY = 'rewind.customRange';
  * The single source of the Rewind date range.
  *
  * Selection, labelling, persistence and URL encoding live here; the rail button,
- * the compact menu, the dashboard sidebar and the artist header are thin adapters
+ * the period panel, the dashboard sidebar and the artist header are thin adapters
  * that read {@link current} and call {@link set}. Sections declare whether the
  * range applies to them, so the Shell knows when to offer the control at all.
  */
@@ -40,7 +40,6 @@ export class RewindRange {
   private readonly _years = signal<string[]>([]);
   private readonly _ready = signal(false);
   private readonly _panelOpen = signal(false);
-  private readonly _pickerOpen = signal(false);
 
   private initialized = false;
 
@@ -52,14 +51,11 @@ export class RewindRange {
   /** False until the browser has resolved the stored and URL range, so nothing fetches twice. */
   readonly ready = this._ready.asReadonly();
 
+  /** True while the range panel is on screen, so routes can stand down their shortcuts. */
   readonly panelOpen = this._panelOpen.asReadonly();
-  readonly pickerOpen = this._pickerOpen.asReadonly();
 
   readonly label = computed(() => rangeLabel(this._current()));
   readonly shortLabel = computed(() => rangeShortLabel(this._current()));
-
-  /** True while either range overlay is on screen, so routes can stand down their shortcuts. */
-  readonly overlayOpen = computed(() => this._panelOpen() || this._pickerOpen());
 
   constructor() {
     this.navidrome.historyChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -109,30 +105,12 @@ export class RewindRange {
     return rangeToParams(this._current());
   }
 
-  /** Drops the stored custom range and falls back to the newest year. */
-  clearCustomRange(): void {
-    if (isPlatformBrowser(this.platformId)) localStorage.removeItem(CUSTOM_RANGE_KEY);
-    if (this._current().kind !== 'custom') return;
-
-    const years = this._years();
-    this.set(years.length > 0 ? { kind: 'year', year: years[0] } : ALL_TIME);
-  }
-
   togglePanel(): void {
     this._panelOpen.update((open) => !open);
   }
 
   closePanel(): void {
     this._panelOpen.set(false);
-  }
-
-  openPicker(): void {
-    this._panelOpen.set(false);
-    this._pickerOpen.set(true);
-  }
-
-  closePicker(): void {
-    this._pickerOpen.set(false);
   }
 
   private settle(urlPicked: boolean, years: string[]): void {
@@ -150,8 +128,13 @@ export class RewindRange {
     });
   }
 
+  /** Only a custom range survives a reload; any other choice drops the stored one. */
   private persist(range: StatRange): void {
-    if (!isPlatformBrowser(this.platformId) || range.kind !== 'custom') return;
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (range.kind !== 'custom') {
+      localStorage.removeItem(CUSTOM_RANGE_KEY);
+      return;
+    }
     localStorage.setItem(CUSTOM_RANGE_KEY, JSON.stringify({ from: range.from, to: range.to }));
   }
 
