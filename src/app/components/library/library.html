@@ -1,27 +1,27 @@
 <div #scroller class="h-full overflow-y-auto bg-surface text-ink-body">
   <!-- Sticky tabs -->
-  <div class="sticky top-0 z-20">
-    <div class="bg-surface border-b border-edge">
-      <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
-        <nav class="flex gap-6" role="tablist" aria-label="Library views">
-          @for (t of tabs; track t.key) {
-            <button
-              type="button"
-              role="tab"
-              [attr.aria-selected]="kind() === t.key"
-              (click)="browse(t.key)"
-              class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
-              [class]="
-                kind() === t.key
-                  ? 'border-accent text-ink'
-                  : 'border-transparent text-ink-muted hover:text-ink'
-              "
-            >
-              {{ t.label }}
-            </button>
-          }
-        </nav>
-      </div>
+  <div
+    class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-edge"
+  >
+    <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
+      <nav class="flex gap-6" role="tablist" aria-label="Library views">
+        @for (t of tabs; track t.key) {
+          <button
+            type="button"
+            role="tab"
+            [attr.aria-selected]="kind() === t.key"
+            (click)="browse(t.key)"
+            class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+            [class]="
+              kind() === t.key
+                ? 'border-accent text-ink'
+                : 'border-transparent text-ink-muted hover:text-ink'
+            "
+          >
+            {{ t.label }}
+          </button>
+        }
+      </nav>
     </div>
   </div>
 
@@ -230,7 +230,7 @@
           class="grid grid-cols-2 medium-up:grid-cols-3 expanded:grid-cols-4 wide:grid-cols-5 gap-x-5 gap-y-8"
         >
           @for (item of items(); track item.id) {
-            <article class="group relative min-w-0">
+            <article class="group relative isolate min-w-0">
               <div class="relative">
                 <div
                   class="aspect-square overflow-hidden bg-fill shadow-sm group-hover:shadow-xl transition-shadow"
