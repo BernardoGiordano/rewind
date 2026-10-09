@@ -1,7 +1,7 @@
 <div data-scroller class="h-full overflow-y-auto bg-surface text-ink-body">
   <!-- Sticky tabs -->
   <div
-    class="sticky top-0 z-20 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-edge"
+    class="sticky top-0 z-20 backdrop-blur bg-surface/80 border-b border-edge"
   >
     <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
       <nav class="flex gap-6" role="tablist" [aria-label]="t('library.views')">
@@ -260,7 +260,7 @@
                 [href]="artistHref(item.id)"
                 [title]="t('library.listeningStats')"
                 [aria-label]="t('library.listeningStatsFor', { title: item.title })"
-                class="flex items-center justify-center w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
+                class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-raised/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
               >
                 <app-icon name="heroChartBarSquare" class="w-4 h-4" aria-hidden="true"></app-icon>
               </a>
@@ -272,7 +272,7 @@
                 (click)="start('album', item.id, item.title)"
                 [title]="t('library.scrobbleAlbum')"
                 [aria-label]="t('library.scrobbleAlbumNamed', { title: item.title })"
-                class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
+                class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full bg-surface-raised/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
               >
                 <app-icon name="heroPlus" class="w-4 h-4" aria-hidden="true"></app-icon>
               </button>
@@ -307,7 +307,7 @@
           type="button"
           [disabled]="!hasPrevious"
           (click)="page(offset - pageSize)"
-          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-surface-raised transition-colors"
         >
           {{ t('common.previous') }}
         </button>
@@ -315,7 +315,7 @@
           type="button"
           [disabled]="!hasNext"
           (click)="page(offset + pageSize)"
-          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-surface-raised transition-colors"
         >
           {{ t('common.next') }}
         </button>

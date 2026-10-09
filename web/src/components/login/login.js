@@ -2,14 +2,13 @@ import { defineComponent, inject, navigate, queryParams, signal, SignalElement }
 
 import { AppIcon } from '../icon/icon.js';
 import { AppLocalePicker } from '../locale-picker/locale-picker.js';
+import { AppThemePicker } from '../theme-picker/theme-picker.js';
 import { AUTH } from '../../services/auth.js';
-import { THEME } from '../../services/theme.js';
 import { errorKey } from '../../utils/api-error.js';
 
 /** The sign-in screen, for servers that let each user sign in with Navidrome credentials. */
 export class Login extends SignalElement {
   #auth = inject(AUTH);
-  #theme = inject(THEME);
 
   username = signal('');
   password = signal('');
@@ -17,12 +16,6 @@ export class Login extends SignalElement {
   submitting = signal(false);
   /** A message key, so the error follows a language change. */
   error = signal(/** @type {string | null} */ (null));
-  darkMode = this.#theme.dark;
-
-  toggleDarkMode() {
-    this.#theme.toggle();
-  }
-
   togglePassword() {
     this.showPassword.value = !this.showPassword.value;
   }
@@ -67,5 +60,5 @@ await defineComponent({
   tag: 'app-login',
   element: Login,
   module: import.meta.url,
-  uses: [AppIcon, AppLocalePicker],
+  uses: [AppIcon, AppLocalePicker, AppThemePicker],
 });

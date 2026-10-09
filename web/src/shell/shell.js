@@ -14,8 +14,8 @@ import {
 
 import { AppIcon } from '../components/icon/icon.js';
 import { AppLocalePicker } from '../components/locale-picker/locale-picker.js';
+import { AppThemePicker } from '../components/theme-picker/theme-picker.js';
 import { AUTH } from '../services/auth.js';
-import { THEME } from '../services/theme.js';
 import { watch } from '../utils/watch.js';
 import { AppByline } from './byline.js';
 import { AppPeriodPanel } from './period-panel.js';
@@ -29,14 +29,12 @@ import { SHELL } from './shell-state.js';
  */
 export class Shell extends SignalElement {
   #auth = inject(AUTH);
-  #theme = inject(THEME);
   #shell = inject(SHELL);
   #registry = inject(SECTION_REGISTRY);
   #range = inject(REWIND_RANGE);
 
   sections = this.#registry.sections;
   activeSection = this.#registry.active;
-  darkMode = this.#theme.dark;
   currentUser = this.#auth.user;
   canLogout = this.#auth.canLogout;
   menuOpen = this.#shell.menuOpen;
@@ -122,15 +120,6 @@ export class Shell extends SignalElement {
     this.#shell.closeMenu();
   }
 
-  toggleDarkMode() {
-    this.#theme.toggle();
-  }
-
-  toggleDarkModeFromMenu() {
-    this.#theme.toggle();
-    this.#shell.closeMenu();
-  }
-
   logout() {
     this.#closeOverlays();
     this.#auth.logout().then(
@@ -151,5 +140,13 @@ await defineComponent({
   tag: 'app-shell',
   element: Shell,
   module: import.meta.url,
-  uses: [RouteOutlet, ComponentOutlet, AppIcon, AppByline, AppLocalePicker, AppPeriodPanel],
+  uses: [
+    RouteOutlet,
+    ComponentOutlet,
+    AppIcon,
+    AppByline,
+    AppLocalePicker,
+    AppThemePicker,
+    AppPeriodPanel,
+  ],
 });

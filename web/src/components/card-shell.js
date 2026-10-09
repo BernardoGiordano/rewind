@@ -1,6 +1,11 @@
-import { defineComponent, SignalElement } from '@srljs/core';
+import { defineComponent, inject, SignalElement } from '@srljs/core';
 
-/** The frame every stat card shares: its gradient, the range badge and the credit. */
+import { THEME } from '../services/theme.js';
+
+/**
+ * The frame every stat card shares: its gradient, the range badge and the credit.
+ * The black theme draws a flat navy card instead of the gradient.
+ */
 export class AppCardShell extends SignalElement {
   static properties = {
     gradient: { attribute: false },
@@ -16,6 +21,8 @@ export class AppCardShell extends SignalElement {
 
   yearLabel = '';
   noRound = false;
+
+  flat = inject(THEME).flatCards;
 }
 
 await defineComponent({ tag: 'app-card-shell', element: AppCardShell, module: import.meta.url });

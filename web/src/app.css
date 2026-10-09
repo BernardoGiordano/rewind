@@ -22,7 +22,8 @@
 
 /* Surface roles. Templates reference roles (bg-surface, text-ink-muted,
    border-edge) instead of spelling slate pairs inline, so a retune happens here.
-   Each role is defined once for light and flipped once under html.dark.
+   Each role is defined once for light and flipped once under html.dark. The black
+   theme keeps html.dark and sets surfaces to pure black, fills and edges a step darker.
 
    Card gradients in STAT_DEFINITIONS are artwork, not chrome, and stay literal. */
 @theme {
@@ -70,6 +71,19 @@ html.dark {
 
   --color-selected: #fff;
   --color-on-selected: oklch(20.8% 0.042 265.755);
+}
+
+html.black {
+  --color-surface: #000;
+  --color-surface-sunken: #000;
+  --color-surface-raised: oklch(20.8% 0.042 265.755);
+
+  --color-fill: oklch(20.8% 0.042 265.755);
+  --color-fill-raised: oklch(27.9% 0.041 260.031);
+  --color-fill-strong: oklch(27.9% 0.041 260.031);
+
+  --color-edge: oklch(20.8% 0.042 265.755);
+  --color-edge-raised: oklch(27.9% 0.041 260.031);
 }
 
 @theme {

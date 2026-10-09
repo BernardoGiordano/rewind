@@ -1,19 +1,12 @@
 <div class="min-h-dvh flex flex-col bg-surface">
-  <!-- Top bar — branding, language and dark mode toggle -->
+  <!-- Top bar — branding, language and theme -->
   <div class="flex items-center justify-between px-6 py-4 expanded:px-10 expanded:py-6">
     <h1 class="font-mono font-bold text-ink tracking-tight text-base expanded:text-lg">
       Navidrome Rewind
     </h1>
     <div class="flex items-center gap-2">
       <app-locale-picker compact></app-locale-picker>
-      <button
-        type="button"
-        (click)="toggleDarkMode()"
-        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-ink-soft bg-fill hover:bg-fill-strong transition-colors"
-        [aria-label]="t(darkMode ? 'theme.switchToLight' : 'theme.switchToDark')"
-      >
-        <app-icon [name]="darkMode ? 'heroSun' : 'heroMoon'" class="w-4 h-4" aria-hidden="true"></app-icon>
-      </button>
+      <app-theme-picker compact></app-theme-picker>
     </div>
   </div>
 

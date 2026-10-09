@@ -22,10 +22,10 @@
     "envSession": "This server signs you in from its configuration, so there is no session to end."
   },
   "theme": {
-    "light": "Light mode",
-    "dark": "Dark mode",
-    "switchToLight": "Switch to light mode",
-    "switchToDark": "Switch to dark mode"
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "black": "Black"
   },
   "locale": {
     "label": "Language"

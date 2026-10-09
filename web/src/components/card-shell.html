@@ -1,8 +1,10 @@
 <div
   class="w-full h-full overflow-hidden relative flex flex-col"
   [class.medium-up:rounded-xl]="!noRound"
-  [class]="gradientStyle ? '' : 'bg-gradient-to-br ' + gradient"
-  [style.background-image]="gradientStyle || null"
+  [class]="flat
+    ? 'bg-slate-950 ring-1 ring-inset ring-slate-800/60'
+    : gradientStyle ? '' : 'bg-gradient-to-br ' + gradient"
+  [style.background-image]="flat ? null : gradientStyle || null"
 >
   <!-- The top-left corner stays empty, where story viewers overlay the poster's name. -->
   <div class="px-8 pt-8 flex items-center justify-end shrink-0">

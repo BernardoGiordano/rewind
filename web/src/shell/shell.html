@@ -1,5 +1,5 @@
 <div class="h-dvh flex flex-col medium-up:pl-16 bg-surface">
-  <!-- RAIL — brand, sections, route tools, then range, route controls, theme and account. -->
+  <!-- RAIL — brand, sections, route tools, then range, route controls and account. -->
   <nav
     class="hidden medium-up:flex fixed inset-y-0 left-0 w-16 z-30 flex-col items-center pt-6 pb-3 bg-surface-sunken border-r border-edge"
     [aria-label]="t('nav.sections')"
@@ -47,16 +47,6 @@
       </button>
 
       <x-outlet [.target]="&railControls"></x-outlet>
-
-      <button
-        type="button"
-        (click)="toggleDarkMode()"
-        [aria-label]="t(darkMode ? 'theme.switchToLight' : 'theme.switchToDark')"
-        [title]="t(darkMode ? 'theme.light' : 'theme.dark')"
-        class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl text-ink-muted hover:bg-fill hover:text-ink transition-colors"
-      >
-        <app-icon [name]="darkMode ? 'heroSun' : 'heroMoon'" class="w-5 h-5" aria-hidden="true"></app-icon>
-      </button>
 
       <div *if="currentUser" class="w-8 border-t border-edge my-1" aria-hidden="true"></div>
       <button
@@ -121,7 +111,8 @@
         {{ t('account.envSession') }}
       </p>
     </div>
-    <div class="border-t border-edge-raised px-4 py-3">
+    <div class="border-t border-edge-raised px-4 py-3 flex flex-col gap-3">
+      <app-theme-picker></app-theme-picker>
       <app-locale-picker></app-locale-picker>
     </div>
   </div>
@@ -231,17 +222,8 @@
 
     <div role="separator" class="my-1 border-t border-edge-raised"></div>
 
-    <button
-      type="button"
-      role="menuitem"
-      (click)="toggleDarkModeFromMenu()"
-      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
-    >
-      <app-icon [name]="darkMode ? 'heroSun' : 'heroMoon'" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
-      {{ t(darkMode ? 'theme.light' : 'theme.dark') }}
-    </button>
-
-    <div class="px-4 py-2.5">
+    <div class="px-4 py-2.5 flex flex-col gap-3">
+      <app-theme-picker></app-theme-picker>
       <app-locale-picker></app-locale-picker>
     </div>
 

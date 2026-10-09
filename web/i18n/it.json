@@ -22,10 +22,10 @@
     "envSession": "Questo server ti fa accedere dalla sua configurazione, quindi non c'è una sessione da chiudere."
   },
   "theme": {
-    "light": "Tema chiaro",
-    "dark": "Tema scuro",
-    "switchToLight": "Passa al tema chiaro",
-    "switchToDark": "Passa al tema scuro"
+    "label": "Tema",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "black": "Nero"
   },
   "locale": {
     "label": "Lingua"
