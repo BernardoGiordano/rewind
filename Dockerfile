@@ -11,4 +11,4 @@ COPY dist/ dist/
 
 EXPOSE 4000
 
-CMD ["node", "dist/rewind/server/server.mjs"]
+CMD ["node", "dist/server/server.js"]

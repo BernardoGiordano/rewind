@@ -1,11 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { STAT_DEFINITIONS, type StatDefinition } from '../src/app/models/stats';
+import { STAT_DEFINITIONS } from '../web/src/models/stats.js';
+import type { StatDefinition } from '../web/src/models/types.js';
 import {
   isStatType,
   statsForRange,
   stepStat,
-} from '../src/app/components/dashboard/stat-traversal';
+} from '../web/src/components/dashboard/stat-traversal.js';
 
 const list = (...types: string[]): StatDefinition[] =>
   types.map((type) => STAT_DEFINITIONS.find((d) => d.type === type)!);

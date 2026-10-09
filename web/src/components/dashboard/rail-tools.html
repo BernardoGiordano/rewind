@@ -1,0 +1,25 @@
+<div class="flex flex-col items-center gap-1" role="group" aria-label="Card aspect ratio">
+  <button
+    *for="mode of cardModes; key: mode.id"
+    type="button"
+    (click)="select(mode.id)"
+    [aria-pressed]="cardMode === mode.id"
+    [aria-label]="mode.label + ' card'"
+    [title]="mode.label"
+    class="cursor-pointer flex items-center justify-center w-10 h-9 rounded-xl transition-colors"
+    [class]="cardMode === mode.id ? 'bg-fill-strong text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
+  >
+    <svg
+      class="w-5 h-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <rect [x]="mode.rect[0]" [y]="mode.rect[1]" [width]="mode.rect[2]" [height]="mode.rect[3]" rx="1.5"></rect>
+    </svg>
+  </button>
+</div>

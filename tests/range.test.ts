@@ -2,7 +2,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALL_TIME,
-  type StatRange,
   customRangeLabel,
   paramsMatch,
   rangeFromParams,
@@ -12,7 +11,8 @@ import {
   rangeSlug,
   rangeToParams,
   sameRange,
-} from '../src/app/models/range';
+} from '../web/src/models/range.js';
+import type { StatRange } from '../web/src/models/types.js';
 
 const reader = (params: Record<string, string>) => ({
   get: (name: string) => params[name] ?? null,
