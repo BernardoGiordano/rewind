@@ -1,14 +1,15 @@
 import {
-  ApiError,
   computed,
   currentPath,
   defineComponent,
+  dt,
   inject,
   navigate,
   queryParams,
   resource,
   signal,
   SignalElement,
+  t,
   untracked,
 } from '@srljs/core';
 
@@ -17,6 +18,7 @@ import { AppIcon } from '../icon/icon.js';
 import { mergeParams } from '../../models/range.js';
 import { API } from '../../services/api.js';
 import { NAVIDROME } from '../../services/navidrome.js';
+import { errorKey } from '../../utils/api-error.js';
 import { watch } from '../../utils/watch.js';
 
 /**
@@ -40,6 +42,8 @@ import { watch } from '../../utils/watch.js';
  *
  * @typedef {Item & { time: number, duration: number }} Entry
  * @typedef {{ kind: 'song' | 'album', id: string, title: string }} Selection
+ * @typedef {{ status: string, confirmed: number, total: number, accepted?: boolean }} ScrobbleResult
+ * @typedef {{ key: string, params?: Record<string, unknown> }} Message
  * @typedef {{ id: string, name: string, cover_id: string }} Named
  * @typedef {{ artist?: Named, album?: Named & { artist: string, artist_id: string } }} Context
  * @typedef {{ items: Item[], total: number, canScrobble: boolean, context?: Context }} LibraryPage
@@ -48,15 +52,39 @@ import { watch } from '../../utils/watch.js';
 const PAGE_SIZE = 50;
 const LIBRARY_PATH = '/library';
 
-/** @type {readonly { key: LibraryKind, label: string }[]} */
+/**
+ * The text each kind of view needs. The sentences differ per kind because other languages
+ * inflect around the noun.
+ *
+ * @type {Readonly<Record<LibraryKind, { labelKey: string, allKey: string, noMatchKey: string }>>}
+ */
+const KINDS = {
+  artists: {
+    labelKey: 'library.kinds.artists.label',
+    allKey: 'library.kinds.artists.all',
+    noMatchKey: 'library.kinds.artists.noMatch',
+  },
+  albums: {
+    labelKey: 'library.kinds.albums.label',
+    allKey: 'library.kinds.albums.all',
+    noMatchKey: 'library.kinds.albums.noMatch',
+  },
+  songs: {
+    labelKey: 'library.kinds.songs.label',
+    allKey: 'library.kinds.songs.all',
+    noMatchKey: 'library.kinds.songs.noMatch',
+  },
+};
+
+/** @type {readonly { key: LibraryKind, labelKey: string }[]} */
 const TABS = [
-  { key: 'artists', label: 'Artists' },
-  { key: 'albums', label: 'Albums' },
-  { key: 'songs', label: 'Songs' },
+  { key: 'artists', labelKey: KINDS.artists.labelKey },
+  { key: 'albums', labelKey: KINDS.albums.labelKey },
+  { key: 'songs', labelKey: KINDS.songs.labelKey },
 ];
 
 /** Date and time, such as `Oct 9, 2026, 3:00:07 PM`. */
-const MEDIUM_DATE = new Intl.DateTimeFormat('en-US', {
+const MEDIUM_DATE = /** @type {Intl.DateTimeFormatOptions} */ ({
   month: 'short',
   day: 'numeric',
   year: 'numeric',
@@ -73,6 +101,7 @@ export class Library extends SignalElement {
   pageSize = PAGE_SIZE;
 
   kind = signal(/** @type {LibraryKind} */ ('artists'));
+  kindText = computed(() => KINDS[this.kind.value]);
   offset = signal(0);
 
   /** Drill-down: the artist or album whose contents are listed, named by the server. */
@@ -133,8 +162,10 @@ export class Library extends SignalElement {
   entries = signal(/** @type {Entry[]} */ ([]));
   busy = signal(false);
   submitted = signal(false);
-  message = signal('');
+  message = signal(/** @type {Message | null} */ (null));
   failed = signal(false);
+
+  /** A message key, or empty when the preview has nothing to report. */
   previewError = signal('');
   listenedAt = signal('');
   timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -266,10 +297,10 @@ export class Library extends SignalElement {
    * @returns {string}
    */
   tileCounts(item) {
-    let text = item.year ? `${item.year} · ` : '';
-    text += `${item.songs ?? ''} ${item.songs === 1 ? 'song' : 'songs'}`;
-    if (item.albums !== undefined) text += ` · ${item.albums} ${item.albums === 1 ? 'album' : 'albums'}`;
-    return text;
+    const parts = [t('library.count.songs', { count: item.songs ?? 0 })];
+    if (item.year) parts.unshift(String(item.year));
+    if (item.albums !== undefined) parts.push(t('library.count.albums', { count: item.albums }));
+    return parts.join(' · ');
   }
 
   /**
@@ -279,13 +310,7 @@ export class Library extends SignalElement {
    * @returns {string}
    */
   mediumDate(ms) {
-    return MEDIUM_DATE.format(ms).replace(/\s(AM|PM)$/u, '\u202f$1');
-  }
-
-  get albumHint() {
-    return this.selection.value?.kind === 'album'
-      ? ' · Tracks are laid out backwards from this time using their durations.'
-      : '';
+    return dt(ms, MEDIUM_DATE).replace(/\s(AM|PM)$/u, '\u202f$1');
   }
 
   // --- Scrobble dialog ---
@@ -308,7 +333,7 @@ export class Library extends SignalElement {
       .toISOString()
       .slice(0, 16);
     this.entries.value = [];
-    this.message.value = '';
+    this.message.value = null;
     this.failed.value = false;
     this.previewError.value = '';
     this.submitted.value = false;
@@ -335,7 +360,7 @@ export class Library extends SignalElement {
   preview() {
     if (this.busy.value) return;
     if (!this.listenedAt.value || !Number.isFinite(new Date(this.listenedAt.value).getTime())) {
-      this.previewError.value = 'Choose a valid date and time.';
+      this.previewError.value = 'library.scrobble.invalidTime';
       return;
     }
     this.busy.value = true;
@@ -349,7 +374,7 @@ export class Library extends SignalElement {
         this.busy.value = false;
       },
       (cause) => {
-        this.previewError.value = serverError(cause) ?? 'Could not preview scrobbles.';
+        this.previewError.value = errorKey(cause, 'library.scrobble.previewFailed');
         this.busy.value = false;
       },
     );
@@ -358,7 +383,7 @@ export class Library extends SignalElement {
   submit() {
     if (this.busy.value || this.submitted.value || !this.entries.value.length) return;
     this.busy.value = true;
-    /** @type {Promise<{ status: string, message: string }>} */ (
+    /** @type {Promise<ScrobbleResult>} */ (
       inject(API).post('/library/scrobbles', {
         ...this.#body(),
         requestId: this.#requestId,
@@ -366,7 +391,7 @@ export class Library extends SignalElement {
       })
     ).then(
       (result) => {
-        this.message.value = result.message;
+        this.message.value = resultMessage(result);
         this.failed.value = result.status !== 'confirmed';
         this.submitted.value = true;
         this.busy.value = false;
@@ -374,8 +399,7 @@ export class Library extends SignalElement {
         this.load();
       },
       (cause) => {
-        this.message.value =
-          serverError(cause) ?? 'Submission outcome unknown. Check listening history before trying again.';
+        this.message.value = { key: errorKey(cause, 'library.scrobble.outcomeUnknown') };
         this.failed.value = true;
         this.submitted.value = true;
         this.busy.value = false;
@@ -395,15 +419,23 @@ export class Library extends SignalElement {
 }
 
 /**
- * The `{ error }` message an API response carried, if any.
+ * What a submission did. The server verifies each scrobble after writing it, so a result
+ * short of `confirmed` reports how many it could find.
  *
- * @param {unknown} cause
- * @returns {string | null}
+ * @param {ScrobbleResult} result
+ * @returns {Message}
  */
-function serverError(cause) {
-  if (!(cause instanceof ApiError)) return null;
-  const body = /** @type {{ error?: unknown } | null | undefined} */ (cause.body);
-  return typeof body?.error === 'string' ? body.error : null;
+function resultMessage(result) {
+  if (result.status === 'confirmed') {
+    return { key: 'library.scrobble.added', params: { count: result.total } };
+  }
+  if (result.accepted !== undefined) {
+    return {
+      key: 'library.scrobble.partial',
+      params: { confirmed: result.confirmed, count: result.total },
+    };
+  }
+  return { key: 'library.scrobble.unverified' };
 }
 
 await defineComponent({

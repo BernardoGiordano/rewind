@@ -1,4 +1,4 @@
-import { computed, inject, signal, SignalElement } from '@srljs/core';
+import { computed, inject, locale, signal, SignalElement } from '@srljs/core';
 
 import { DOMINANT_COLOR } from '../services/dominant-color.js';
 import { NAVIDROME } from '../services/navidrome.js';
@@ -140,6 +140,8 @@ export class CardsBase extends SignalElement {
   monthLabel(yearMonth, months) {
     const year = months[0]?.month.slice(0, 4);
     const multiYear = months.some((m) => m.month.slice(0, 4) !== year);
-    return multiYear ? formatYearMonthWithYear(yearMonth) : formatYearMonth(yearMonth);
+    return multiYear
+      ? formatYearMonthWithYear(yearMonth, locale.value)
+      : formatYearMonth(yearMonth, locale.value);
   }
 }

@@ -37,6 +37,7 @@ export class StatStore {
   };
 
   loading = signal(false);
+  /** A message key, so the error follows a language change. */
   error = signal(/** @type {string | null} */ (null));
 
   /** The stat, range and history version the data on screen answers. */
@@ -82,10 +83,10 @@ export class StatStore {
         this.loading.value = false;
       });
       this.#shown = shown;
-    } catch (cause) {
+    } catch {
       if (request.signal.aborted) return;
       batch(() => {
-        this.error.value = cause instanceof Error ? cause.message : 'Failed to load data';
+        this.error.value = 'dashboard.loadFailed';
         this.loading.value = false;
       });
     }

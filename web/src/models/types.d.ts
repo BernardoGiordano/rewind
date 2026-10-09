@@ -27,8 +27,17 @@ export interface ParamReader {
 
 /** A one-click window the period panel offers next to the years. */
 export interface RangePreset {
-  label: string;
+  labelKey: string;
   range: StatRange;
+}
+
+/**
+ * Translation for code that builds text outside a template. The browser passes srl's
+ * `t` and the active locale; tests pass a bundle of their own.
+ */
+export interface I18n {
+  t(key: string, params?: Readonly<Record<string, unknown>>): string;
+  locale: string;
 }
 
 export interface TopSong {
@@ -175,7 +184,7 @@ export interface StatData {
 
 export interface StatDefinition {
   type: StatType;
-  label: string;
+  labelKey: string;
   icon: string;
   gradient: string;
   yearOnly: boolean;

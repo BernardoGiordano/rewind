@@ -30,22 +30,43 @@ const scope = `COALESCE(mf.missing, 0) = 0 AND (
 const trackColumns = `mf.id, mf.title, mf.artist, mf.album, mf.album_id, mf.artist_id,
   mf.duration, mf.disc_number, mf.track_number`;
 
+/** A selection the server refuses. `code` names the reason for the client to translate. */
+class SelectionError extends Error {
+  code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/** The `{ error, message }` body for a refused selection. */
+function selectionError(error: unknown) {
+  return error instanceof SelectionError
+    ? { error: error.code, message: error.message }
+    : { error: 'invalid_selection', message: 'Invalid selection.' };
+}
+
 function planScrobbles(tracks: Track[], finishedAt: number, now = Date.now()): Entry[] {
   if (!Number.isSafeInteger(finishedAt) || finishedAt < 0 || finishedAt > now) {
-    throw new Error('Choose a valid date and time in the past.');
+    throw new SelectionError('time_not_past', 'Choose a valid date and time in the past.');
   }
-  if (!tracks.length || tracks.length > 1000) throw new Error('Select between 1 and 1000 songs.');
+  if (!tracks.length || tracks.length > 1000) {
+    throw new SelectionError('track_count', 'Select between 1 and 1000 songs.');
+  }
   let cursor = Math.floor(finishedAt / 1000) * 1000;
   const entries: Entry[] = [];
   for (const track of [...tracks].reverse()) {
     if (!Number.isFinite(track.duration) || track.duration <= 0) {
-      throw new Error(
+      throw new SelectionError(
+        'missing_duration',
         'Track duration is missing. Scrobble this song separately with a valid timestamp.',
       );
     }
     // Subsonic timestamps describe when listening started.
     cursor -= Math.max(1, Math.round(track.duration)) * 1000;
-    if (cursor < 0) throw new Error('Listening would start before 1970.');
+    if (cursor < 0)
+      throw new SelectionError('time_too_early', 'Listening would start before 1970.');
     entries.push({ ...track, time: cursor });
   }
   return entries.reverse();
@@ -171,7 +192,9 @@ export function libraryRouter(deps: Dependencies): express.Router {
         context: describeContext(db, params.uid, params.artist, params.album),
       });
     } catch {
-      res.status(400).json({ error: 'Could not load this library view.' });
+      res
+        .status(400)
+        .json({ error: 'library_unavailable', message: 'Could not load this library view.' });
     }
   });
 
@@ -181,7 +204,7 @@ export function libraryRouter(deps: Dependencies): express.Router {
       !['song', 'album'].includes(String(body['kind'])) ||
       typeof body['id'] !== 'string'
     ) {
-      throw new Error('Select a song or album.');
+      throw new SelectionError('invalid_selection', 'Select a song or album.');
     }
     const column = body['kind'] === 'album' ? 'album_id' : 'id';
     const tracks = deps
@@ -191,12 +214,16 @@ export function libraryRouter(deps: Dependencies): express.Router {
       WHERE ${scope} AND mf.${column} = @id ORDER BY mf.disc_number, mf.track_number, mf.id`,
       )
       .all({ uid, id: body['id'] }) as Track[];
-    if (!tracks.length) throw new Error('This selection is no longer available.');
+    if (!tracks.length) {
+      throw new SelectionError('selection_unavailable', 'This selection is no longer available.');
+    }
     const time = body['finishedAt'];
-    if (typeof time !== 'number') throw new Error('Choose a valid date and time.');
+    if (typeof time !== 'number') {
+      throw new SelectionError('invalid_time', 'Choose a valid date and time.');
+    }
     if (body['kind'] === 'song') {
       if (!Number.isSafeInteger(time) || time < 0 || time > Date.now())
-        throw new Error('Choose a valid date and time in the past.');
+        throw new SelectionError('time_not_past', 'Choose a valid date and time in the past.');
       return [{ ...tracks[0], time: Math.floor(time / 1000) * 1000 }];
     }
     return planScrobbles(tracks, time);
@@ -211,9 +238,7 @@ export function libraryRouter(deps: Dependencies): express.Router {
     try {
       res.json({ entries: prepare(auth.uid, req.body) });
     } catch (error) {
-      res
-        .status(400)
-        .json({ error: error instanceof Error ? error.message : 'Invalid selection.' });
+      res.status(400).json(selectionError(error));
     }
   });
 
@@ -222,12 +247,17 @@ export function libraryRouter(deps: Dependencies): express.Router {
     if (!auth) return;
     // JSON-only writes plus a same-origin browser check protect both cookie and transparent auth.
     if (!req.is('application/json') || req.headers['sec-fetch-site'] === 'cross-site') {
-      res.status(403).json({ error: 'Cross-site submissions are not allowed.' });
+      res
+        .status(403)
+        .json({ error: 'cross_site', message: 'Cross-site submissions are not allowed.' });
       return;
     }
     const baseUrl = deps.getUrl();
     if (!baseUrl) {
-      res.status(503).json({ error: 'Configure NAVIDROME_URL to add scrobbles.' });
+      res.status(503).json({
+        error: 'scrobbling_not_configured',
+        message: 'Configure NAVIDROME_URL to add scrobbles.',
+      });
       return;
     }
     let entries: Entry[];
@@ -242,17 +272,20 @@ export function libraryRouter(deps: Dependencies): express.Router {
             req.body.entries[index]?.time === entry.time,
         )
       ) {
-        throw new Error('The selection changed. Preview it again before submitting.');
+        throw new SelectionError(
+          'selection_changed',
+          'The selection changed. Preview it again before submitting.',
+        );
       }
     } catch (error) {
-      res
-        .status(400)
-        .json({ error: error instanceof Error ? error.message : 'Invalid selection.' });
+      res.status(400).json(selectionError(error));
       return;
     }
     const requestId = req.body.requestId;
     if (typeof requestId !== 'string' || !/^[\w-]{16,80}$/.test(requestId)) {
-      res.status(400).json({ error: 'Invalid submission identifier.' });
+      res
+        .status(400)
+        .json({ error: 'invalid_request_id', message: 'Invalid submission identifier.' });
       return;
     }
     const key = `${auth.uid}:${requestId}`;
@@ -262,20 +295,25 @@ export function libraryRouter(deps: Dependencies): express.Router {
     const previous = attempts.get(key);
     if (previous) {
       if (previous.fingerprint !== fingerprint || !previous.result) {
-        res
-          .status(409)
-          .json({ error: 'Submission already in progress or identifier already used.' });
+        res.status(409).json({
+          error: 'request_id_used',
+          message: 'Submission already in progress or identifier already used.',
+        });
       } else res.json(previous.result);
       return;
     }
     if (pending.has(auth.uid)) {
-      res.status(409).json({ error: 'Wait for your current submission to finish.' });
+      res.status(409).json({
+        error: 'submission_pending',
+        message: 'Wait for your current submission to finish.',
+      });
       return;
     }
     if (attempts.size >= 10000) {
-      res
-        .status(503)
-        .json({ error: 'Submission capacity reached. Restart Rewind before adding more.' });
+      res.status(503).json({
+        error: 'capacity_reached',
+        message: 'Submission capacity reached. Restart Rewind before adding more.',
+      });
       return;
     }
     const exists = (entry: Entry) =>
@@ -288,7 +326,8 @@ export function libraryRouter(deps: Dependencies): express.Router {
         .get(auth.uid, entry.id, entry.time / 1000);
     if (entries.some(exists)) {
       res.status(409).json({
-        error:
+        error: 'scrobble_exists',
+        message:
           'A scrobble already exists at one of these timestamps. Review listening history before adding more.',
       });
       return;

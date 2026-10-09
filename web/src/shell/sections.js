@@ -4,7 +4,7 @@
  *
  * @typedef {object} Section
  * @property {string} id
- * @property {string} label
+ * @property {string} labelKey
  * @property {string} icon
  * @property {string} route Where the section's navigation entry points.
  * @property {string[]} owns Extra URL prefixes this section owns, such as drill-down pages reached from it.
@@ -16,7 +16,7 @@
 export const SECTIONS = [
   {
     id: 'library',
-    label: 'Library',
+    labelKey: 'nav.library',
     icon: 'heroRectangleStack',
     route: '/library',
     owns: [],
@@ -25,7 +25,7 @@ export const SECTIONS = [
   },
   {
     id: 'analytics',
-    label: 'Analytics',
+    labelKey: 'nav.analytics',
     icon: 'heroChartPie',
     route: '/',
     owns: ['/artist'],

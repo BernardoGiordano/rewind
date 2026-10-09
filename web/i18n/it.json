@@ -1,0 +1,395 @@
+{
+  "$comment": "Le chiavi che finiscono in one/other sono forme plurali, scelte in base al valore passato come {count}. I numeri nei segnaposto sono formattati per la lingua.",
+  "common": {
+    "back": "Indietro",
+    "retry": "Riprova",
+    "close": "Chiudi",
+    "cancel": "Annulla",
+    "previous": "Precedente",
+    "next": "Successiva"
+  },
+  "nav": {
+    "sections": "Sezioni",
+    "library": "Libreria",
+    "analytics": "Statistiche",
+    "openMenu": "Apri il menu delle opzioni"
+  },
+  "account": {
+    "title": "Account",
+    "label": "Account, accesso eseguito come {username}",
+    "signedInAs": "Accesso eseguito come",
+    "signOut": "Esci",
+    "envSession": "Questo server ti fa accedere dalla sua configurazione, quindi non c'è una sessione da chiudere."
+  },
+  "theme": {
+    "light": "Tema chiaro",
+    "dark": "Tema scuro",
+    "switchToLight": "Passa al tema chiaro",
+    "switchToDark": "Passa al tema scuro"
+  },
+  "locale": {
+    "label": "Lingua"
+  },
+  "links": {
+    "donate": "Dona"
+  },
+  "byline": {
+    "$comment": "Si legge attorno a un cuore e al nome dell'autore: Fatto con ♥ da Bernardo Giordano.",
+    "madeWith": "Fatto con",
+    "by": "da"
+  },
+  "units": {
+    "$comment": "Brevi come in inglese: stanno in colonne strette accanto a un'intestazione che nomina l'unità.",
+    "minutes": "{value}m",
+    "hours": "{value}h",
+    "decade": "{decade}"
+  },
+  "range": {
+    "title": "Periodo di ascolto",
+    "titled": "Periodo di ascolto · {label}",
+    "change": "Cambia il periodo di ascolto, ora {label}",
+    "allTime": "Da sempre",
+    "lastWeek": "Ultima settimana",
+    "lastMonth": "Mese scorso",
+    "span": "{from} – {to}",
+    "spanInYear": "{from} – {to} {year}",
+    "short": {
+      "$comment": "Sta in una barra di 48 px sotto un'icona. Circa sei caratteri al massimo.",
+      "allTime": "Tutto",
+      "custom": "Pers."
+    },
+    "preset": {
+      "allTime": "Da sempre",
+      "lastWeek": "Ultima settimana",
+      "last30Days": "Ultimi 30 giorni",
+      "lastMonth": "Mese scorso"
+    },
+    "quickPicks": "Scelte rapide",
+    "years": "Anni",
+    "custom": "Intervallo personalizzato"
+  },
+  "datePicker": {
+    "previousYear": "Anno precedente",
+    "previousMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "nextYear": "Anno successivo",
+    "from": "Dal",
+    "to": "Al",
+    "pickDay": "Scegli un giorno",
+    "reset": "Reimposta",
+    "apply": "Applica intervallo"
+  },
+  "login": {
+    "title": "Accedi",
+    "intro": "Usa il nome utente e la password di Navidrome.",
+    "username": "Nome utente",
+    "usernamePlaceholder": "nome utente",
+    "password": "Password",
+    "showPassword": "Mostra la password",
+    "hidePassword": "Nascondi la password",
+    "submit": "Accedi",
+    "submitting": "Accesso in corso…",
+    "credentialsNote": "Le credenziali vengono inviate al tuo server Navidrome per la verifica.",
+    "missingCredentials": "Inserisci sia il nome utente sia la password.",
+    "failed": "Accesso non riuscito."
+  },
+  "stats": {
+    "summary": "Il tuo anno in musica",
+    "topSongs": "Brani più ascoltati",
+    "topArtists": "Artisti più ascoltati",
+    "topAlbums": "Album più ascoltati",
+    "topGenres": "Generi più ascoltati",
+    "listeningClock": "Orologio degli ascolti",
+    "monthlyTrends": "Andamento mensile",
+    "dayOfWeek": "Giorno della settimana",
+    "streak": "Serie di ascolti",
+    "lateNight": "Ascolti notturni",
+    "onRepeat": "In loop",
+    "songOfMonth": "Brano del mese",
+    "favoriteDecades": "Decenni preferiti",
+    "recap": "Il tuo riepilogo"
+  },
+  "dashboard": {
+    "statistics": "Statistiche dei brani",
+    "statisticsShort": "Statistiche",
+    "chooseStat": "Scegli una statistica",
+    "loading": "Caricamento delle statistiche…",
+    "loadFailed": "Impossibile caricare i dati.",
+    "collapseSidebar": "Comprimi la barra laterale",
+    "expandSidebar": "Espandi la barra laterale",
+    "toggleSidebar": "Mostra o nascondi la barra laterale",
+    "previousStat": "Statistica precedente",
+    "nextStat": "Statistica successiva",
+    "autoplay": "Scorrimento automatico",
+    "startAutoplay": "Avvia lo scorrimento automatico",
+    "stopAutoplay": "Ferma lo scorrimento automatico",
+    "pauseAutoplay": "Metti in pausa lo scorrimento automatico",
+    "resumeAutoplay": "Riprendi lo scorrimento automatico",
+    "exportImage": "Esporta immagine",
+    "aspectRatio": "Formato della scheda",
+    "cardMode": "Scheda in formato {mode}",
+    "cardModes": {
+      "portrait": "verticale",
+      "square": "quadrato",
+      "landscape": "orizzontale"
+    }
+  },
+  "cards": {
+    "$comment": "Testi delle schede condivisibili. Quasi tutte le etichette stanno sotto un numero grande.",
+    "hoursListened": "ore di ascolto",
+    "minutesListened": "minuti di ascolto",
+    "hoursListenedValue": "{value} h di ascolto",
+    "songsPlayed": "brani ascoltati",
+    "artists": "artisti",
+    "albums": "album",
+    "uniqueSongs": "brani diversi",
+    "topGenre": "genere preferito",
+    "daysOfMusic": {
+      "one": "È {count} giorno di musica",
+      "other": "Sono {count} giorni di musica"
+    },
+    "topSong": "Brano n. 1",
+    "topArtist": "Artista n. 1",
+    "topAlbum": "Album n. 1",
+    "plays": {
+      "one": "{count} ascolto",
+      "other": "{count} ascolti"
+    },
+    "playsWord": {
+      "one": "ascolto",
+      "other": "ascolti"
+    },
+    "tracks": {
+      "one": "{count} brano",
+      "other": "{count} brani"
+    },
+    "songCount": {
+      "one": "{count} brano",
+      "other": "{count} brani"
+    },
+    "artistCount": {
+      "one": "{count} artista",
+      "other": "{count} artisti"
+    },
+    "days": {
+      "one": "{count} giorno",
+      "other": "{count} giorni"
+    },
+    "consecutiveDays": {
+      "one": "giorno consecutivo",
+      "other": "giorni consecutivi"
+    },
+    "clockSubtitle": "Ascolti per ora del giorno",
+    "peak": "Picco",
+    "longestStreak": "Serie più lunga",
+    "otherStreaks": "Altre serie",
+    "dragToReframe": "Trascina per riposizionare",
+    "lateNightSubtitle": "Brani ascoltati tra mezzanotte e le 5",
+    "onRepeatSubtitle": "Brani ascoltati 3 o più volte in un solo giorno",
+    "columns": {
+      "track": "Brano",
+      "artist": "Artista",
+      "album": "Album",
+      "genre": "Genere",
+      "plays": "Ascolti",
+      "minutes": "Min",
+      "hours": "Ore",
+      "month": "Mese",
+      "songs": "Brani",
+      "artists": "Artisti",
+      "days": "Giorni",
+      "period": "Periodo",
+      "lateNight": "Di notte",
+      "date": "Data",
+      "decade": "Decennio"
+    }
+  },
+  "artist": {
+    "loading": "Caricamento dell'artista…",
+    "loadFailed": "Impossibile caricare questo artista.",
+    "views": "Viste dell'artista",
+    "tabs": {
+      "overview": "Panoramica",
+      "patterns": "Abitudini",
+      "activity": "Attività"
+    },
+    "browseMusic": "Sfoglia la musica",
+    "kicker": "Artista",
+    "unknown": "Sconosciuto",
+    "noPlays": "Ancora nessun ascolto",
+    "firstHeard": {
+      "one": "Primo ascolto il {date} · lo ascolti da {count} giorno",
+      "other": "Primo ascolto il {date} · lo ascolti da {count} giorni"
+    },
+    "metrics": {
+      "plays": "Ascolti",
+      "hours": "Ore",
+      "uniqueTracks": "Brani diversi",
+      "rank": "Posizione",
+      "share": "Quota",
+      "libraryDepth": "Copertura libreria"
+    },
+    "heatmap": {
+      "title": "Mappa delle attività",
+      "playsInPeriod": {
+        "$comment": "Segue il numero di ascolti, mostrato in grassetto.",
+        "one": "ascolto in questo periodo",
+        "other": "ascolti in questo periodo"
+      },
+      "cell": {
+        "one": "{date}: {count} ascolto",
+        "other": "{date}: {count} ascolti"
+      },
+      "less": "Meno",
+      "more": "Di più"
+    },
+    "topTracks": "Brani più ascoltati",
+    "noTracks": "Nessun brano in questo periodo.",
+    "topAlbums": "Album più ascoltati",
+    "noAlbums": "Nessun album in questo periodo.",
+    "noData": "Nessun dato in questo periodo.",
+    "listeningClock": "Orologio degli ascolti",
+    "clockBar": {
+      "one": "{hour}:00 — {count} ascolto",
+      "other": "{hour}:00 — {count} ascolti"
+    },
+    "dayOfWeek": "Giorno della settimana",
+    "rankTrajectory": "Andamento in classifica",
+    "rankNeedsData": "Servono almeno 2 mesi di dati per mostrare l'andamento.",
+    "songOfMonth": "Brano del mese",
+    "recent": {
+      "title": "Scrobble recenti",
+      "note": "Ultimi 25 ascolti, anche fuori dal periodo selezionato",
+      "empty": "Ancora nessuno scrobble."
+    },
+    "lifetime": {
+      "title": "Da sempre",
+      "firstHeard": "Primo ascolto",
+      "lastHeard": "Ultimo ascolto",
+      "totalPlays": "Ascolti totali",
+      "uniqueTracks": "Brani diversi ascoltati",
+      "libraryTracks": "Brani in libreria"
+    },
+    "ago": {
+      "now": "adesso",
+      "minutes": {
+        "one": "{count} min fa",
+        "other": "{count} min fa"
+      },
+      "hours": {
+        "one": "{count} h fa",
+        "other": "{count} h fa"
+      },
+      "days": {
+        "one": "{count} giorno fa",
+        "other": "{count} giorni fa"
+      }
+    }
+  },
+  "library": {
+    "title": "Libreria",
+    "kicker": "La tua collezione",
+    "intro": "Tutto ciò che Rewind vede, compresa la musica che non hai mai ascoltato. Aggiungi gli ascolti che non sono mai arrivati a Navidrome.",
+    "views": "Viste della libreria",
+    "breadcrumb": "Percorso",
+    "kinds": {
+      "artists": {
+        "label": "Artisti",
+        "all": "Tutti gli artisti",
+        "noMatch": "Nessun artista corrisponde a “{query}”."
+      },
+      "albums": {
+        "label": "Album",
+        "all": "Tutti gli album",
+        "noMatch": "Nessun album corrisponde a “{query}”."
+      },
+      "songs": {
+        "label": "Brani",
+        "all": "Tutti i brani",
+        "noMatch": "Nessun brano corrisponde a “{query}”."
+      }
+    },
+    "album": "Album",
+    "artist": "Artista",
+    "unknownArtist": "Artista sconosciuto",
+    "browse": "Sfoglia {title}",
+    "listeningStats": "Statistiche di ascolto",
+    "listeningStatsFor": "Statistiche di ascolto per {title}",
+    "scrobbleAlbum": "Scrobble dell'album",
+    "scrobbleAlbumNamed": "Aggiungi gli scrobble dell'album {title}",
+    "search": {
+      "label": "Cerca nella libreria",
+      "placeholder": "Cerca artisti, album o brani",
+      "clear": "Cancella la ricerca"
+    },
+    "loading": "Caricamento della libreria…",
+    "loadFailed": "Impossibile caricare la libreria. Riprova.",
+    "empty": {
+      "title": "Nessuna musica trovata",
+      "view": "Questa vista è vuota."
+    },
+    "pageRange": "{start}–{end} di",
+    "count": {
+      "songs": {
+        "one": "{count} brano",
+        "other": "{count} brani"
+      },
+      "albums": {
+        "one": "{count} album",
+        "other": "{count} album"
+      }
+    },
+    "scrobble": {
+      "addOne": "Aggiungi scrobble",
+      "addFor": "Aggiungi uno scrobble per {title}",
+      "add": {
+        "one": "Aggiungi {count} scrobble",
+        "other": "Aggiungi {count} scrobble"
+      },
+      "listenedAt": "Ascoltato il",
+      "finishedAt": "Ascolto terminato il",
+      "albumHint": "I brani vengono disposti a ritroso da quest'ora in base alla loro durata.",
+      "forwardNote": "Scrive su Navidrome e può inoltrare ai servizi di scrobbling collegati.",
+      "unavailable": "Gli scrobble manuali richiedono una connessione a Navidrome. Imposta NAVIDROME_URL per abilitarli.",
+      "preview": "Anteprima",
+      "preparing": "Preparazione…",
+      "submitting": "Invio in corso…",
+      "invalidTime": "Scegli una data e un'ora valide.",
+      "previewFailed": "Impossibile generare l'anteprima degli scrobble.",
+      "outcomeUnknown": "Esito dell'invio sconosciuto. Controlla la cronologia degli ascolti prima di riprovare.",
+      "added": {
+        "one": "{count} scrobble aggiunto a Navidrome.",
+        "other": "{count} scrobble aggiunti a Navidrome."
+      },
+      "partial": {
+        "one": "Verificati {confirmed} scrobble su {count}. Controlla la cronologia degli ascolti prima di riprovare: alcune scritture potrebbero essere comunque riuscite.",
+        "other": "Verificati {confirmed} scrobble su {count}. Controlla la cronologia degli ascolti prima di riprovare: alcune scritture potrebbero essere comunque riuscite."
+      },
+      "unverified": "Impossibile verificare questo invio. Controlla la cronologia degli ascolti prima di riprovare."
+    }
+  },
+  "errors": {
+    "$comment": "Indicizzati dal codice che il server invia in `error`.",
+    "login_disabled": "Il server usa l'accesso configurato nell'ambiente: il login è disattivato.",
+    "credentials_required": "Nome utente e password sono obbligatori.",
+    "navidrome_not_configured": "NAVIDROME_URL non è configurato sul server.",
+    "invalid_credentials": "Nome utente o password non validi.",
+    "user_not_found": "Nessun utente Navidrome con questo nome utente.",
+    "library_unavailable": "Impossibile caricare questa vista della libreria.",
+    "invalid_selection": "Seleziona un brano o un album.",
+    "selection_unavailable": "Questa selezione non è più disponibile.",
+    "selection_changed": "La selezione è cambiata. Rigenera l'anteprima prima di inviare.",
+    "track_count": "Seleziona da 1 a 1000 brani.",
+    "missing_duration": "Manca la durata del brano. Aggiungi lo scrobble di questo brano a parte, con un orario valido.",
+    "invalid_time": "Scegli una data e un'ora valide.",
+    "time_not_past": "Scegli una data e un'ora valide nel passato.",
+    "time_too_early": "L'ascolto inizierebbe prima del 1970.",
+    "cross_site": "Gli invii da altri siti non sono consentiti.",
+    "scrobbling_not_configured": "Configura NAVIDROME_URL per aggiungere scrobble.",
+    "invalid_request_id": "Identificativo di invio non valido.",
+    "request_id_used": "Invio già in corso o identificativo già usato.",
+    "submission_pending": "Attendi la fine dell'invio in corso.",
+    "capacity_reached": "Capacità di invio esaurita. Riavvia Rewind prima di aggiungerne altri.",
+    "scrobble_exists": "Esiste già uno scrobble in uno di questi orari. Controlla la cronologia degli ascolti prima di aggiungerne altri."
+  }
+}

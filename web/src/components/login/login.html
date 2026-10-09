@@ -1,17 +1,20 @@
 <div class="min-h-dvh flex flex-col bg-surface">
-  <!-- Top bar — branding + dark mode toggle -->
+  <!-- Top bar — branding, language and dark mode toggle -->
   <div class="flex items-center justify-between px-6 py-4 expanded:px-10 expanded:py-6">
     <h1 class="font-mono font-bold text-ink tracking-tight text-base expanded:text-lg">
       Navidrome Rewind
     </h1>
-    <button
-      type="button"
-      (click)="toggleDarkMode()"
-      class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-ink-soft bg-fill hover:bg-fill-strong transition-colors"
-      [aria-label]="darkMode ? 'Switch to light mode' : 'Switch to dark mode'"
-    >
-      <app-icon [name]="darkMode ? 'heroSun' : 'heroMoon'" class="w-4 h-4" aria-hidden="true"></app-icon>
-    </button>
+    <div class="flex items-center gap-2">
+      <app-locale-picker compact></app-locale-picker>
+      <button
+        type="button"
+        (click)="toggleDarkMode()"
+        class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full text-ink-soft bg-fill hover:bg-fill-strong transition-colors"
+        [aria-label]="t(darkMode ? 'theme.switchToLight' : 'theme.switchToDark')"
+      >
+        <app-icon [name]="darkMode ? 'heroSun' : 'heroMoon'" class="w-4 h-4" aria-hidden="true"></app-icon>
+      </button>
+    </div>
   </div>
 
   <!-- Card -->
@@ -19,8 +22,8 @@
     <div class="w-full max-w-sm">
       <div class="rounded-2xl bg-surface-sunken border border-edge shadow-sm p-6 medium-up:p-8">
         <div class="mb-6">
-          <h2 class="text-xl font-semibold text-ink">Sign in</h2>
-          <p class="mt-1 text-sm text-ink-muted">Use your Navidrome username and password.</p>
+          <h2 class="text-xl font-semibold text-ink">{{ t('login.title') }}</h2>
+          <p class="mt-1 text-sm text-ink-muted">{{ t('login.intro') }}</p>
         </div>
 
         <form (submit)="submit($event)" class="space-y-4" novalidate>
@@ -30,7 +33,7 @@
               for="username"
               class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5"
             >
-              Username
+              {{ t('login.username') }}
             </label>
             <div class="relative">
               <span
@@ -50,7 +53,7 @@
                 (input)="setUsername($event.target.value)"
                 [disabled]="submitting"
                 class="w-full pl-9 pr-3 py-2.5 rounded-lg bg-surface-raised border border-edge-raised text-sm text-ink-body placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-colors disabled:opacity-60"
-                placeholder="username"
+                [placeholder]="t('login.usernamePlaceholder')"
               />
             </div>
           </div>
@@ -61,7 +64,7 @@
               for="password"
               class="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5"
             >
-              Password
+              {{ t('login.password') }}
             </label>
             <div class="relative">
               <span
@@ -84,7 +87,7 @@
               <button
                 type="button"
                 (click)="togglePassword()"
-                [aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [aria-label]="t(showPassword ? 'login.hidePassword' : 'login.showPassword')"
                 class="cursor-pointer absolute inset-y-0 right-2 flex items-center px-1.5 text-ink-faint hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               >
                 <app-icon [name]="showPassword ? 'heroEyeSlash' : 'heroEye'" class="w-4 h-4" aria-hidden="true"></app-icon>
@@ -98,7 +101,7 @@
             class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
             <app-icon name="heroExclamationCircle" class="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true"></app-icon>
-            <span>{{ error }}</span>
+            <span>{{ t(error) }}</span>
           </div>
 
           <button
@@ -111,13 +114,13 @@
               class="inline-block w-4 h-4 border-2 border-white/40 dark:border-slate-900/40 border-t-white dark:border-t-slate-900 rounded-full animate-spin"
               aria-hidden="true"
             ></span>
-            {{ submitting ? 'Signing in…' : 'Sign in' }}
+            {{ t(submitting ? 'login.submitting' : 'login.submit') }}
           </button>
         </form>
       </div>
 
       <p class="mt-6 text-center text-xs text-ink-faint">
-        Your credentials are sent to your Navidrome server for verification.
+        {{ t('login.credentialsNote') }}
       </p>
     </div>
   </div>

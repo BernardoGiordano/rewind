@@ -1,11 +1,11 @@
-<div class="flex flex-col items-center gap-1" role="group" aria-label="Card aspect ratio">
+<div class="flex flex-col items-center gap-1" role="group" [aria-label]="t('dashboard.aspectRatio')">
   <button
     *for="mode of cardModes; key: mode.id"
     type="button"
     (click)="select(mode.id)"
     [aria-pressed]="cardMode === mode.id"
-    [aria-label]="mode.label + ' card'"
-    [title]="mode.label"
+    [aria-label]="t('dashboard.cardMode', { mode: t(mode.labelKey) })"
+    [title]="t(mode.labelKey)"
     class="cursor-pointer flex items-center justify-center w-10 h-9 rounded-xl transition-colors"
     [class]="cardMode === mode.id ? 'bg-fill-strong text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
   >

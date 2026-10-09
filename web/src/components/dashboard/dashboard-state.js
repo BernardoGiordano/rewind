@@ -13,12 +13,12 @@ const CARD_MODE_KEY = 'rewind.cardMode';
 /**
  * Each card aspect with the outline its rail button draws, as SVG rect x, y, width, height.
  *
- * @type {readonly { id: CardMode, label: string, rect: readonly [number, number, number, number] }[]}
+ * @type {readonly { id: CardMode, labelKey: string, rect: readonly [number, number, number, number] }[]}
  */
 export const CARD_MODES = [
-  { id: 'portrait', label: 'Portrait', rect: [7, 3, 10, 18] },
-  { id: 'square', label: 'Square', rect: [5, 5, 14, 14] },
-  { id: 'landscape', label: 'Landscape', rect: [3, 6, 18, 12] },
+  { id: 'portrait', labelKey: 'dashboard.cardModes.portrait', rect: [7, 3, 10, 18] },
+  { id: 'square', labelKey: 'dashboard.cardModes.square', rect: [5, 5, 14, 14] },
+  { id: 'landscape', labelKey: 'dashboard.cardModes.landscape', rect: [3, 6, 18, 12] },
 ];
 
 /** @type {InjectionToken<DashboardState>} */

@@ -9,19 +9,19 @@
       *if="summaryData"
       class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6"
     >
-      Your Year in Music
+      {{ t('stats.summary') }}
     </h2>
     <div *if="summaryData" class="flex-1 flex gap-10 min-h-0">
       <!-- Left: hero hours -->
       <div class="flex-1 flex flex-col justify-center items-center text-center">
         <p class="text-white/60 text-base font-bold uppercase tracking-[0.25em] mb-2">
-          Hours Listened
+          {{ t('cards.hoursListened') }}
         </p>
         <p class="text-[12em] leading-none font-black text-white tracking-tight">
           {{ num(summaryData.total_hours) }}
         </p>
         <p class="text-white/70 text-2xl font-semibold mt-6">
-          That's {{ num(summaryData.total_days) }} days of music
+          {{ t('cards.daysOfMusic', { count: summaryData.total_days }) }}
         </p>
       </div>
       <!-- Right: 2x2 stat grid -->
@@ -30,25 +30,25 @@
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
           <p class="text-5xl font-black text-white">{{ num(summaryData.total_plays) }}</p>
-          <p class="text-white/60 text-base font-medium mt-2">songs played</p>
+          <p class="text-white/60 text-base font-medium mt-2">{{ t('cards.songsPlayed') }}</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
           <p class="text-5xl font-black text-white">{{ num(summaryData.unique_artists) }}</p>
-          <p class="text-white/60 text-base font-medium mt-2">artists</p>
+          <p class="text-white/60 text-base font-medium mt-2">{{ t('cards.artists') }}</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
           <p class="text-5xl font-black text-white">{{ num(summaryData.unique_albums) }}</p>
-          <p class="text-white/60 text-base font-medium mt-2">albums</p>
+          <p class="text-white/60 text-base font-medium mt-2">{{ t('cards.albums') }}</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
           <p class="text-5xl font-black text-white">{{ num(summaryData.unique_songs) }}</p>
-          <p class="text-white/60 text-base font-medium mt-2">unique songs</p>
+          <p class="text-white/60 text-base font-medium mt-2">{{ t('cards.uniqueSongs') }}</p>
         </div>
       </div>
     </div>
@@ -62,7 +62,9 @@
     [.year-label]="rangeLabel"
     [.no-round]="true"
   >
-    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Songs</h2>
+    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
+      {{ t('stats.topSongs') }}
+    </h2>
     <div class="flex-1 flex gap-8 min-h-0">
       <!-- Left: hero #1 -->
 
@@ -82,15 +84,17 @@
           </div>
         </div>
         <div class="mt-4 shrink-0">
-          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">#1 Song</p>
+          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
+            {{ t('cards.topSong') }}
+          </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topSong.title }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topSong.artist }}</p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ topSong.plays }} plays</span
+              >{{ t('cards.plays', { count: topSong.plays }) }}</span
             >
             <span class="text-white/30 text-sm tabular-nums"
-              >{{ decimal(topSong.total_minutes, 1, 1) }}m</span
+              >{{ minutes(topSong.total_minutes) }}</span
             >
           </div>
         </div>
@@ -117,17 +121,17 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
               >
-                Track
+                {{ t('cards.columns.track') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                Plays
+                {{ t('cards.columns.plays') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                Min
+                {{ t('cards.columns.minutes') }}
               </th>
             </tr>
           </thead>
@@ -169,7 +173,7 @@
                   {{ song.plays }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ decimal(song.total_minutes, 1, 1) }}m
+                  {{ minutes(song.total_minutes) }}
                 </td>
               </tr>
             </tbody>
@@ -187,7 +191,9 @@
     [.year-label]="rangeLabel"
     [.no-round]="true"
   >
-    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Artists</h2>
+    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
+      {{ t('stats.topArtists') }}
+    </h2>
     <div class="flex-1 flex gap-8 min-h-0">
       <!-- Left: hero #1 -->
 
@@ -207,16 +213,19 @@
           </div>
         </div>
         <div class="mt-4 shrink-0">
-          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">#1 Artist</p>
+          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
+            {{ t('cards.topArtist') }}
+          </p>
           <p class="text-white font-black text-2xl leading-tight truncate">
             {{ topArtist.artist }}
           </p>
           <p class="text-white/70 text-base truncate mt-0.5">
-            {{ topArtist.unique_tracks }} tracks · {{ decimal(topArtist.total_hours, 1, 1) }}h
+            {{ t('cards.tracks', { count: topArtist.unique_tracks }) }} · {{
+            hours(topArtist.total_hours) }}
           </p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ topArtist.plays }} plays</span
+              >{{ t('cards.plays', { count: topArtist.plays }) }}</span
             >
           </div>
         </div>
@@ -243,17 +252,17 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
               >
-                Artist
+                {{ t('cards.columns.artist') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                Plays
+                {{ t('cards.columns.plays') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                Hours
+                {{ t('cards.columns.hours') }}
               </th>
             </tr>
           </thead>
@@ -289,13 +298,15 @@
                   >
                     {{ artist.artist }}
                   </p>
-                  <p class="text-white/50 text-xs truncate">{{ artist.unique_tracks }} tracks</p>
+                  <p class="text-white/50 text-xs truncate">
+                    {{ t('cards.tracks', { count: artist.unique_tracks }) }}
+                  </p>
                 </td>
                 <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
                   {{ artist.plays }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ decimal(artist.total_hours, 1, 1) }}h
+                  {{ hours(artist.total_hours) }}
                 </td>
               </tr>
             </tbody>
@@ -313,7 +324,9 @@
     [.year-label]="rangeLabel"
     [.no-round]="true"
   >
-    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Albums</h2>
+    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
+      {{ t('stats.topAlbums') }}
+    </h2>
     <div class="flex-1 flex gap-8 min-h-0">
       <!-- Left: hero #1 -->
 
@@ -333,15 +346,17 @@
           </div>
         </div>
         <div class="mt-4 shrink-0">
-          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">#1 Album</p>
+          <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
+            {{ t('cards.topAlbum') }}
+          </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ topAlbum.plays }} plays</span
+              >{{ t('cards.plays', { count: topAlbum.plays }) }}</span
             >
             <span class="text-white/30 text-sm tabular-nums"
-              >{{ decimal(topAlbum.total_minutes, 1, 1) }}m</span
+              >{{ minutes(topAlbum.total_minutes) }}</span
             >
           </div>
         </div>
@@ -368,17 +383,17 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
               >
-                Album
+                {{ t('cards.columns.album') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                Plays
+                {{ t('cards.columns.plays') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                Min
+                {{ t('cards.columns.minutes') }}
               </th>
             </tr>
           </thead>
@@ -420,7 +435,7 @@
                   {{ album.plays }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ decimal(album.total_minutes, 1, 1) }}m
+                  {{ minutes(album.total_minutes) }}
                 </td>
               </tr>
             </tbody>
@@ -437,7 +452,9 @@
     [.year-label]="rangeLabel"
     [.no-round]="true"
   >
-    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Genres</h2>
+    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
+      {{ t('stats.topGenres') }}
+    </h2>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
         <colgroup>
@@ -457,22 +474,22 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10"
             >
-              Genre
+              {{ t('cards.columns.genre') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Hours
+              {{ t('cards.columns.hours') }}
             </th>
           </tr>
         </thead>
@@ -506,7 +523,7 @@
                 {{ genre.plays }}
               </td>
               <td class="text-white/40 text-sm tabular-nums text-right py-1.5">
-                {{ decimal(genre.total_hours, 1, 1) }}h
+                {{ hours(genre.total_hours) }}
               </td>
             </tr>
           </tbody>
@@ -525,14 +542,15 @@
     <div class="flex items-center justify-between mb-4 shrink-0">
       <div>
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest">
-          Listening Clock
+          {{ t('stats.listeningClock') }}
         </h2>
-        <p class="text-white/40 text-base mt-1">Plays by hour of day</p>
+        <p class="text-white/40 text-base mt-1">{{ t('cards.clockSubtitle') }}</p>
       </div>
 
       <p *if="peakHour" class="text-white/50 text-sm font-mono">
-        Peak <span class="text-white font-semibold">{{ padHour(peakHour.hour) }}:00</span> · {{
-        peakHour.plays }} plays
+        {{ t('cards.peak') }}
+        <span class="text-white font-semibold">{{ padHour(peakHour.hour) }}:00</span> · {{
+        t('cards.plays', { count: peakHour.plays }) }}
       </p>
     </div>
     <div class="flex-1 flex flex-col min-h-0">
@@ -574,7 +592,7 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
-      Monthly Trends
+      {{ t('stats.monthlyTrends') }}
     </h2>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
@@ -591,32 +609,32 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
             >
-              Month
+              {{ t('cards.columns.month') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Hours
+              {{ t('cards.columns.hours') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Songs
+              {{ t('cards.columns.songs') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Artists
+              {{ t('cards.columns.artists') }}
             </th>
           </tr>
         </thead>
@@ -648,7 +666,7 @@
                 {{ m.plays }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
-                {{ decimal(m.hours, 1, 1) }}h
+                {{ hours(m.hours) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
                 {{ m.unique_songs }}
@@ -671,23 +689,23 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
-      Day of the Week
+      {{ t('stats.dayOfWeek') }}
     </h2>
     <div class="flex-1 flex flex-col justify-center gap-4">
       <div *for="d of dayOfWeek; key: d.day" class="flex items-center gap-6">
-        <span class="text-white/70 text-2xl font-semibold w-32 shrink-0">{{ d.day }}</span>
+        <span class="text-white/70 text-2xl font-semibold w-32 shrink-0">{{ weekday(d.day) }}</span>
         <div class="flex-1 h-12 bg-white/10 rounded-full overflow-hidden">
           <div
             class="h-full bg-white/40 rounded-full flex items-center justify-end pr-5"
             [style.width.%]="percentOf(d.plays, maxDayPlays)"
           >
             <span class="text-white/90 text-base font-semibold tabular-nums"
-              >{{ d.plays }} plays</span
+              >{{ t('cards.plays', { count: d.plays }) }}</span
             >
           </div>
         </div>
         <span class="text-white/50 text-base font-medium w-24 text-right shrink-0 tabular-nums"
-          >{{ decimal(d.total_hours, 1, 1) }}h</span
+          >{{ hours(d.total_hours) }}</span
         >
       </div>
     </div>
@@ -701,19 +719,21 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
-      Listening Streak
+      {{ t('stats.streak') }}
     </h2>
 
     <div *if="streaks.length > 0" class="flex-1 flex gap-10 min-h-0">
       <!-- Hero: longest streak -->
       <div class="flex flex-col items-center justify-center shrink-0 text-center w-72">
         <p class="text-white/50 text-sm font-black uppercase tracking-[0.25em] mb-3">
-          Longest Streak
+          {{ t('cards.longestStreak') }}
         </p>
         <p class="text-[10em] leading-none font-black text-white tabular-nums">
           {{ streaks[0].streak_days }}
         </p>
-        <p class="text-white/70 text-2xl font-semibold mt-4">consecutive days</p>
+        <p class="text-white/70 text-2xl font-semibold mt-4">
+          {{ t('cards.consecutiveDays', { count: streaks[0].streak_days }) }}
+        </p>
         <p class="text-white/50 text-base mt-2 font-mono">
           {{ streaks[0].streak_start }} — {{ streaks[0].streak_end }}
         </p>
@@ -737,12 +757,12 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
               >
-                Days
+                {{ t('cards.columns.days') }}
               </th>
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
               >
-                Period
+                {{ t('cards.columns.period') }}
               </th>
             </tr>
           </thead>
@@ -760,7 +780,7 @@
                   {{ i + 2 }}
                 </td>
                 <td class="text-white font-bold text-lg tabular-nums pr-4 py-2">
-                  {{ s.streak_days }} days
+                  {{ t('cards.days', { count: s.streak_days }) }}
                 </td>
                 <td class="max-w-0 py-2">
                   <span class="text-white/50 text-sm font-mono truncate block"
@@ -784,11 +804,9 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">
-      Late Night Vibes
+      {{ t('stats.lateNight') }}
     </h2>
-    <p class="text-white/40 text-sm mb-4 shrink-0">
-      Songs you listened to between midnight and 5 AM
-    </p>
+    <p class="text-white/40 text-sm mb-4 shrink-0">{{ t('cards.lateNightSubtitle') }}</p>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
         <colgroup>
@@ -808,12 +826,12 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              Track
+              {{ t('cards.columns.track') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Late Night
+              {{ t('cards.columns.lateNight') }}
             </th>
           </tr>
         </thead>
@@ -867,8 +885,10 @@
     [.year-label]="rangeLabel"
     [.no-round]="true"
   >
-    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">On Repeat</h2>
-    <p class="text-white/40 text-sm mb-4 shrink-0">Songs you played 3+ times in a single day</p>
+    <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">
+      {{ t('stats.onRepeat') }}
+    </h2>
+    <p class="text-white/40 text-sm mb-4 shrink-0">{{ t('cards.onRepeatSubtitle') }}</p>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
         <colgroup>
@@ -881,17 +901,17 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
             >
-              Track
+              {{ t('cards.columns.track') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Date
+              {{ t('cards.columns.date') }}
             </th>
           </tr>
         </thead>
@@ -938,7 +958,7 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
-      Song of the Month
+      {{ t('stats.songOfMonth') }}
     </h2>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
@@ -953,18 +973,18 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
             >
-              Month
+              {{ t('cards.columns.month') }}
             </th>
             <th class="pb-2 pr-6 border-b border-white/10"></th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              Track
+              {{ t('cards.columns.track') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
           </tr>
         </thead>
@@ -1019,7 +1039,7 @@
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
-      Favorite Decades
+      {{ t('stats.favoriteDecades') }}
     </h2>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
@@ -1035,27 +1055,27 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
             >
-              Decade
+              {{ t('cards.columns.decade') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Plays
+              {{ t('cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              Hours
+              {{ t('cards.columns.hours') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              Artists
+              {{ t('cards.columns.artists') }}
             </th>
           </tr>
         </thead>
@@ -1072,7 +1092,7 @@
           <tbody>
             <tr *for="dec of favoriteDecades; key: dec.decade; index as i">
               <td class="py-2">
-                <p class="text-white font-black text-2xl tabular-nums">{{ dec.decade }}s</p>
+                <p class="text-white font-black text-2xl tabular-nums">{{ decade(dec.decade) }}</p>
               </td>
               <td class="pr-4 py-2">
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
@@ -1086,10 +1106,10 @@
                 {{ dec.total_plays }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
-                {{ decimal(dec.total_hours, 1, 1) }}h
+                {{ hours(dec.total_hours) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right py-2">
-                {{ dec.unique_artists }} artists
+                {{ t('cards.artistCount', { count: dec.unique_artists }) }}
               </td>
             </tr>
           </tbody>
@@ -1110,13 +1130,17 @@
       <!-- Top stats -->
       <div class="grid grid-cols-2 gap-4 shrink-0">
         <div class="bg-white/10 rounded-2xl px-5 py-3 flex items-center justify-between">
-          <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Minutes listened</p>
+          <p class="text-white/60 text-sm font-medium uppercase tracking-wider">
+            {{ t('cards.minutesListened') }}
+          </p>
           <p class="text-3xl font-black text-white tabular-nums">
             {{ num(recapData.total_minutes) }}
           </p>
         </div>
         <div class="bg-white/10 rounded-2xl px-5 py-3 flex items-center justify-between">
-          <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Top genre</p>
+          <p class="text-white/60 text-sm font-medium uppercase tracking-wider">
+            {{ t('cards.topGenre') }}
+          </p>
           <p class="text-3xl font-black text-white truncate ml-3">{{ recapData.top_genre }}</p>
         </div>
       </div>
@@ -1137,10 +1161,13 @@
             class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none"
           ></div>
           <div class="absolute bottom-0 left-0 right-0 p-5 pointer-events-none">
-            <p class="text-white/70 text-xs font-bold uppercase tracking-widest">#1 Artist</p>
+            <p class="text-white/70 text-xs font-bold uppercase tracking-widest">
+              {{ t('cards.topArtist') }}
+            </p>
             <p class="text-white font-black text-3xl leading-tight">{{ recapTopArtist.artist }}</p>
             <p class="text-white/70 text-base mt-1">
-              {{ decimal(recapTopArtist.total_hours, 1, 1) }}h listened
+              {{ t('cards.hoursListenedValue', { value: decimal(recapTopArtist.total_hours, 1, 1) })
+              }}
             </p>
           </div>
         </div>
@@ -1148,7 +1175,7 @@
         <!-- Top Artists -->
         <div class="flex-1 flex flex-col min-w-0 bg-white/5 rounded-2xl p-5 min-h-0">
           <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">
-            Top Artists
+            {{ t('stats.topArtists') }}
           </p>
           <div class="flex-1 flex flex-col min-h-0">
             <table class="w-full table-fixed border-collapse shrink-0">
@@ -1168,17 +1195,17 @@
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10"
                   >
-                    Artist
+                    {{ t('cards.columns.artist') }}
                   </th>
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
                   >
-                    Plays
+                    {{ t('cards.columns.plays') }}
                   </th>
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
-                    Hours
+                    {{ t('cards.columns.hours') }}
                   </th>
                 </tr>
               </thead>
@@ -1213,7 +1240,7 @@
                       {{ artist.plays }}
                     </td>
                     <td class="text-white/40 text-xs tabular-nums text-right py-1.5">
-                      {{ decimal(artist.total_hours, 1, 1) }}h
+                      {{ hours(artist.total_hours) }}
                     </td>
                   </tr>
                 </tbody>
@@ -1224,7 +1251,7 @@
         <!-- Top Songs -->
         <div class="flex-1 flex flex-col min-w-0 bg-white/5 rounded-2xl p-5 min-h-0">
           <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 shrink-0">
-            Top Songs
+            {{ t('stats.topSongs') }}
           </p>
           <div class="flex-1 flex flex-col min-h-0">
             <table class="w-full table-fixed border-collapse shrink-0">
@@ -1244,17 +1271,17 @@
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-left pb-2 pr-2 border-b border-white/10"
                   >
-                    Track
+                    {{ t('cards.columns.track') }}
                   </th>
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
                   >
-                    Plays
+                    {{ t('cards.columns.plays') }}
                   </th>
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
-                    Hours
+                    {{ t('cards.columns.hours') }}
                   </th>
                 </tr>
               </thead>
@@ -1290,7 +1317,7 @@
                       {{ song.plays }}
                     </td>
                     <td class="text-white/50 text-xs tabular-nums text-right py-1.5">
-                      {{ decimal(song.total_minutes / 60, 1, 1) }}h
+                      {{ hours(song.total_minutes / 60) }}
                     </td>
                   </tr>
                 </tbody>

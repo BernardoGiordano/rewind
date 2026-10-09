@@ -366,30 +366,39 @@ app.get('/api/auth/me', (req, res) => {
 app.post('/api/auth/login', jsonParser, async (req, res) => {
   noCache(res);
   if (envAuthAvailable()) {
-    res.status(409).json({ error: 'Server is configured for env-based auth; login is disabled' });
+    res.status(409).json({
+      error: 'login_disabled',
+      message: 'Server is configured for env-based auth; login is disabled',
+    });
     return;
   }
   const body = (req.body ?? {}) as { username?: unknown; password?: unknown };
   const username = typeof body.username === 'string' ? body.username.trim() : '';
   const password = typeof body.password === 'string' ? body.password : '';
   if (!username || !password) {
-    res.status(400).json({ error: 'Username and password are required' });
+    res.status(400).json({ error: 'credentials_required', message: 'Username and password are required' });
     return;
   }
   const baseUrl = getNavidromeUrl();
   if (!baseUrl) {
-    res.status(503).json({ error: 'NAVIDROME_URL is not configured on the server' });
+    res.status(503).json({
+      error: 'navidrome_not_configured',
+      message: 'NAVIDROME_URL is not configured on the server',
+    });
     return;
   }
   const ok = await pingSubsonic(baseUrl, username, password);
   if (!ok) {
-    res.status(401).json({ error: 'Invalid username or password' });
+    res.status(401).json({ error: 'invalid_credentials', message: 'Invalid username or password' });
     return;
   }
   const db = getDb();
   const uid = resolveUserId(db, username);
   if (!uid) {
-    res.status(404).json({ error: `No Navidrome user found with user_name='${username}'` });
+    res.status(404).json({
+      error: 'user_not_found',
+      message: `No Navidrome user found with user_name='${username}'`,
+    });
     return;
   }
   writeSessionCookie(req, res, { uid, username, password });

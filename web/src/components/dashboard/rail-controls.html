@@ -2,8 +2,8 @@
   type="button"
   (click)="toggleAutoplay()"
   [aria-pressed]="autoplay"
-  [aria-label]="autoplay ? 'Stop autoplay' : 'Start autoplay'"
-  [title]="autoplay ? 'Stop autoplay' : 'Autoplay'"
+  [aria-label]="t(autoplay ? 'dashboard.stopAutoplay' : 'dashboard.startAutoplay')"
+  [title]="t(autoplay ? 'dashboard.stopAutoplay' : 'dashboard.autoplay')"
   class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
   [class]="autoplay ? 'bg-fill-strong text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
 >

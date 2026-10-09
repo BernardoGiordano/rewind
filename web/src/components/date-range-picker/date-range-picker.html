@@ -4,8 +4,8 @@
     type="button"
     (click)="shiftMonths(-12)"
     class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
-    aria-label="Previous year"
-    title="Previous year"
+    [aria-label]="t('datePicker.previousYear')"
+    [title]="t('datePicker.previousYear')"
   >
     <app-icon name="heroChevronDoubleLeft" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
   </button>
@@ -13,8 +13,8 @@
     type="button"
     (click)="shiftMonths(-1)"
     class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
-    aria-label="Previous month"
-    title="Previous month"
+    [aria-label]="t('datePicker.previousMonth')"
+    [title]="t('datePicker.previousMonth')"
   >
     <app-icon name="heroChevronLeft" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
   </button>
@@ -26,8 +26,8 @@
     (click)="shiftMonths(1)"
     [disabled]="atLatestMonth"
     class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
-    aria-label="Next month"
-    title="Next month"
+    [aria-label]="t('datePicker.nextMonth')"
+    [title]="t('datePicker.nextMonth')"
   >
     <app-icon name="heroChevronRight" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
   </button>
@@ -36,8 +36,8 @@
     (click)="shiftMonths(12)"
     [disabled]="atLatestMonth"
     class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
-    aria-label="Next year"
-    title="Next year"
+    [aria-label]="t('datePicker.nextYear')"
+    [title]="t('datePicker.nextYear')"
   >
     <app-icon name="heroChevronDoubleRight" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
   </button>
@@ -80,12 +80,12 @@
 <!-- Ends of the selection. The one the next click sets is outlined. -->
 <div class="mt-3 grid grid-cols-2 gap-2">
   <div
-    *for="end of ends; key: end.label"
+    *for="end of ends; key: end.labelKey"
     class="rounded-lg px-3 py-2 border transition-colors"
     [class]="end.next ? 'border-ink-muted bg-surface-raised' : 'border-edge-raised bg-fill'"
   >
     <p class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint leading-none">
-      {{ end.label }}
+      {{ t(end.labelKey) }}
     </p>
     <p
       class="mt-1 text-sm font-medium tabular-nums truncate"
@@ -103,7 +103,7 @@
     (click)="reset()"
     class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
   >
-    Reset
+    {{ t('datePicker.reset') }}
   </button>
   <button
     type="button"
@@ -111,6 +111,6 @@
     [disabled]="!canApply"
     class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-selected text-on-selected hover:opacity-90 disabled:opacity-30 disabled:cursor-default transition-opacity"
   >
-    Apply range
+    {{ t('datePicker.apply') }}
   </button>
 </div>

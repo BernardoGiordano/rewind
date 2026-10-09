@@ -1,3 +1,4 @@
 {
-  "$schema": "../node_modules/@srljs/core/lib/core/remotes/app.manifest.schema.json"
+  "$schema": "../node_modules/@srljs/core/lib/core/remotes/app.manifest.schema.json",
+  "i18n": { "supportedLocales": ["en", "it"], "bundles": ["/i18n/{locale}.json"] }
 }

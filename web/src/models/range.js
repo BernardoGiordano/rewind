@@ -1,6 +1,12 @@
-import { MONTH_FULL, MONTH_SHORT, parseIsoDate, toIsoDate } from '../utils/format.js';
+import {
+  formatDayMonth,
+  formatDayMonthYear,
+  formatMonth,
+  parseIsoDate,
+  toIsoDate,
+} from '../utils/format.js';
 
-/** @import { ParamReader, RangeParams, RangePreset, StatRange } from './types.js' */
+/** @import { I18n, ParamReader, RangeParams, RangePreset, StatRange } from './types.js' */
 
 /** @type {StatRange} */
 export const ALL_TIME = { kind: 'all-time' };
@@ -74,23 +80,24 @@ export function mergeParams(search, params) {
   return next;
 }
 
-/** @param {StatRange} range @param {Date} [today] @returns {string} */
-export function rangeLabel(range, today = startOfToday()) {
-  if (range.kind === 'all-time') return 'All Time';
+/** @param {StatRange} range @param {I18n} i18n @param {Date} [today] @returns {string} */
+export function rangeLabel(range, i18n, today = startOfToday()) {
+  if (range.kind === 'all-time') return i18n.t('range.allTime');
   if (range.kind === 'year') return range.year;
-  return customRangeLabel(range.from, range.to, today);
+  return customRangeLabel(range.from, range.to, i18n, today);
 }
 
 /**
  * Label for the 48 px rail, where the full one does not fit.
  *
  * @param {StatRange} range
+ * @param {I18n} i18n
  * @returns {string}
  */
-export function rangeShortLabel(range) {
-  if (range.kind === 'all-time') return 'All';
+export function rangeShortLabel(range, i18n) {
+  if (range.kind === 'all-time') return i18n.t('range.short.allTime');
   if (range.kind === 'year') return range.year;
-  return 'Custom';
+  return i18n.t('range.short.custom');
 }
 
 /**
@@ -110,10 +117,13 @@ export function rangePresets(today = startOfToday()) {
   const month = today.getMonth();
 
   return [
-    { label: 'All time', range: ALL_TIME },
-    { label: 'Last week', range: custom(shiftDays(today, -7), today) },
-    { label: 'Last 30 days', range: custom(shiftDays(today, -30), today) },
-    { label: 'Last month', range: custom(new Date(year, month - 1, 1), new Date(year, month, 0)) },
+    { labelKey: 'range.preset.allTime', range: ALL_TIME },
+    { labelKey: 'range.preset.lastWeek', range: custom(shiftDays(today, -7), today) },
+    { labelKey: 'range.preset.last30Days', range: custom(shiftDays(today, -30), today) },
+    {
+      labelKey: 'range.preset.lastMonth',
+      range: custom(new Date(year, month - 1, 1), new Date(year, month, 0)),
+    },
   ];
 }
 
@@ -135,10 +145,12 @@ export function rangeSlug(range) {
  *
  * @param {string} fromIso
  * @param {string} toIso
+ * @param {I18n} i18n
  * @param {Date} [today]
  * @returns {string}
  */
-export function customRangeLabel(fromIso, toIso, today = startOfToday()) {
+export function customRangeLabel(fromIso, toIso, i18n, today = startOfToday()) {
+  const { t, locale } = i18n;
   const from = parseIsoDate(fromIso);
   const to = parseIsoDate(toIso);
   const currentYear = today.getFullYear();
@@ -151,12 +163,12 @@ export function customRangeLabel(fromIso, toIso, today = startOfToday()) {
     (sameDate(from, sevenAgo) && sameDate(to, today)) ||
     (sameDate(from, eightAgo) && sameDate(to, yesterday))
   ) {
-    return 'Last Week';
+    return t('range.lastWeek');
   }
 
   const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  if (sameDate(from, lastMonthStart) && sameDate(to, lastMonthEnd)) return 'Last Month';
+  if (sameDate(from, lastMonthStart) && sameDate(to, lastMonthEnd)) return t('range.lastMonth');
 
   // Any full calendar month
   if (
@@ -165,25 +177,19 @@ export function customRangeLabel(fromIso, toIso, today = startOfToday()) {
     from.getMonth() === to.getMonth()
   ) {
     const monthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
-    if (sameDate(to, monthEnd)) {
-      const year = from.getFullYear();
-      return year === currentYear
-        ? MONTH_FULL[from.getMonth()] ?? ''
-        : `${MONTH_FULL[from.getMonth()] ?? ''} ${year}`;
-    }
+    if (sameDate(to, monthEnd)) return formatMonth(from, locale, from.getFullYear() !== currentYear);
   }
-
-  /** @param {Date} d */
-  const short = (d) => `${MONTH_SHORT[d.getMonth()] ?? ''} ${d.getDate()}`;
-  /** @param {Date} d */
-  const withYear = (d) => `${short(d)}, ${d.getFullYear()}`;
 
   if (from.getFullYear() === to.getFullYear()) {
+    const span = { from: formatDayMonth(from, locale), to: formatDayMonth(to, locale) };
     const year = from.getFullYear();
-    if (year === currentYear) return `${short(from)} – ${short(to)}`;
-    return `${short(from)} – ${short(to)}, ${year}`;
+    if (year === currentYear) return t('range.span', span);
+    return t('range.spanInYear', { ...span, year: String(year) });
   }
-  return `${withYear(from)} – ${withYear(to)}`;
+  return t('range.span', {
+    from: formatDayMonthYear(from, locale),
+    to: formatDayMonthYear(to, locale),
+  });
 }
 
 /** @returns {Date} */

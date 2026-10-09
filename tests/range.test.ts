@@ -13,6 +13,10 @@ import {
   sameRange,
 } from '../web/src/models/range.js';
 import type { StatRange } from '../web/src/models/types.js';
+import { bundleI18n } from './i18n.js';
+
+const en = bundleI18n('en');
+const it_ = bundleI18n('it');
 
 const reader = (params: Record<string, string>) => ({
   get: (name: string) => params[name] ?? null,
@@ -117,39 +121,51 @@ describe('rangeLabel', () => {
   const today = new Date(2026, 8, 14);
 
   it('names all-time and a year', () => {
-    expect(rangeLabel(ALL_TIME)).toBe('All Time');
-    expect(rangeLabel(YEAR)).toBe('2024');
+    expect(rangeLabel(ALL_TIME, en)).toBe('All Time');
+    expect(rangeLabel(YEAR, en)).toBe('2024');
   });
 
   it('names a rolling week ending today or yesterday', () => {
-    expect(customRangeLabel('2026-09-07', '2026-09-14', today)).toBe('Last Week');
-    expect(customRangeLabel('2026-09-06', '2026-09-13', today)).toBe('Last Week');
+    expect(customRangeLabel('2026-09-07', '2026-09-14', en, today)).toBe('Last Week');
+    expect(customRangeLabel('2026-09-06', '2026-09-13', en, today)).toBe('Last Week');
   });
 
   it('names the previous calendar month', () => {
-    expect(customRangeLabel('2026-08-01', '2026-08-31', today)).toBe('Last Month');
+    expect(customRangeLabel('2026-08-01', '2026-08-31', en, today)).toBe('Last Month');
   });
 
   it('names a full month, adding the year only when it is not this one', () => {
-    expect(customRangeLabel('2026-03-01', '2026-03-31', today)).toBe('March');
-    expect(customRangeLabel('2024-03-01', '2024-03-31', today)).toBe('March 2024');
+    expect(customRangeLabel('2026-03-01', '2026-03-31', en, today)).toBe('March');
+    expect(customRangeLabel('2024-03-01', '2024-03-31', en, today)).toBe('March 2024');
   });
 
   it('falls back to dates, adding the year only when it is not this one', () => {
-    expect(customRangeLabel('2026-03-02', '2026-03-20', today)).toBe('Mar 2 – Mar 20');
-    expect(customRangeLabel('2024-03-02', '2024-03-20', today)).toBe('Mar 2 – Mar 20, 2024');
+    expect(customRangeLabel('2026-03-02', '2026-03-20', en, today)).toBe('Mar 2 – Mar 20');
+    expect(customRangeLabel('2024-03-02', '2024-03-20', en, today)).toBe('Mar 2 – Mar 20, 2024');
   });
 
   it('carries both years across a boundary', () => {
-    expect(customRangeLabel('2024-12-20', '2025-01-10', today)).toBe('Dec 20, 2024 – Jan 10, 2025');
+    expect(customRangeLabel('2024-12-20', '2025-01-10', en, today)).toBe(
+      'Dec 20, 2024 – Jan 10, 2025',
+    );
+  });
+
+  it('writes the same ranges in Italian', () => {
+    expect(rangeLabel(ALL_TIME, it_)).toBe('Da sempre');
+    expect(customRangeLabel('2026-09-07', '2026-09-14', it_, today)).toBe('Ultima settimana');
+    expect(customRangeLabel('2024-03-01', '2024-03-31', it_, today)).toBe('Marzo 2024');
+    expect(customRangeLabel('2024-03-02', '2024-03-20', it_, today)).toBe('2 mar – 20 mar 2024');
+    expect(customRangeLabel('2024-12-20', '2025-01-10', it_, today)).toBe(
+      '20 dic 2024 – 10 gen 2025',
+    );
   });
 });
 
 describe('rangeShortLabel', () => {
   it('fits the rail', () => {
-    expect(rangeShortLabel(ALL_TIME)).toBe('All');
-    expect(rangeShortLabel(YEAR)).toBe('2024');
-    expect(rangeShortLabel(CUSTOM)).toBe('Custom');
+    expect(rangeShortLabel(ALL_TIME, en)).toBe('All');
+    expect(rangeShortLabel(YEAR, en)).toBe('2024');
+    expect(rangeShortLabel(CUSTOM, en)).toBe('Custom');
   });
 });
 
@@ -165,7 +181,7 @@ describe('rangePresets', () => {
   const today = new Date(2026, 2, 15);
 
   it('resolves each window against today', () => {
-    const ranges = Object.fromEntries(rangePresets(today).map((p) => [p.label, p.range]));
+    const ranges = Object.fromEntries(rangePresets(today).map((p) => [en.t(p.labelKey), p.range]));
     expect(ranges['All time']).toEqual(ALL_TIME);
     expect(ranges['Last week']).toEqual({ kind: 'custom', from: '2026-03-08', to: '2026-03-15' });
     expect(ranges['Last 30 days']).toEqual({
@@ -177,13 +193,15 @@ describe('rangePresets', () => {
   });
 
   it('labels each window the way the rest of the app names it', () => {
-    const labels = rangePresets(today).map((p) => rangeLabel(p.range, today));
+    const labels = rangePresets(today).map((p) => rangeLabel(p.range, en, today));
     expect(labels).toEqual(['All Time', 'Last Week', 'Feb 13 – Mar 15', 'Last Month']);
   });
 
   it('reaches back across a year boundary in January', () => {
     const january = new Date(2026, 0, 10);
-    const lastMonth = rangePresets(january).find((p) => p.label === 'Last month')!.range;
+    const lastMonth = rangePresets(january).find(
+      (p) => p.labelKey === 'range.preset.lastMonth',
+    )!.range;
     expect(lastMonth).toEqual({ kind: 'custom', from: '2025-12-01', to: '2025-12-31' });
   });
 });

@@ -1,4 +1,15 @@
-import { computed, currentPath, effect, inject, queryParams, signal, token, untracked } from '@srljs/core';
+import {
+  computed,
+  currentPath,
+  effect,
+  inject,
+  locale,
+  queryParams,
+  signal,
+  t,
+  token,
+  untracked,
+} from '@srljs/core';
 
 import {
   ALL_TIME,
@@ -49,8 +60,9 @@ export class RewindRange {
   /** True while the range panel is on screen, so routes can stand down their shortcuts. */
   panelOpen = computed(() => this.#panelOpen.value);
 
-  label = computed(() => rangeLabel(this.#current.value));
-  shortLabel = computed(() => rangeShortLabel(this.#current.value));
+  /** Both read the active language, so a language change relabels the range. */
+  label = computed(() => rangeLabel(this.#current.value, { t, locale: locale.value }));
+  shortLabel = computed(() => rangeShortLabel(this.#current.value, { t, locale: locale.value }));
 
   constructor() {
     const navidrome = inject(NAVIDROME);

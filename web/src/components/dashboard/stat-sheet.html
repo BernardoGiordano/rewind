@@ -4,7 +4,7 @@
   <div
     role="dialog"
     aria-modal="true"
-    aria-label="Choose a statistic"
+    [aria-label]="t('dashboard.chooseStat')"
     class="absolute inset-x-0 bottom-0 max-h-[75dvh] flex flex-col rounded-t-2xl bg-surface-raised shadow-lg ring-1 ring-edge-raised"
   >
     <div class="flex-none pt-2 pb-1 flex justify-center" aria-hidden="true">
@@ -12,7 +12,7 @@
     </div>
 
     <h2 class="flex-none px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-      Songs statistics
+      {{ t('dashboard.statistics') }}
     </h2>
 
     <ul role="list" class="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
@@ -25,7 +25,7 @@
           [class]="current === def.type ? 'bg-fill-raised text-ink' : 'text-ink-soft hover:bg-fill-raised'"
         >
           <app-icon [name]="def.icon" class="w-5 h-5 shrink-0" aria-hidden="true"></app-icon>
-          {{ def.label }}
+          {{ t(def.labelKey) }}
         </button>
       </li>
     </ul>

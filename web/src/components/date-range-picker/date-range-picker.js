@@ -1,9 +1,13 @@
-import { computed, defineComponent, signal, SignalElement } from '@srljs/core';
+import { computed, defineComponent, locale, signal, SignalElement, t } from '@srljs/core';
 
 import { AppIcon } from '../icon/icon.js';
-import { MONTH_FULL, MONTH_SHORT, parseIsoDate, toIsoDate } from '../../utils/format.js';
-
-const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+import {
+  formatDayMonthYear,
+  formatMonth,
+  parseIsoDate,
+  toIsoDate,
+  weekdayNames,
+} from '../../utils/format.js';
 
 /**
  * @typedef {object} DayCell
@@ -37,7 +41,8 @@ export class AppDateRangePicker extends SignalElement {
   /** @type {string | null} */
   initialTo = null;
 
-  weekdays = WEEKDAYS;
+  /** Two letters each, from Monday. */
+  weekdays = computed(() => weekdayNames(locale.value, 2));
 
   #todayIso = toIsoDate(new Date());
 
@@ -51,7 +56,9 @@ export class AppDateRangePicker extends SignalElement {
   /** The initial range as last applied, so `canApply` compares against what is in force. */
   #initial = signal(/** @type {{ from: string | null, to: string | null }} */ ({ from: null, to: null }));
 
-  monthLabel = computed(() => `${MONTH_FULL[this.viewMonth.value] ?? ''} ${this.viewYear.value}`);
+  monthLabel = computed(() =>
+    formatMonth(new Date(this.viewYear.value, this.viewMonth.value, 1), locale.value, true),
+  );
 
   atLatestMonth = computed(() => {
     const today = new Date();
@@ -71,8 +78,8 @@ export class AppDateRangePicker extends SignalElement {
   ends = computed(() => {
     const awaitingEnd = !!this.start.value && !this.end.value;
     return [
-      { label: 'From', value: this.start.value, next: !awaitingEnd },
-      { label: 'To', value: this.end.value, next: awaitingEnd },
+      { labelKey: 'datePicker.from', value: this.start.value, next: !awaitingEnd },
+      { labelKey: 'datePicker.to', value: this.end.value, next: awaitingEnd },
     ];
   });
 
@@ -202,13 +209,12 @@ export class AppDateRangePicker extends SignalElement {
 
   /** @param {string | null} iso @returns {string} */
   endLabel(iso) {
-    return iso ? this.formatDate(iso) : 'Pick a day';
+    return iso ? this.formatDate(iso) : t('datePicker.pickDay');
   }
 
   /** @param {string} iso @returns {string} */
   formatDate(iso) {
-    const d = parseIsoDate(iso);
-    return `${MONTH_SHORT[d.getMonth()] ?? ''} ${d.getDate()}, ${d.getFullYear()}`;
+    return formatDayMonthYear(parseIsoDate(iso), locale.value);
   }
 
   /** @param {{ from: string, to: string }} range */

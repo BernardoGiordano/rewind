@@ -5,8 +5,8 @@
     type="button"
     (click)="toggleSidebar()"
     [aria-expanded]="sidebarShowing"
-    [aria-label]="sidebarShowing ? 'Collapse sidebar' : 'Expand sidebar'"
-    title="Toggle sidebar"
+    [aria-label]="t(sidebarShowing ? 'dashboard.collapseSidebar' : 'dashboard.expandSidebar')"
+    [title]="t('dashboard.toggleSidebar')"
     class="hidden medium-up:flex fixed top-4 -translate-x-1/2 z-50 items-center justify-center w-7 h-7 rounded-full bg-surface-raised border border-edge-raised text-ink-muted hover:text-ink hover:bg-fill-raised shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
     [class]="[
       sidebarCollapsed ? 'expanded:left-16' : 'expanded:left-[22rem] wide:left-[24rem]',
@@ -40,7 +40,7 @@
     <div class="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-10 pb-4">
       <!-- The period is chosen from the rail; the sidebar only names it -->
       <div class="min-w-0">
-        <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted">Listening period</span>
+        <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('range.title') }}</span>
         <p class="mt-2 flex items-center gap-2 text-base font-bold text-ink">
           <app-icon name="heroCalendarDays" class="w-4 h-4 shrink-0 text-ink-muted" aria-hidden="true"></app-icon>
           <span class="truncate" [title]="rangeLabel">{{ rangeLabel }}</span>
@@ -55,7 +55,7 @@
           class="cursor-pointer w-full flex items-center justify-between mb-3"
         >
           <h2 class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-            Songs statistics
+            {{ t('dashboard.statistics') }}
           </h2>
           <app-icon
             name="heroChevronDown"
@@ -73,7 +73,7 @@
               [class]="selectedStat === def.type ? 'bg-fill-strong/80 text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
             >
               <app-icon [name]="def.icon" class="w-4 h-4" aria-hidden="true"></app-icon>
-              {{ def.label }}
+              {{ t(def.labelKey) }}
             </button>
           </li>
         </ul>
@@ -104,7 +104,7 @@
         class="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-fill hover:text-ink transition-colors"
       >
         <app-icon name="heroHeart" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
-        Donate
+        {{ t('links.donate') }}
       </a>
     </div>
   </aside>
@@ -123,18 +123,18 @@
         <div
           class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
         ></div>
-        <p class="mt-4 text-sm text-ink-muted">Loading stats…</p>
+        <p class="mt-4 text-sm text-ink-muted">{{ t('dashboard.loading') }}</p>
       </div>
     </div>
     <div *else *if="error" class="flex-1 flex items-center justify-center">
       <div class="text-center px-6">
-        <p class="text-red-500 font-medium">{{ error }}</p>
+        <p class="text-red-500 font-medium">{{ t(error) }}</p>
         <button
           type="button"
           (click)="reload()"
           class="cursor-pointer mt-4 text-sm text-ink-muted hover:text-slate-700 dark:hover:text-white underline"
         >
-          Retry
+          {{ t('common.retry') }}
         </button>
       </div>
     </div>
@@ -189,7 +189,7 @@
             type="button"
             (click)="prevStat()"
             class="export-ignore cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
-            aria-label="Previous stat"
+            [aria-label]="t('dashboard.previousStat')"
           >
             <svg
               class="w-4 h-4 text-white"
@@ -207,7 +207,7 @@
             type="button"
             (click)="nextStat()"
             class="export-ignore cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
-            aria-label="Next stat"
+            [aria-label]="t('dashboard.nextStat')"
           >
             <svg
               class="w-4 h-4 text-white"
@@ -228,7 +228,7 @@
             [aria-expanded]="statSheetOpen"
             class="export-ignore cursor-pointer medium-up:hidden absolute bottom-3 left-3 z-20 flex items-center gap-1.5 max-w-[55%] pl-3 pr-2 py-1.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-sm font-medium hover:bg-black/60 transition-colors"
           >
-            <span class="truncate">{{ selectedDef?.label ?? 'Statistics' }}</span>
+            <span class="truncate">{{ t(selectedDef?.labelKey ?? 'dashboard.statisticsShort') }}</span>
             <app-icon name="heroChevronDown" class="w-4 h-4 shrink-0 rotate-180" aria-hidden="true"></app-icon>
           </button>
 
@@ -239,7 +239,7 @@
               type="button"
               (click)="toggleAutoplayPause()"
               class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
-              [aria-label]="autoplayPaused ? 'Resume autoplay' : 'Pause autoplay'"
+              [aria-label]="t(autoplayPaused ? 'dashboard.resumeAutoplay' : 'dashboard.pauseAutoplay')"
             >
               <svg *if="autoplayPaused" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -259,8 +259,8 @@
               type="button"
               (click)="exportCard()"
               class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
-              aria-label="Export image"
-              title="Export image"
+              [aria-label]="t('dashboard.exportImage')"
+              [title]="t('dashboard.exportImage')"
             >
               <svg
                 class="w-4 h-4"

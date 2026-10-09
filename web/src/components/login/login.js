@@ -1,8 +1,10 @@
-import { ApiError, defineComponent, inject, navigate, queryParams, signal, SignalElement } from '@srljs/core';
+import { defineComponent, inject, navigate, queryParams, signal, SignalElement } from '@srljs/core';
 
 import { AppIcon } from '../icon/icon.js';
+import { AppLocalePicker } from '../locale-picker/locale-picker.js';
 import { AUTH } from '../../services/auth.js';
 import { THEME } from '../../services/theme.js';
+import { errorKey } from '../../utils/api-error.js';
 
 /** The sign-in screen, for servers that let each user sign in with Navidrome credentials. */
 export class Login extends SignalElement {
@@ -13,6 +15,7 @@ export class Login extends SignalElement {
   password = signal('');
   showPassword = signal(false);
   submitting = signal(false);
+  /** A message key, so the error follows a language change. */
   error = signal(/** @type {string | null} */ (null));
   darkMode = this.#theme.dark;
 
@@ -40,7 +43,7 @@ export class Login extends SignalElement {
     const username = this.username.value.trim();
     const password = this.password.value;
     if (!username || !password) {
-      this.error.value = 'Please enter both username and password.';
+      this.error.value = 'login.missingCredentials';
       return;
     }
     this.error.value = null;
@@ -54,24 +57,15 @@ export class Login extends SignalElement {
       },
       (cause) => {
         this.submitting.value = false;
-        this.error.value = loginError(cause);
+        this.error.value = errorKey(cause, 'login.failed');
       },
     );
   }
 }
 
-/**
- * The server's own reason when it gave one.
- *
- * @param {unknown} cause
- * @returns {string}
- */
-function loginError(cause) {
-  if (cause instanceof ApiError) {
-    const body = /** @type {{ error?: unknown } | null | undefined} */ (cause.body);
-    if (typeof body?.error === 'string') return body.error;
-  }
-  return cause instanceof Error ? cause.message : 'Login failed';
-}
-
-await defineComponent({ tag: 'app-login', element: Login, module: import.meta.url, uses: [AppIcon] });
+await defineComponent({
+  tag: 'app-login',
+  element: Login,
+  module: import.meta.url,
+  uses: [AppIcon, AppLocalePicker],
+});

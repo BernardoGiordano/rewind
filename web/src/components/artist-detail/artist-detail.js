@@ -1,12 +1,15 @@
 import {
   computed,
   defineComponent,
+  dt,
   inject,
+  locale,
   navigate,
   resource,
   routeParams,
   signal,
   SignalElement,
+  t,
 } from '@srljs/core';
 
 import { AppCover } from '../cover.js';
@@ -15,19 +18,26 @@ import { NAVIDROME } from '../../services/navidrome.js';
 import { NAVIGATION_HISTORY } from '../../shell/navigation-history.js';
 import { REWIND_RANGE } from '../../shell/rewind-range.js';
 import { SECTION_REGISTRY } from '../../shell/section-registry.js';
-import { MONTH_SHORT, parseIsoDate, toIsoDate } from '../../utils/format.js';
+import { formatMonthShort, parseIsoDate, toIsoDate } from '../../utils/format.js';
 import { watch } from '../../utils/watch.js';
 
 /** @import { ArtistDetail as ArtistDetailData } from '../../models/types.js' */
 
 /** @typedef {'overview' | 'patterns' | 'activity'} TabKey */
 
-/** @type {readonly { key: TabKey, label: string }[]} */
+/** @type {readonly { key: TabKey, labelKey: string }[]} */
 const TABS = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'patterns', label: 'Patterns' },
-  { key: 'activity', label: 'Activity' },
+  { key: 'overview', labelKey: 'artist.tabs.overview' },
+  { key: 'patterns', labelKey: 'artist.tabs.patterns' },
+  { key: 'activity', labelKey: 'artist.tabs.activity' },
 ];
+
+/** `formatDate`'s pattern, such as `Oct 9, 2026`. */
+const SHORT_DATE = /** @type {Intl.DateTimeFormatOptions} */ ({
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
 
 /** One artist's listening history over the Rewind range. */
 export class ArtistDetail extends SignalElement {
@@ -135,6 +145,7 @@ export class ArtistDetail extends SignalElement {
   heatmapMonthLabels = computed(() => {
     const cells = this.heatmapCells.value;
     if (!cells) return [];
+    const tag = locale.value;
     const weeks = Math.ceil(cells.length / 7);
     /** @type {{ col: number, label: string }[]} */
     const labels = [];
@@ -150,7 +161,8 @@ export class ArtistDetail extends SignalElement {
         }
       }
       if (!monthCell) continue;
-      const month = parseIsoDate(monthCell.date).getMonth();
+      const day = parseIsoDate(monthCell.date);
+      const month = day.getMonth();
       if (month !== prevMonth) {
         // Only label if this week has at least ~3 days in the new month so the label fits
         let inNewMonth = 0;
@@ -159,7 +171,7 @@ export class ArtistDetail extends SignalElement {
           if (c && parseIsoDate(c.date).getMonth() === month) inNewMonth++;
         }
         if (inNewMonth >= 3 || w === 0) {
-          labels.push({ col: w + 1, label: MONTH_SHORT[month] ?? '' });
+          labels.push({ col: w + 1, label: formatMonthShort(day, tag) });
           prevMonth = month;
         }
       }
@@ -281,25 +293,27 @@ export class ArtistDetail extends SignalElement {
   /** @returns {string} */
   firstHeardLabel() {
     const d = this.data.value;
-    if (!d?.first_scrobble) return 'No plays yet';
-    return `First heard ${this.formatDate(d.first_scrobble)} · listening for ${this.daysListening.value} days`;
+    if (!d?.first_scrobble) return t('artist.noPlays');
+    return t('artist.firstHeard', {
+      date: this.formatDate(d.first_scrobble),
+      count: this.daysListening.value,
+    });
   }
 
   /** @param {number | null} ts @returns {string} */
   formatDate(ts) {
     if (!ts) return '—';
-    const d = new Date(ts * 1000);
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    return dt(ts * 1000, SHORT_DATE);
   }
 
   /** @param {number} ts @returns {string} */
   formatRelative(ts) {
     const now = Math.floor(Date.now() / 1000);
     const diff = now - ts;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
+    if (diff < 60) return t('artist.ago.now');
+    if (diff < 3600) return t('artist.ago.minutes', { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t('artist.ago.hours', { count: Math.floor(diff / 3600) });
+    if (diff < 86400 * 7) return t('artist.ago.days', { count: Math.floor(diff / 86400) });
     return this.formatDate(ts);
   }
 }

@@ -13,6 +13,7 @@ import {
 } from '@srljs/core';
 
 import { AppIcon } from '../components/icon/icon.js';
+import { AppLocalePicker } from '../components/locale-picker/locale-picker.js';
 import { AUTH } from '../services/auth.js';
 import { THEME } from '../services/theme.js';
 import { watch } from '../utils/watch.js';
@@ -150,5 +151,5 @@ await defineComponent({
   tag: 'app-shell',
   element: Shell,
   module: import.meta.url,
-  uses: [RouteOutlet, ComponentOutlet, AppIcon, AppByline, AppPeriodPanel],
+  uses: [RouteOutlet, ComponentOutlet, AppIcon, AppByline, AppLocalePicker, AppPeriodPanel],
 });
