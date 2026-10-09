@@ -2,6 +2,7 @@ import type { Database } from 'better-sqlite3';
 import BetterSqlite3 from 'better-sqlite3';
 import express from 'express';
 import { libraryRouter } from './library.ts';
+import { soundtrackFor } from './soundtrack.ts';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import {
@@ -346,7 +347,7 @@ function noCache(res: express.Response): void {
 
 app.get('/api/config', (_req, res) => {
   noCache(res);
-  res.json({ coverArtAvailable: isCoverArtAvailable() });
+  res.json({ coverArtAvailable: isCoverArtAvailable(), musicAvailable: !!getNavidromeUrl() });
 });
 
 // --- /api/auth/* ---
@@ -462,6 +463,94 @@ app.get('/api/cover/:id', (req, res) => {
   proxyReq.on('error', (err) => {
     console.error('[cover] Proxy request error:', err.message);
     res.status(502).json({ error: 'Failed to fetch cover art' });
+  });
+  proxyReq.end();
+});
+
+// --- /api/soundtrack — one song per stat slide ---
+
+app.get('/api/soundtrack', (req, res) => {
+  try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
+    const range = resolveRange(
+      req.query['year'] as string | undefined,
+      req.query['from'] as string | undefined,
+      req.query['to'] as string | undefined,
+    );
+    noCache(res);
+    res.json(soundtrackFor(getDb(), auth.uid, range));
+  } catch (err: unknown) {
+    res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// --- /api/stream/:id — proxy to Navidrome stream ---
+
+const STREAM_HEADERS = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'last-modified'];
+
+app.get('/api/stream/:id', (req, res) => {
+  const baseUrl = getNavidromeUrl();
+  if (!baseUrl) {
+    res.status(503).json({ error: 'NAVIDROME_URL not configured' });
+    return;
+  }
+
+  const auth = requireAuth(req, res);
+  if (!auth) return;
+
+  const params = buildSubsonicAuthParams(auth.username, auth.password);
+  params.set('id', req.params['id']);
+
+  // The original file streams with Range support, so the browser seeks by itself.
+  // A browser that cannot decode it asks for MP3, which Navidrome transcodes from an offset.
+  if (req.query['format'] === 'mp3') {
+    params.set('format', 'mp3');
+    params.set('maxBitRate', '192');
+    const offset = Number(req.query['offset']);
+    if (Number.isInteger(offset) && offset > 0) params.set('timeOffset', String(offset));
+  }
+
+  const streamUrl = `${baseUrl.replace(/\/$/, '')}/rest/stream?${params.toString()}`;
+  const headers: Record<string, string> = {};
+  if (req.headers.range) headers['Range'] = req.headers.range;
+
+  const requester = streamUrl.startsWith('https') ? httpsRequest : httpRequest;
+  const proxyReq = requester(streamUrl, { headers }, (proxyRes) => {
+    const status = proxyRes.statusCode ?? 502;
+    const contentType = proxyRes.headers['content-type'] ?? '';
+
+    // Subsonic reports a failure as a JSON body, often with status 200.
+    if (status >= 400 || contentType.includes('json')) {
+      proxyRes.resume();
+      console.error('[stream] Upstream failed for', req.params['id'], 'status:', status);
+      res.status(502).json({ error: 'Failed to stream song' });
+      return;
+    }
+
+    res.status(status);
+    for (const name of STREAM_HEADERS) {
+      const value = proxyRes.headers[name];
+      if (value !== undefined) res.setHeader(name, value);
+    }
+    proxyRes.pipe(res);
+  });
+  // The browser drops a request when it seeks or changes song.
+  let dropped = false;
+  res.on('close', () => {
+    if (res.writableFinished) return;
+    dropped = true;
+    proxyReq.destroy();
+  });
+
+  proxyReq.on('error', (err) => {
+    if (dropped) return;
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    console.error('[stream] Proxy request error:', err.message);
+    res.status(502).json({ error: 'Failed to stream song' });
   });
   proxyReq.end();
 });
@@ -609,7 +698,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.id ORDER BY total_minutes DESC LIMIT 100
+      GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -623,7 +712,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.id ORDER BY total_minutes DESC LIMIT 100
+    GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
   `,
     [uid],
   );
@@ -643,7 +732,7 @@ function getTopArtists(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       LEFT JOIN artist a ON a.id = mf.artist_id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist_id ORDER BY total_hours DESC LIMIT 100
+      GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -660,7 +749,7 @@ function getTopArtists(db: Database, uid: string, range: Range) {
     JOIN media_file mf ON s.media_file_id = mf.id
     LEFT JOIN artist a ON a.id = mf.artist_id
     WHERE s.user_id = ?
-    GROUP BY mf.artist_id ORDER BY total_hours DESC LIMIT 100
+    GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
   `,
     [uid],
   );
@@ -677,7 +766,7 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.album_id ORDER BY total_minutes DESC LIMIT 100
+      GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -691,7 +780,7 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.album_id ORDER BY total_minutes DESC LIMIT 100
+    GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
   `,
     [uid],
   );
@@ -709,7 +798,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY total_hours DESC LIMIT 100
+      GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -724,7 +813,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
       json_each(json_extract(mf.tags, '$.genre')) AS g
     WHERE s.user_id = ?
       AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY total_hours DESC LIMIT 100
+    GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
   `,
     [uid],
   );
@@ -806,7 +895,7 @@ function getStreak(db: Database, uid: string, range: NonNullable<Range>) {
     )
     SELECT MIN(play_date) AS streak_start, MAX(play_date) AS streak_end,
       COUNT(*) AS streak_days
-    FROM numbered GROUP BY streak_group ORDER BY streak_days DESC LIMIT 100
+    FROM numbered GROUP BY streak_group ORDER BY streak_days DESC, streak_start DESC LIMIT 100
   `,
     [uid, startTs, endTs],
   );
@@ -823,7 +912,7 @@ function getLateNight(db: Database, uid: string, range: NonNullable<Range>) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       AND CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER) BETWEEN 0 AND 4
-    GROUP BY mf.id ORDER BY late_night_plays DESC LIMIT 100
+    GROUP BY mf.id ORDER BY late_night_plays DESC, SUM(mf.duration) DESC, mf.id LIMIT 100
   `,
     [uid, startTs, endTs],
   );
@@ -840,7 +929,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
     GROUP BY the_date, mf.id HAVING COUNT(*) >= 3
-    ORDER BY plays_that_day DESC LIMIT 100
+    ORDER BY plays_that_day DESC, the_date DESC, mf.id LIMIT 100
   `,
     [uid, startTs, endTs],
   );
@@ -882,7 +971,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY total_hours DESC LIMIT 100
+      GROUP BY decade ORDER BY SUM(mf.duration) DESC, decade LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -896,7 +985,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY total_hours DESC LIMIT 100
+    GROUP BY decade ORDER BY SUM(mf.duration * a.play_count) DESC, decade LIMIT 100
   `,
     [uid],
   );

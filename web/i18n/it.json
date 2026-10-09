@@ -126,6 +126,12 @@
     "pauseAutoplay": "Metti in pausa lo scorrimento automatico",
     "resumeAutoplay": "Riprendi lo scorrimento automatico",
     "exportImage": "Esporta immagine",
+    "music": {
+      "play": "Riproduci musica",
+      "mute": "Disattiva musica",
+      "nowPlaying": "In riproduzione: {title} di {artist}",
+      "volume": "Volume musica"
+    },
     "aspectRatio": "Formato della scheda",
     "cardMode": "Scheda in formato {mode}",
     "cardModes": {

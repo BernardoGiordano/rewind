@@ -125,6 +125,12 @@
     "pauseAutoplay": "Pause autoplay",
     "resumeAutoplay": "Resume autoplay",
     "exportImage": "Export image",
+    "music": {
+      "play": "Play music",
+      "mute": "Mute music",
+      "nowPlaying": "Now playing: {title} by {artist}",
+      "volume": "Music volume"
+    },
     "aspectRatio": "Card aspect ratio",
     "cardMode": "{mode} card",
     "cardModes": {

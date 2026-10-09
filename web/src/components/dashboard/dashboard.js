@@ -22,6 +22,7 @@ import { DASHBOARD } from './dashboard-state.js';
 import { DashboardMenuActions } from './menu-actions.js';
 import { DashboardRailControls } from './rail-controls.js';
 import { DashboardRailTools } from './rail-tools.js';
+import { SoundtrackControl } from './soundtrack-control.js';
 import { AppStatSheet } from './stat-sheet.js';
 import { STAT_NAVIGATOR } from './stat-navigator.js';
 import { STAT_STORE } from './stat-store.js';
@@ -244,5 +245,5 @@ await defineComponent({
   tag: 'app-dashboard',
   element: Dashboard,
   module: import.meta.url,
-  uses: [AppIcon, AppCardsPortrait, AppCardsSquare, AppCardsLandscape, AppStatSheet],
+  uses: [AppIcon, AppCardsPortrait, AppCardsSquare, AppCardsLandscape, AppStatSheet, SoundtrackControl],
 });

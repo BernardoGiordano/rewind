@@ -1,0 +1,29 @@
+<!-- Hover only opens the slider where a pointer can hover. Touch screens use the device volume. -->
+<div
+  *if="available"
+  class="group/music flex items-center h-8 rounded-full bg-black/25 hover:bg-black/40 text-white transition-colors"
+>
+  <input
+    type="range"
+    min="0"
+    max="1"
+    step="0.05"
+    [.value]="volume"
+    (input)="setVolume($event)"
+    [aria-label]="t('dashboard.music.volume')"
+    class="cursor-pointer w-0 m-0 opacity-0 accent-white transition-[width,margin,opacity] duration-200 group-hover/music:w-20 group-hover/music:ml-3 group-hover/music:opacity-100 focus-visible:w-20 focus-visible:ml-3 focus-visible:opacity-100"
+  />
+  <button
+    type="button"
+    (click)="toggle()"
+    [aria-label]="t(playing ? 'dashboard.music.mute' : 'dashboard.music.play')"
+    [title]="playing && song ? t('dashboard.music.nowPlaying', { title: song.title, artist: song.artist }) : t('dashboard.music.play')"
+    class="cursor-pointer w-8 h-8 shrink-0 rounded-full flex items-center justify-center"
+  >
+    <app-icon
+      [name]="playing ? 'heroSpeakerWave' : 'heroSpeakerXMark'"
+      class="w-4 h-4"
+      aria-hidden="true"
+    ></app-icon>
+  </button>
+</div>

@@ -15,6 +15,7 @@ import { COVER_FOCUS, CoverFocusStore } from './components/pan-cover.js';
 import { DASHBOARD, DashboardState } from './components/dashboard/dashboard-state.js';
 import { STAT_NAVIGATOR, StatNavigator } from './components/dashboard/stat-navigator.js';
 import { STAT_STORE, StatStore } from './components/dashboard/stat-store.js';
+import { SOUNDTRACK, Soundtrack } from './components/dashboard/soundtrack.js';
 
 await startApplication({
   providers: () => {
@@ -31,6 +32,10 @@ await startApplication({
     provide(STAT_NAVIGATOR, () => new StatNavigator(inject(REWIND_RANGE)));
     provide(STAT_STORE, () => new StatStore());
     provide(DASHBOARD, () => new DashboardState());
+    provide(
+      SOUNDTRACK,
+      () => new Soundtrack(inject(NAVIDROME), inject(REWIND_RANGE), inject(STAT_NAVIGATOR)),
+    );
     provide(COVER_FOCUS, () => new CoverFocusStore());
 
     // Before the root renders, so the first paint is already in the right theme.

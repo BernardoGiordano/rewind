@@ -16,6 +16,8 @@ A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.nav
 
 Rewind gives you a stories-style slideshow (think Instagram stories) that go through your personal stats: top songs, artists, albums, and genres, a listening clock that shows when you listen most, monthly trends, day-of-week breakdowns, your longest listening streaks, late-night favorites, songs you had on repeat, a "song of the month" for each month, and your favorite decades. Each card can be exported as a shareable image for your social media profiles.
 
+Each slide plays a song from your library that fits it, streamed from Navidrome: your #1 song on top songs, the most-played song of your top artist, album, genre or decade, the song you played most in your busiest hour, weekday or month, or during your longest streak. Moving between slides crossfades to the next song. The speaker button next to the export button mutes the music, and hovering it opens a volume slider. Music needs `NAVIDROME_URL`. Browsers hold sound back until your first click or key press on the page.
+
 ## Library and manual scrobbles
 
 Open **Library** to browse artists, albums, and songs, including music with no recorded listens.

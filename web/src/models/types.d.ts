@@ -50,6 +50,7 @@ export interface TopSong {
   artist_id: string;
 }
 
+
 export interface TopArtist {
   artist: string;
   plays: number;
@@ -163,6 +164,18 @@ export type StatType =
   | 'song-of-month'
   | 'favorite-decades'
   | 'recap';
+
+/** A song the recap plays behind the cards. `duration` is in seconds. */
+export interface SoundtrackSong {
+  id: string;
+  title: string;
+  artist: string;
+  album_id: string;
+  duration: number;
+}
+
+/** The song each slide plays. A slide with nothing to show has none. */
+export type SoundtrackSongs = Partial<Record<StatType, SoundtrackSong>>;
 
 /** Each stat's response, keyed by the stat that returns it. */
 export interface StatData {

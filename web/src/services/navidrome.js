@@ -3,17 +3,18 @@ import { inject, signal, token } from '@srljs/core';
 import { API } from './api.js';
 
 /** @import { InjectionToken } from '@core/foundation/types.js' */
-/** @import { ArtistDetail, StatRange, StatType } from '../models/types.js' */
+/** @import { ArtistDetail, SoundtrackSongs, StatRange, StatType } from '../models/types.js' */
 
 /** @type {InjectionToken<NavidromeService>} */
 export const NAVIDROME = token('Navidrome');
 
 /**
- * The listening-history API, plus what screens share about it: whether covers can load,
- * and a version that moves whenever history changes under them.
+ * The listening-history API, plus what screens share about it: whether covers and music
+ * can load, and a version that moves whenever history changes under them.
  */
 export class NavidromeService {
   coverArtAvailable = signal(false);
+  musicAvailable = signal(false);
 
   /**
    * Bumps when listening history changes, such as after a manual scrobble, and when
@@ -28,8 +29,10 @@ export class NavidromeService {
     this.#configLoaded = true;
     inject(API)
       .get('/config')
-      .then((config) => {
-        this.coverArtAvailable.value = /** @type {{ coverArtAvailable: boolean }} */ (config).coverArtAvailable;
+      .then((response) => {
+        const config = /** @type {{ coverArtAvailable: boolean, musicAvailable?: boolean }} */ (response);
+        this.coverArtAvailable.value = config.coverArtAvailable;
+        this.musicAvailable.value = config.musicAvailable === true;
       })
       .catch(() => {
         this.#configLoaded = false;
@@ -54,6 +57,17 @@ export class NavidromeService {
     return `/api/cover/${encodeURIComponent(id)}?size=${size}`;
   }
 
+  /**
+   * @param {string} id
+   * @param {{ offset: number, transcode: boolean }} options
+   * @returns {string}
+   */
+  streamUrl(id, { offset, transcode }) {
+    const base = `/api/stream/${encodeURIComponent(id)}`;
+    if (transcode) return `${base}?format=mp3&offset=${offset}`;
+    return offset > 0 ? `${base}#t=${offset}` : base;
+  }
+
   /** @returns {Promise<string[]>} */
   getYears() {
     return inject(API).get('/years');
@@ -67,6 +81,17 @@ export class NavidromeService {
    */
   getStat(type, range, signal) {
     return inject(API).get(`/stats/${type}`, rangeQuery(range), signal);
+  }
+
+  /**
+   * The song each slide plays over `range`.
+   *
+   * @param {StatRange} range
+   * @param {AbortSignal} [signal]
+   * @returns {Promise<SoundtrackSongs>}
+   */
+  getSoundtrack(range, signal) {
+    return inject(API).get('/soundtrack', rangeQuery(range), signal);
   }
 
   /**

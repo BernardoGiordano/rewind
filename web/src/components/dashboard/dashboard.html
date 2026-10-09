@@ -232,7 +232,7 @@
             <app-icon name="heroChevronDown" class="w-4 h-4 shrink-0 rotate-180" aria-hidden="true"></app-icon>
           </button>
 
-          <!-- Bottom-right overlay: pause/resume (autoplay only) + export (always) -->
+          <!-- Bottom-right overlay: pause/resume (autoplay only), music, export (always) -->
           <div class="export-ignore absolute bottom-3 right-3 z-20 flex items-center gap-2">
             <button
               *if="autoplay"
@@ -254,6 +254,7 @@
                 ></path>
               </svg>
             </button>
+            <app-soundtrack-control></app-soundtrack-control>
             <!-- Export / download button — always visible -->
             <button
               type="button"
