@@ -2,7 +2,6 @@ import {
   computed,
   currentPath,
   defineComponent,
-  effect,
   inject,
   navigate,
   queryParams,
@@ -27,6 +26,7 @@ import { AppStatSheet } from './stat-sheet.js';
 import { STAT_NAVIGATOR } from './stat-navigator.js';
 import { STAT_STORE } from './stat-store.js';
 import { STAT_PARAM } from './stat-traversal.js';
+import { watch } from '../../utils/watch.js';
 
 /** @import { StatType } from '../../models/types.js' */
 
@@ -69,51 +69,21 @@ export class Dashboard extends SignalElement {
     this.#layout.isCompact.value ? 'portrait' : this.#state.cardMode.value,
   );
 
-  /**
-   * Sidebar width per layout mode. `sidebarCollapsed` drives the expanded classes and
-   * `drawerOpen` the medium ones, so the sidebar starts pinned at expanded and the
-   * drawer closed at medium without asking how wide the viewport is.
-   */
-  sidebarClasses = computed(() => {
-    const expanded = this.sidebarCollapsed.value
-      ? 'expanded:w-0 expanded:border-r-0 expanded:blur-sm'
-      : 'expanded:w-72 wide:w-80';
-    const medium = this.drawerOpen.value
-      ? 'medium:w-72 medium:shadow-xl'
-      : 'medium:w-0 medium:border-r-0';
-    return `${expanded} ${medium}`;
-  });
-
-  /** Expanded pushes the card aside; medium overlays it, so only expanded gets a margin. */
-  mainClasses = computed(() =>
-    this.sidebarCollapsed.value ? 'expanded:ml-0' : 'expanded:ml-72 wide:ml-80',
-  );
-
   /** Whether the panel is on screen right now. Only the handle's label and icon read it. */
   sidebarShowing = computed(() =>
     this.#layout.isExpanded.value ? !this.sidebarCollapsed.value : this.drawerOpen.value,
   );
-
-  /** The collapse handle rides the sidebar's right edge in whichever mode is showing it. */
-  sidebarToggleClasses = computed(() => {
-    const expanded = this.sidebarCollapsed.value
-      ? 'expanded:left-16'
-      : 'expanded:left-[22rem] wide:left-[24rem]';
-    const medium = this.drawerOpen.value ? 'medium:left-[22rem]' : 'medium:left-16';
-    return `${expanded} ${medium}`;
-  });
 
   /** @type {{ x: number, y: number } | null} */
   #swipeStart = null;
 
   connectedCallback() {
     super.connectedCallback();
-    const { lifetime } = this;
     const navidrome = inject(NAVIDROME);
 
     // The navigator restores its selection once the range that filters the list is settled.
     const ready = signal(false);
-    const stopRestore = effect(() => {
+    watch(this, () => {
       if (!this.#range.ready.value || untracked(() => ready.value)) return;
       untracked(() => {
         this.#nav.restore(queryParams.value.get(STAT_PARAM));
@@ -123,7 +93,7 @@ export class Dashboard extends SignalElement {
 
     // One load path: whatever moves the selection, the range or the history, the
     // fetch follows. Data still held for what is on screen is shown as it is.
-    const stopLoad = effect(() => {
+    watch(this, () => {
       const type = this.#nav.current.value;
       const range = this.#range.current.value;
       void navidrome.historyVersion.value;
@@ -134,18 +104,14 @@ export class Dashboard extends SignalElement {
     });
 
     // A landscape card runs the full width, so the Shell's corner credit steps aside.
-    const stopCorner = effect(() => {
+    watch(this, () => {
       const quiet = this.effectiveCardMode.value !== 'landscape';
       if (untracked(() => currentPath.value) === '/') this.#shell.setQuietCorner(quiet);
     });
 
-    lifetime.addEventListener('abort', () => {
-      stopRestore();
-      stopLoad();
-      stopCorner();
+    document.addEventListener('keydown', (event) => this.#onKeydown(event), {
+      signal: this.lifetime,
     });
-
-    document.addEventListener('keydown', (event) => this.#onKeydown(event), { signal: lifetime });
   }
 
   onMount() {

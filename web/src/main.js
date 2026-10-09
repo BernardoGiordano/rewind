@@ -1,5 +1,6 @@
 import { inject, provide, startApplication } from '@srljs/core';
 
+import './template-globals.js';
 import { API, createApi } from './services/api.js';
 import { AUTH, AuthService } from './services/auth.js';
 import { DOMINANT_COLOR, DominantColorService } from './services/dominant-color.js';

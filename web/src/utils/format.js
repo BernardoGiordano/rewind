@@ -22,11 +22,6 @@ export function toIsoDate(d) {
   return `${y}-${m}-${day}`;
 }
 
-/** @param {number} n @returns {string} */
-export function formatNum(n) {
-  return n >= 1000 ? n.toLocaleString() : String(n);
-}
-
 /** @param {number} h @returns {string} */
 export function padHour(h) {
   return String(h).padStart(2, '0');

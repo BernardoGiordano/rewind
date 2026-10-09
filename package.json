@@ -24,8 +24,8 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "@srljs/cli": "file:../srl/cli",
-    "@srljs/core": "file:../srl/source",
+    "@srljs/cli": "1.1.0",
+    "@srljs/core": "1.1.0",
     "@tailwindcss/cli": "4.3.3",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^5.0.1",

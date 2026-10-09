@@ -1,17 +1,12 @@
-import { computed, effect, inject, signal, SignalElement } from '@srljs/core';
+import { computed, inject, signal, SignalElement } from '@srljs/core';
 
 import { DOMINANT_COLOR } from '../services/dominant-color.js';
 import { NAVIDROME } from '../services/navidrome.js';
 import { REWIND_RANGE } from '../shell/rewind-range.js';
 import { STAT_NAVIGATOR } from './dashboard/stat-navigator.js';
 import { STAT_STORE } from './dashboard/stat-store.js';
-import {
-  formatDecimal,
-  formatNum,
-  formatYearMonth,
-  formatYearMonthWithYear,
-  padHour,
-} from '../utils/format.js';
+import { formatYearMonth, formatYearMonthWithYear } from '../utils/format.js';
+import { watch } from '../utils/watch.js';
 
 /** @import { ListeningClock } from '../models/types.js' */
 
@@ -63,7 +58,6 @@ export class CardsBase extends SignalElement {
   coverArtAvailable = this.#navidrome.coverArtAvailable;
 
   currentGradient = computed(() => this.selectedDef.value?.gradient ?? '');
-  yearLabel = computed(() => this.rangeLabel.value);
 
   heroCoverId = computed(() => {
     switch (this.selectedStat.value) {
@@ -99,20 +93,19 @@ export class CardsBase extends SignalElement {
 
   connectedCallback() {
     super.connectedCallback();
-    const stop = effect(() => {
+    watch(this, () => {
       const id = this.heroCoverId.value;
       if (!id || !this.coverArtAvailable.value) {
         this.dynamicGradientStyle.value = null;
         return;
       }
-      const url = this.coverUrl(id, 200);
+      const url = this.#navidrome.coverUrl(id, 200);
       void inject(DOMINANT_COLOR)
         .gradientFor(url)
         .then((gradient) => {
           if (this.heroCoverId.value === id) this.dynamicGradientStyle.value = gradient;
         });
     });
-    this.lifetime.addEventListener('abort', stop);
   }
 
   /**
@@ -124,7 +117,7 @@ export class CardsBase extends SignalElement {
   openArtist(artistId, event) {
     if (!artistId) return;
     event?.stopPropagation();
-    this.#artistClick(artistId);
+    this.dispatchEvent(new CustomEvent('artist-click', { detail: artistId }));
   }
 
   /**
@@ -135,38 +128,6 @@ export class CardsBase extends SignalElement {
    */
   openArtistOnEnter(artistId, event) {
     if (event.key === 'Enter') this.openArtist(artistId, event);
-  }
-
-  /** @param {string} artistId */
-  #artistClick(artistId) {
-    this.dispatchEvent(new CustomEvent('artist-click', { detail: artistId }));
-  }
-
-  /** @param {string} id @param {number} [size] @returns {string} */
-  coverUrl(id, size = 150) {
-    return this.#navidrome.coverUrl(id, size);
-  }
-
-  /** @param {number} n @returns {string} */
-  formatNum(n) {
-    return formatNum(n);
-  }
-
-  /** @param {number} h @returns {string} */
-  padHour(h) {
-    return padHour(h);
-  }
-
-  /**
-   * A number with between `minFraction` and `maxFraction` fraction digits.
-   *
-   * @param {number} value
-   * @param {number} minFraction
-   * @param {number} maxFraction
-   * @returns {string}
-   */
-  decimal(value, minFraction, maxFraction) {
-    return formatDecimal(value, minFraction, maxFraction);
   }
 
   /**
@@ -180,30 +141,5 @@ export class CardsBase extends SignalElement {
     const year = months[0]?.month.slice(0, 4);
     const multiYear = months.some((m) => m.month.slice(0, 4) !== year);
     return multiYear ? formatYearMonthWithYear(yearMonth) : formatYearMonth(yearMonth);
-  }
-
-  /** @param {number} plays @returns {number} */
-  genreBarWidth(plays) {
-    return (plays / this.maxGenrePlays.value) * 100;
-  }
-
-  /** @param {number} plays @returns {number} */
-  clockBarWidth(plays) {
-    return (plays / this.maxClockPlays.value) * 100;
-  }
-
-  /** @param {number} plays @returns {number} */
-  dayBarWidth(plays) {
-    return (plays / this.maxDayPlays.value) * 100;
-  }
-
-  /** @param {number} plays @returns {number} */
-  decadeBarWidth(plays) {
-    return (plays / this.maxDecadePlays.value) * 100;
-  }
-
-  /** @param {number} plays @returns {number} */
-  monthBarWidth(plays) {
-    return (plays / this.maxMonthPlays.value) * 100;
   }
 }

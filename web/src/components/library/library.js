@@ -3,10 +3,10 @@ import {
   computed,
   currentPath,
   defineComponent,
-  effect,
   inject,
   navigate,
   queryParams,
+  resource,
   signal,
   SignalElement,
   untracked,
@@ -17,6 +17,7 @@ import { AppIcon } from '../icon/icon.js';
 import { mergeParams } from '../../models/range.js';
 import { API } from '../../services/api.js';
 import { NAVIDROME } from '../../services/navidrome.js';
+import { watch } from '../../utils/watch.js';
 
 /**
  * @typedef {'artists' | 'albums' | 'songs'} LibraryKind
@@ -72,17 +73,41 @@ export class Library extends SignalElement {
   pageSize = PAGE_SIZE;
 
   kind = signal(/** @type {LibraryKind} */ ('artists'));
-  items = signal(/** @type {Item[]} */ ([]));
-  total = signal(0);
   offset = signal(0);
-  loading = signal(true);
-  error = signal('');
-  canScrobble = signal(false);
 
   /** Drill-down: the artist or album whose contents are listed, named by the server. */
   artist = signal('');
   album = signal('');
-  context = signal(/** @type {Context} */ ({}));
+  search = signal('');
+
+  #page = resource(
+    (signal) =>
+      /** @type {Promise<LibraryPage>} */ (
+        inject(API).get(
+          '/library',
+          {
+            kind: this.kind.value,
+            q: this.search.value,
+            offset: String(this.offset.value),
+            artist: this.artist.value,
+            album: this.album.value,
+          },
+          signal,
+        )
+      ),
+    {
+      initial: /** @type {LibraryPage} */ ({ items: [], total: 0, canScrobble: false }),
+      lifetime: () => this.lifetime,
+    },
+  );
+
+  items = computed(() => this.#page.value.value.items);
+  total = computed(() => this.#page.value.value.total);
+  canScrobble = computed(() => this.#page.value.value.canScrobble);
+  context = computed(() => this.#page.value.value.context ?? {});
+  loading = this.#page.pending;
+  loadFailed = this.#page.failed;
+
   focused = computed(() => this.context.value.album ?? this.context.value.artist ?? null);
   focusIsAlbum = computed(() => !!this.context.value.album);
   contextAlbum = computed(() => this.context.value.album ?? null);
@@ -94,8 +119,6 @@ export class Library extends SignalElement {
     if (album?.artist_id) return { id: album.artist_id, name: album.artist };
     return null;
   });
-
-  search = signal('');
 
   /** The standing hero is an introduction, so it yields once the user is searching or paging. */
   heroCollapsed = computed(() => this.offset.value > 0 || this.search.value.length > 0);
@@ -118,9 +141,6 @@ export class Library extends SignalElement {
 
   #requestId = '';
 
-  /** @type {AbortController | null} */
-  #request = null;
-
   /** @type {ReturnType<typeof setTimeout> | null} */
   #searchTimer = null;
 
@@ -128,7 +148,7 @@ export class Library extends SignalElement {
     super.connectedCallback();
 
     // The URL is the state: every change of view is a navigation, and this follows it.
-    const stop = effect(() => {
+    watch(this, () => {
       const params = queryParams.value;
       if (currentPath.value !== LIBRARY_PATH) return;
       untracked(() => {
@@ -143,11 +163,7 @@ export class Library extends SignalElement {
       });
     });
 
-    this.lifetime.addEventListener('abort', () => {
-      stop();
-      this.#request?.abort();
-      this.#clearSearchTimer();
-    });
+    this.lifetime.addEventListener('abort', () => this.#clearSearchTimer(), { once: true });
   }
 
   onMount() {
@@ -155,39 +171,7 @@ export class Library extends SignalElement {
   }
 
   load() {
-    this.#request?.abort();
-    const request = new AbortController();
-    this.#request = request;
-
-    this.loading.value = true;
-    this.error.value = '';
-    /** @type {Promise<LibraryPage>} */ (
-      inject(API).get(
-        '/library',
-        {
-          kind: this.kind.value,
-          q: this.search.value,
-          offset: String(this.offset.value),
-          artist: this.artist.value,
-          album: this.album.value,
-        },
-        request.signal,
-      )
-    ).then(
-      (data) => {
-        if (request.signal.aborted) return;
-        this.items.value = data.items;
-        this.total.value = data.total;
-        this.canScrobble.value = data.canScrobble;
-        this.context.value = data.context ?? {};
-        this.loading.value = false;
-      },
-      () => {
-        if (request.signal.aborted) return;
-        this.error.value = 'Could not load the library. Try again.';
-        this.loading.value = false;
-      },
-    );
+    void this.#page.reload();
   }
 
   /**

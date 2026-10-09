@@ -1,13 +1,12 @@
 import {
   computed,
   defineComponent,
-  effect,
   inject,
   navigate,
+  resource,
   routeParams,
   signal,
   SignalElement,
-  untracked,
 } from '@srljs/core';
 
 import { AppCover } from '../cover.js';
@@ -16,14 +15,8 @@ import { NAVIDROME } from '../../services/navidrome.js';
 import { NAVIGATION_HISTORY } from '../../shell/navigation-history.js';
 import { REWIND_RANGE } from '../../shell/rewind-range.js';
 import { SECTION_REGISTRY } from '../../shell/section-registry.js';
-import {
-  MONTH_SHORT,
-  formatDecimal,
-  formatYearMonthWithYear,
-  padHour,
-  parseIsoDate,
-  toIsoDate,
-} from '../../utils/format.js';
+import { MONTH_SHORT, parseIsoDate, toIsoDate } from '../../utils/format.js';
+import { watch } from '../../utils/watch.js';
 
 /** @import { ArtistDetail as ArtistDetailData } from '../../models/types.js' */
 
@@ -44,17 +37,20 @@ export class ArtistDetail extends SignalElement {
   tabs = TABS;
 
   artistId = computed(() => routeParams.value['id'] ?? '');
-  data = signal(/** @type {ArtistDetailData | null} */ (null));
-  loading = signal(true);
-  error = signal(/** @type {string | null} */ (null));
   activeTab = signal(/** @type {TabKey} */ ('overview'));
 
   /** The range is the Shell's; this page reads it and reloads when it moves. */
   range = this.#rewindRange.current;
   rangeLabel = this.#rewindRange.label;
 
-  /** @type {AbortController | null} */
-  #request = null;
+  #artist = resource(
+    (signal) => this.#navidrome.getArtist(this.artistId.value, this.range.value, signal),
+    { initial: /** @type {ArtistDetailData | null} */ (null), lifetime: () => this.lifetime },
+  );
+
+  data = this.#artist.value;
+  loading = this.#artist.pending;
+  failed = this.#artist.failed;
 
   /**
    * Derived heatmap: 7-day rows, Sunday-top, filling the selected range. Empty days
@@ -171,17 +167,13 @@ export class ArtistDetail extends SignalElement {
     return labels;
   });
 
-  maxClockPlays = computed(() => {
-    const d = this.data.value;
-    if (!d || d.listening_clock.length === 0) return 1;
-    return Math.max(...d.listening_clock.map((c) => c.plays), 1);
-  });
+  maxClockPlays = computed(() =>
+    Math.max(...(this.data.value?.listening_clock ?? []).map((c) => c.plays), 1),
+  );
 
-  maxDayPlays = computed(() => {
-    const d = this.data.value;
-    if (!d || d.day_of_week.length === 0) return 1;
-    return Math.max(...d.day_of_week.map((x) => x.plays), 1);
-  });
+  maxDayPlays = computed(() =>
+    Math.max(...(this.data.value?.day_of_week ?? []).map((d) => d.plays), 1),
+  );
 
   rankMin = computed(() => {
     const d = this.data.value;
@@ -244,46 +236,15 @@ export class ArtistDetail extends SignalElement {
     super.connectedCallback();
 
     // One load path: whatever moves the artist or the range, the fetch follows.
-    const stop = effect(() => {
-      const id = this.artistId.value;
-      const range = this.range.value;
-      if (!id || !this.#rewindRange.ready.value) return;
-      untracked(() => this.load(id, range));
-    });
-    this.lifetime.addEventListener('abort', () => {
-      stop();
-      this.#request?.abort();
+    watch(this, () => {
+      void this.range.value;
+      if (!this.artistId.value || !this.#rewindRange.ready.value) return;
+      void this.#artist.reload();
     });
   }
 
   onMount() {
     this.#navidrome.loadConfig();
-  }
-
-  /**
-   * @param {string} [id]
-   * @param {import('../../models/types.js').StatRange} [range]
-   */
-  load(id = this.artistId.value, range = this.range.value) {
-    if (!id) return;
-    this.#request?.abort();
-    const request = new AbortController();
-    this.#request = request;
-
-    this.loading.value = true;
-    this.error.value = null;
-    this.#navidrome.getArtist(id, range, request.signal).then(
-      (d) => {
-        if (request.signal.aborted) return;
-        this.data.value = d;
-        this.loading.value = false;
-      },
-      (cause) => {
-        if (request.signal.aborted) return;
-        this.error.value = cause instanceof Error ? cause.message : 'Failed to load artist';
-        this.loading.value = false;
-      },
-    );
   }
 
   /** @param {TabKey} tab */
@@ -305,16 +266,6 @@ export class ArtistDetail extends SignalElement {
     }
   }
 
-  /** @param {number} plays @returns {number} */
-  clockBarPct(plays) {
-    return (plays / this.maxClockPlays.value) * 100;
-  }
-
-  /** @param {number} plays @returns {number} */
-  dayBarPct(plays) {
-    return (plays / this.maxDayPlays.value) * 100;
-  }
-
   /** @param {{ plays: number, inRange: boolean }} cell @returns {string} */
   heatmapColor(cell) {
     if (!cell.inRange) return 'bg-transparent';
@@ -325,11 +276,6 @@ export class ArtistDetail extends SignalElement {
     if (pct > 0.5) return 'bg-rose-400';
     if (pct > 0.25) return 'bg-rose-300 dark:bg-rose-600';
     return 'bg-rose-200 dark:bg-rose-900';
-  }
-
-  /** @param {string} yearMonth @returns {string} */
-  formatMonth(yearMonth) {
-    return formatYearMonthWithYear(yearMonth);
   }
 
   /** @returns {string} */
@@ -355,21 +301,6 @@ export class ArtistDetail extends SignalElement {
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
     return this.formatDate(ts);
-  }
-
-  /** @param {number} h @returns {string} */
-  padHour(h) {
-    return padHour(h);
-  }
-
-  /**
-   * @param {number} value
-   * @param {number} minFraction
-   * @param {number} maxFraction
-   * @returns {string}
-   */
-  decimal(value, minFraction, maxFraction) {
-    return formatDecimal(value, minFraction, maxFraction);
   }
 }
 

@@ -16,14 +16,6 @@ export class AppCardShell extends SignalElement {
 
   yearLabel = '';
   noRound = false;
-
-  get containerClass() {
-    const base =
-      'w-full h-full overflow-hidden relative flex flex-col ' +
-      (this.noRound ? '' : 'medium-up:rounded-xl ');
-    if (this.gradientStyle) return base;
-    return base + 'bg-gradient-to-br ' + this.gradient;
-  }
 }
 
 await defineComponent({ tag: 'app-card-shell', element: AppCardShell, module: import.meta.url });

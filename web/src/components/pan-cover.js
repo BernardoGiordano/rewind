@@ -1,6 +1,7 @@
-import { computed, defineComponent, effect, inject, signal, SignalElement, token } from '@srljs/core';
+import { computed, defineComponent, inject, signal, SignalElement, token } from '@srljs/core';
 
 import { NAVIDROME } from '../services/navidrome.js';
+import { watch } from '../utils/watch.js';
 
 /** @import { InjectionToken } from '@core/foundation/types.js' */
 
@@ -117,8 +118,7 @@ export class AppPanCover extends SignalElement {
     super.connectedCallback();
     this.classList.add('group/pan', 'absolute', 'inset-0', 'block', 'touch-none');
 
-    const { lifetime } = this;
-    const listen = { signal: lifetime };
+    const listen = { signal: this.lifetime };
     this.addEventListener('pointerdown', (event) => this.#onPointerDown(event), listen);
     this.addEventListener('pointermove', (event) => this.#onPointerMove(event), listen);
     this.addEventListener('pointerup', (event) => this.#onPointerUp(event), listen);
@@ -126,7 +126,7 @@ export class AppPanCover extends SignalElement {
     this.addEventListener('click', (event) => this.#onClick(event), listen);
 
     // The crop math needs the image's own proportions.
-    const stopNatural = effect(() => {
+    watch(this, () => {
       const url = this.#src.value;
       this.#natural.value = null;
       if (!url) return;
@@ -141,14 +141,9 @@ export class AppPanCover extends SignalElement {
       };
     });
 
-    const stopCursor = effect(() => {
+    watch(this, () => {
       this.classList.toggle('cursor-grab', this.pannable && !this.dragging.value);
       this.classList.toggle('cursor-grabbing', this.dragging.value);
-    });
-
-    lifetime.addEventListener('abort', () => {
-      stopNatural();
-      stopCursor();
     });
   }
 

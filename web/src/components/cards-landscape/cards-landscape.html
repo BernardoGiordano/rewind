@@ -2,7 +2,7 @@
   <app-card-shell
     *if="selectedStat === 'summary'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2
@@ -18,10 +18,10 @@
           Hours Listened
         </p>
         <p class="text-[12em] leading-none font-black text-white tracking-tight">
-          {{ formatNum(summaryData.total_hours) }}
+          {{ num(summaryData.total_hours) }}
         </p>
         <p class="text-white/70 text-2xl font-semibold mt-6">
-          That's {{ formatNum(summaryData.total_days) }} days of music
+          That's {{ num(summaryData.total_days) }} days of music
         </p>
       </div>
       <!-- Right: 2x2 stat grid -->
@@ -29,25 +29,25 @@
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
-          <p class="text-5xl font-black text-white">{{ formatNum(summaryData.total_plays) }}</p>
+          <p class="text-5xl font-black text-white">{{ num(summaryData.total_plays) }}</p>
           <p class="text-white/60 text-base font-medium mt-2">songs played</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
-          <p class="text-5xl font-black text-white">{{ formatNum(summaryData.unique_artists) }}</p>
+          <p class="text-5xl font-black text-white">{{ num(summaryData.unique_artists) }}</p>
           <p class="text-white/60 text-base font-medium mt-2">artists</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
-          <p class="text-5xl font-black text-white">{{ formatNum(summaryData.unique_albums) }}</p>
+          <p class="text-5xl font-black text-white">{{ num(summaryData.unique_albums) }}</p>
           <p class="text-white/60 text-base font-medium mt-2">albums</p>
         </div>
         <div
           class="bg-white/10 rounded-2xl p-6 flex flex-col justify-center items-center text-center"
         >
-          <p class="text-5xl font-black text-white">{{ formatNum(summaryData.unique_songs) }}</p>
+          <p class="text-5xl font-black text-white">{{ num(summaryData.unique_songs) }}</p>
           <p class="text-white/60 text-base font-medium mt-2">unique songs</p>
         </div>
       </div>
@@ -59,7 +59,7 @@
     *if="selectedStat === 'top-songs'"
     [.gradient]="currentGradient"
     [.gradient-style]="dynamicGradientStyle"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Songs</h2>
@@ -184,7 +184,7 @@
     *if="selectedStat === 'top-artists'"
     [.gradient]="currentGradient"
     [.gradient-style]="dynamicGradientStyle"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Artists</h2>
@@ -310,7 +310,7 @@
     *if="selectedStat === 'top-albums'"
     [.gradient]="currentGradient"
     [.gradient-style]="dynamicGradientStyle"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Albums</h2>
@@ -434,7 +434,7 @@
     *else
     *if="selectedStat === 'top-genres'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">Top Genres</h2>
@@ -498,7 +498,7 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="genreBarWidth(genre.plays)"
+                    [style.width.%]="percentOf(genre.plays, maxGenrePlays)"
                   ></div>
                 </div>
               </td>
@@ -519,7 +519,7 @@
     *else
     *if="selectedStat === 'listening-clock'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <div class="flex items-center justify-between mb-4 shrink-0">
@@ -551,7 +551,7 @@
                       : hour.hour >= 6 && hour.hour <= 10
                         ? 'bg-white/50'
                         : 'bg-white/35'"
-            [style.height.%]="clockBarWidth(hour.plays)"
+            [style.height.%]="percentOf(hour.plays, maxClockPlays)"
             [style.min-height.px]="hour.plays > 0 ? 2 : 0"
           ></div>
         </div>
@@ -570,7 +570,7 @@
     *else
     *if="selectedStat === 'monthly-trends'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
@@ -640,7 +640,7 @@
                 <div class="h-8 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/30 rounded-lg transition-all"
-                    [style.width.%]="monthBarWidth(m.plays)"
+                    [style.width.%]="percentOf(m.plays, maxMonthPlays)"
                   ></div>
                 </div>
               </td>
@@ -667,7 +667,7 @@
     *else
     *if="selectedStat === 'day-of-week'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
@@ -679,7 +679,7 @@
         <div class="flex-1 h-12 bg-white/10 rounded-full overflow-hidden">
           <div
             class="h-full bg-white/40 rounded-full flex items-center justify-end pr-5"
-            [style.width.%]="dayBarWidth(d.plays)"
+            [style.width.%]="percentOf(d.plays, maxDayPlays)"
           >
             <span class="text-white/90 text-base font-semibold tabular-nums"
               >{{ d.plays }} plays</span
@@ -697,7 +697,7 @@
     *else
     *if="selectedStat === 'streak'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
@@ -780,7 +780,7 @@
     *if="selectedStat === 'late-night'"
     [.gradient]="currentGradient"
     [.gradient-style]="dynamicGradientStyle"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">
@@ -864,7 +864,7 @@
     *else
     *if="selectedStat === 'on-repeat'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">On Repeat</h2>
@@ -934,7 +934,7 @@
     *else
     *if="selectedStat === 'song-of-month'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
@@ -1015,7 +1015,7 @@
     *else
     *if="selectedStat === 'favorite-decades'"
     [.gradient]="currentGradient"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
@@ -1078,7 +1078,7 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="decadeBarWidth(dec.total_plays)"
+                    [style.width.%]="percentOf(dec.total_plays, maxDecadePlays)"
                   ></div>
                 </div>
               </td>
@@ -1103,7 +1103,7 @@
     *if="selectedStat === 'recap'"
     [.gradient]="currentGradient"
     [.gradient-style]="dynamicGradientStyle"
-    [.year-label]="yearLabel"
+    [.year-label]="rangeLabel"
     [.no-round]="true"
   >
     <div *if="recapData" class="flex-1 flex flex-col min-h-0 gap-4">
@@ -1112,7 +1112,7 @@
         <div class="bg-white/10 rounded-2xl px-5 py-3 flex items-center justify-between">
           <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Minutes listened</p>
           <p class="text-3xl font-black text-white tabular-nums">
-            {{ formatNum(recapData.total_minutes) }}
+            {{ num(recapData.total_minutes) }}
           </p>
         </div>
         <div class="bg-white/10 rounded-2xl px-5 py-3 flex items-center justify-between">

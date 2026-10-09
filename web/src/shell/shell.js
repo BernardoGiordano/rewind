@@ -3,7 +3,6 @@ import {
   computed,
   currentPath,
   defineComponent,
-  effect,
   inject,
   navigate,
   queryParams,
@@ -16,6 +15,7 @@ import {
 import { AppIcon } from '../components/icon/icon.js';
 import { AUTH } from '../services/auth.js';
 import { THEME } from '../services/theme.js';
+import { watch } from '../utils/watch.js';
 import { AppByline } from './byline.js';
 import { AppPeriodPanel } from './period-panel.js';
 import { REWIND_RANGE } from './rewind-range.js';
@@ -62,7 +62,7 @@ export class Shell extends SignalElement {
 
     // Leaving a page drops its contributed controls; the next page registers its own.
     let first = true;
-    const stop = effect(() => {
+    watch(this, () => {
       void currentPath.value;
       if (first) {
         first = false;
@@ -71,17 +71,14 @@ export class Shell extends SignalElement {
       untracked(() => {
         this.#shell.setRouteChrome({});
         this.#shell.setQuietCorner(false);
-        this.#shell.closeMenu();
-        this.accountOpen.value = false;
-        this.#range.closePanel();
+        this.#closeOverlays();
       });
     });
-    this.lifetime.addEventListener('abort', stop);
 
     document.addEventListener(
       'keydown',
       (event) => {
-        if (event.key === 'Escape') this.#onEscape();
+        if (event.key === 'Escape') this.#closeOverlays();
       },
       { signal: this.lifetime },
     );
@@ -134,15 +131,15 @@ export class Shell extends SignalElement {
   }
 
   logout() {
-    this.#shell.closeMenu();
-    this.accountOpen.value = false;
+    this.#closeOverlays();
     this.#auth.logout().then(
       () => navigate('/login'),
       () => navigate('/login'),
     );
   }
 
-  #onEscape() {
+  /** Closes the menu, the account popover and the range panel. */
+  #closeOverlays() {
     this.#shell.closeMenu();
     this.accountOpen.value = false;
     this.#range.closePanel();
