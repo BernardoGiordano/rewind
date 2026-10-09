@@ -30,7 +30,6 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -46,7 +45,6 @@ Thumbs.db
 .vscode
 .citadel
 .planning
-.angular
 .claude
 AGENTS.md
 CLAUDE.md

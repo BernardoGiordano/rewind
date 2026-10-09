@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <title>Navidrome Rewind</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin="anonymous" />
+    <!-- Satoshi, pinned to the bytes Fontshare serves. If Fontshare changes them, the page falls back to the system font until the pin is updated. -->
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap"
+      integrity="sha384-3AK87YhdchdO/4MK0aICe8SrpdHb5BKJwPj7p/KQ5kP7eHLk21gvvlmvCISiT7bB"
+      crossorigin="anonymous"
+    />
+
+    <!-- The import map must precede module scripts. `srl check importmap` compares it with the installed library. -->
+    <script type="importmap">
+{
+  "imports": {
+    "lit": "/lib/vendor/lit-all.min.js",
+    "lit/async-directive.js": "/lib/vendor/lit-all.min.js",
+    "lit/directives/repeat.js": "/lib/vendor/lit-all.min.js",
+    "@preact/signals-core": "/lib/vendor/signals-core.mjs",
+    "@srljs/core": "/lib/srl-core.js",
+    "@core/": "/lib/core/",
+    "@auth/": "/lib/auth/",
+    "@host/": "/lib/host/",
+    "@components/": "/components/",
+    "@core/foundation/pin-probe.js": "data:text/javascript,export%20const%20probe%20%3D%20true%3B#srl-pin-probe"
+  },
+  "integrity": {
+    "/lib/vendor/lit-all.min.js": "sha384-qSoE0anPDAzsBuoT95C270Wd5oKtOOlLdEvSXEk9bRYTg+5ygjyt20ZuhzH0oNbt",
+    "/lib/vendor/signals-core.mjs": "sha384-keryyWsAJJ2UD+2G3I6cCzzXkFvp97AwDUCMKAOYrVGK2iwcrnTYMpWMrq9xkPSm",
+    "data:text/javascript,export%20const%20probe%20%3D%20true%3B#srl-pin-control": "sha384-THhiqtbWX5OeF4HVBm/Zv1KwP1F/7VKSRBsO2utL7lYi95x/jfLVpbG0o0up8PT5",
+    "data:text/javascript,#srl-pin-empty": "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb",
+    "data:text/javascript,export%20const%20probe%20%3D%20true%3B#srl-pin-probe": "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"
+  }
+}
+    </script>
+
+    <!-- Development compiles Tailwind in the page from src/app.css, which `srl serve` inlines here. The build compiles the same file. -->
+    <script src="/lib/vendor/tailwind-browser.js" integrity="sha384-2ql948lIdLcGEE0/qxNiudyTjgauA3RDJERu5xW75kFCvSl5a9odyQYCb6tEjnmB"></script>
+    <style type="text/tailwindcss" data-source="src/app.css"></style>
+
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body class="h-full">
+    <app-root></app-root>
+    <noscript>Navidrome Rewind needs JavaScript.</noscript>
+  </body>
+</html>

@@ -1,0 +1,494 @@
+<div
+  *if="loading && !data"
+  class="h-full overflow-y-auto flex items-center justify-center bg-surface"
+>
+  <div class="text-center">
+    <div
+      class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
+    ></div>
+    <p class="mt-4 text-sm text-ink-muted">{{ t('artist.loading') }}</p>
+  </div>
+</div>
+
+<div *else *if="failed" class="h-full flex items-center justify-center bg-surface px-6">
+  <div class="text-center">
+    <p class="text-red-500 font-medium">{{ t('artist.loadFailed') }}</p>
+    <button
+      type="button"
+      (click)="goBack()"
+      class="mt-4 inline-block text-sm text-ink-muted hover:text-ink underline cursor-pointer"
+    >
+      {{ t('common.back') }}
+    </button>
+  </div>
+</div>
+
+<div *else *if="data" class="h-full overflow-y-auto bg-surface text-ink-body">
+  <!-- Sticky bar: back, tabs and page actions in one row -->
+  <div
+    class="sticky top-0 z-20 backdrop-blur bg-surface/80 border-b border-edge"
+  >
+    <div
+      class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 flex items-stretch gap-3 medium-up:gap-5"
+    >
+      <button
+        type="button"
+        (click)="goBack()"
+        [aria-label]="t('common.back')"
+        [title]="t('common.back')"
+        class="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors cursor-pointer"
+      >
+        <app-icon name="heroArrowLeft" class="w-4 h-4" aria-hidden="true"></app-icon>
+        <span class="compact:hidden">{{ t('common.back') }}</span>
+      </button>
+
+      <div class="my-3 border-l border-edge" aria-hidden="true"></div>
+
+      <nav
+        class="flex-1 min-w-0 flex gap-4 medium-up:gap-6 overflow-x-auto [scrollbar-width:none]"
+        role="tablist"
+        [aria-label]="t('artist.views')"
+      >
+        <button
+          *for="tab of tabs; key: tab.key"
+          type="button"
+          role="tab"
+          [aria-selected]="activeTab === tab.key"
+          (click)="selectTab(tab.key)"
+          class="cursor-pointer shrink-0 py-3 text-sm font-semibold transition-colors border-b-2"
+          [class]="activeTab === tab.key
+                  ? 'border-accent text-ink'
+                  : 'border-transparent text-ink-muted hover:text-ink'"
+        >
+          {{ t(tab.labelKey) }}
+        </button>
+      </nav>
+
+      <div class="shrink-0 flex items-center gap-3 medium-up:gap-4">
+        <a
+          [href]="libraryHref"
+          [title]="t('artist.browseMusic')"
+          [aria-label]="t('artist.browseMusic')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+        >
+          <app-icon name="heroRectangleStack" class="w-4 h-4" aria-hidden="true"></app-icon>
+          <span class="hidden expanded:inline">{{ t('artist.browseMusic') }}</span>
+        </a>
+        <button
+          type="button"
+          (click)="openRangePanel()"
+          aria-haspopup="dialog"
+          [aria-label]="t('range.change', { label: rangeLabel })"
+          [title]="t('range.titled', { label: rangeLabel })"
+          class="cursor-pointer inline-flex items-center gap-1.5 max-w-48 text-xs font-mono uppercase tracking-widest text-ink-muted hover:text-ink transition-colors"
+        >
+          <app-icon name="heroCalendarDays" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
+          <span class="compact:hidden truncate">{{ rangeLabel }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 pt-8 pb-6">
+    <div class="flex flex-col medium-up:flex-row gap-6 items-start medium-up:items-end">
+      <div
+        class="w-40 h-40 medium-up:w-48 medium-up:h-48 rounded-full overflow-hidden bg-gradient-to-br from-rose-500 to-pink-900 shrink-0 shadow-xl"
+      >
+        <app-cover [.cover-id]="data.artist_id" [.size]="400" [.eager]="true"></app-cover>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold uppercase tracking-widest text-accent">{{ t('artist.kicker') }}</p>
+        <h1 class="mt-1 text-4xl medium-up:text-6xl font-black leading-none truncate">
+          {{ data.artist ?? t('artist.unknown') }}
+        </h1>
+        <p class="mt-4 text-sm text-ink-muted">{{ firstHeardLabel() }}</p>
+      </div>
+    </div>
+
+    <!-- Key metrics -->
+    <div class="mt-8 grid grid-cols-2 medium-up:grid-cols-3 expanded:grid-cols-6 gap-3">
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.plays') }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ num(data.plays) }}</p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.hours') }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ decimal(data.total_hours, 1, 1) }}</p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.uniqueTracks') }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ data.unique_tracks }}</p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.rank') }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">
+          {{ data.rank !== null ? '#' + data.rank : '—' }}<span
+            *if="data.rank !== null"
+            class="text-sm text-ink-faint font-medium"
+            >/{{ data.total_artists }}</span
+          >
+        </p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.share') }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ percent(data.share_pct, 1, 2) }}</p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+          {{ t('artist.metrics.libraryDepth') }}
+        </p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ percent(libraryDepthPct, 0, 1) }}</p>
+        <p class="text-xs text-ink-faint tabular-nums mt-0.5">
+          {{ data.played_tracks }}/{{ data.library_tracks }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab content -->
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 py-8">
+    <!-- Heatmap -->
+
+    <section *if="(activeTab === 'overview') && heatmapCells" class="mb-10">
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted">
+          {{ t('artist.heatmap.title') }}
+        </h2>
+        <p class="text-sm text-ink-muted">
+          <span class="font-black tabular-nums text-ink">{{ num(heatmapTotalPlays) }}</span>
+          {{ t('artist.heatmap.playsInPeriod', { count: heatmapTotalPlays }) }}
+        </p>
+      </div>
+      <div class="rounded-xl bg-surface-sunken p-4 overflow-x-auto">
+        <div class="flex gap-2">
+          <!-- Day labels -->
+          <div class="grid grid-rows-7 gap-[3px] text-[10px] text-ink-muted pt-[18px] shrink-0">
+            <span class="h-3 leading-3"></span>
+            <span class="h-3 leading-3">{{ weekdayShort('Monday') }}</span>
+            <span class="h-3 leading-3"></span>
+            <span class="h-3 leading-3">{{ weekdayShort('Wednesday') }}</span>
+            <span class="h-3 leading-3"></span>
+            <span class="h-3 leading-3">{{ weekdayShort('Friday') }}</span>
+            <span class="h-3 leading-3"></span>
+          </div>
+          <div class="min-w-0">
+            <!-- Month labels -->
+            <div
+              class="grid gap-[3px] mb-1 text-[10px] text-ink-muted h-[14px]"
+              [style.grid-template-columns]="'repeat(' + heatmapWeekCount + ', 12px)'"
+            >
+              <span
+                *for="m of heatmapMonthLabels; key: m.col"
+                [style.grid-column-start]="m.col"
+                class="whitespace-nowrap"
+                >{{ m.label }}</span
+              >
+            </div>
+            <!-- Cells -->
+            <div class="grid grid-rows-7 grid-flow-col gap-[3px]" style="grid-auto-columns: 12px">
+              <div
+                *for="cell of heatmapCells; key: cell.date"
+                class="w-3 h-3 rounded-sm"
+                [class]="heatmapColor(cell)"
+                [title]="t('artist.heatmap.cell', { date: cell.date, count: cell.plays })"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- Legend -->
+        <div class="flex items-center justify-end gap-2 mt-3 text-[10px] text-ink-muted">
+          <span>{{ t('artist.heatmap.less') }}</span>
+          <span class="w-3 h-3 rounded-sm bg-fill"></span>
+          <span class="w-3 h-3 rounded-sm bg-rose-200 dark:bg-rose-900"></span>
+          <span class="w-3 h-3 rounded-sm bg-rose-300 dark:bg-rose-600"></span>
+          <span class="w-3 h-3 rounded-sm bg-rose-400"></span>
+          <span class="w-3 h-3 rounded-sm bg-rose-500"></span>
+          <span>{{ t('artist.heatmap.more') }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top tracks + Top albums -->
+    <div *if="activeTab === 'overview'" class="grid grid-cols-1 expanded:grid-cols-2 gap-8">
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.topTracks') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken overflow-hidden">
+          <p *if="data.top_tracks.length === 0" class="p-6 text-sm text-ink-muted">
+            {{ t('artist.noTracks') }}
+          </p>
+
+          <ul *else class="divide-y divide-edge">
+            <li
+              *for="track of data.top_tracks; key: track.id; index as i"
+              class="flex items-center gap-3 p-3"
+            >
+              <span class="text-sm font-black tabular-nums text-ink-faint w-6 text-right"
+                >{{ i + 1 }}</span
+              >
+              <div class="w-10 h-10 rounded-md overflow-hidden bg-fill shrink-0">
+                <app-cover [.cover-id]="track.album_id" [.size]="100"></app-cover>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate">{{ track.title }}</p>
+                <p class="text-xs text-ink-muted truncate">{{ track.album }}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-bold tabular-nums">{{ track.plays }}</p>
+                <p class="text-xs text-ink-faint tabular-nums">
+                  {{ minutes(track.total_minutes, 0, 0) }}
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.topAlbums') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken overflow-hidden">
+          <p *if="data.top_albums.length === 0" class="p-6 text-sm text-ink-muted">
+            {{ t('artist.noAlbums') }}
+          </p>
+
+          <ul *else class="divide-y divide-edge">
+            <li
+              *for="a of data.top_albums; key: a.album_id; index as i"
+              class="flex items-center gap-3 p-3"
+            >
+              <span class="text-sm font-black tabular-nums text-ink-faint w-6 text-right"
+                >{{ i + 1 }}</span
+              >
+              <div class="w-10 h-10 rounded-md overflow-hidden bg-fill shrink-0">
+                <app-cover [.cover-id]="a.album_id" [.size]="100"></app-cover>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate">{{ a.album }}</p>
+                <p class="text-xs text-ink-muted">{{ t('cards.tracks', { count: a.unique_tracks }) }}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-bold tabular-nums">{{ a.plays }}</p>
+                <p class="text-xs text-ink-faint tabular-nums">
+                  {{ minutes(a.total_minutes, 0, 0) }}
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <div *if="activeTab === 'patterns'" class="grid grid-cols-1 expanded:grid-cols-2 gap-8">
+      <!-- Listening clock -->
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.listeningClock') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken p-5">
+          <p *if="data.listening_clock.length === 0" class="text-sm text-ink-muted">
+            {{ t('artist.noData') }}
+          </p>
+
+          <div *else>
+            <div class="flex gap-1 h-40">
+              <div
+                *for="c of data.listening_clock; key: c.hour"
+                class="flex-1 flex flex-col items-center gap-1 min-w-0"
+              >
+                <div class="flex-1 w-full flex items-end">
+                  <div
+                    class="w-full rounded-t-sm bg-rose-500"
+                    [style.height.%]="percentOf(c.plays, maxClockPlays)"
+                    [style.min-height.px]="c.plays > 0 ? 2 : 0"
+                    [title]="t('artist.clockBar', { hour: padHour(c.hour), count: c.plays })"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-1 mt-2 text-[10px] font-mono text-ink-faint">
+              <span
+                *for="c of data.listening_clock; key: c.hour"
+                class="flex-1 text-center tabular-nums"
+                >{{ c.hour % 3 === 0 ? padHour(c.hour) : '' }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Day of week -->
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.dayOfWeek') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken p-5">
+          <p *if="data.day_of_week.length === 0" class="text-sm text-ink-muted">
+            {{ t('artist.noData') }}
+          </p>
+
+          <div *else class="space-y-2">
+            <div *for="day of data.day_of_week; key: day.day" class="flex items-center gap-3">
+              <span class="text-sm font-medium w-24 shrink-0">{{ weekday(day.day) }}</span>
+              <div class="flex-1 h-6 bg-fill rounded-md overflow-hidden">
+                <div
+                  class="h-full bg-rose-500"
+                  [style.width.%]="percentOf(day.plays, maxDayPlays)"
+                ></div>
+              </div>
+              <span class="text-sm font-bold tabular-nums w-12 text-right">{{ day.plays }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rank trajectory -->
+      <section class="expanded:col-span-2">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.rankTrajectory') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken p-5">
+          <p *if="data.rank_trajectory.length < 2" class="text-sm text-ink-faint">
+            {{ t('artist.rankNeedsData') }}
+          </p>
+
+          <div *else>
+            <div class="relative h-40">
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                class="w-full h-full overflow-visible"
+              >
+                <path
+                  [d]="rankPath"
+                  fill="none"
+                  stroke="rgb(244 63 94)"
+                  stroke-width="0.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  vector-effect="non-scaling-stroke"
+                ></path>
+
+                <circle
+                  *for="p of data.rank_trajectory; key: p.month; index as i"
+                  [cx]="(i / (data.rank_trajectory.length - 1)) * 100"
+                  [cy]="rankMax - rankMin > 0
+                              ? ((p.rnk - rankMin) / (rankMax - rankMin)) * 100
+                              : 50"
+                  r="0.8"
+                  fill="rgb(244 63 94)"
+                  vector-effect="non-scaling-stroke"
+                ></circle>
+              </svg>
+              <span class="absolute top-0 left-0 text-xs font-mono text-ink-faint"
+                >#{{ rankMin }}</span
+              >
+              <span class="absolute bottom-0 left-0 text-xs font-mono text-ink-faint"
+                >#{{ rankMax }}</span
+              >
+            </div>
+            <div class="flex justify-between mt-2 text-xs font-mono text-ink-faint">
+              <span>{{ monthYear(firstRankMonth) }}</span>
+              <span>{{ monthYear(lastRankMonth) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Song of month -->
+      <section class="expanded:col-span-2">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.songOfMonth') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken overflow-hidden">
+          <p *if="data.song_of_month.length === 0" class="p-6 text-sm text-ink-muted">
+            {{ t('artist.noData') }}
+          </p>
+
+          <ul *else class="divide-y divide-edge">
+            <li *for="s of data.song_of_month; key: s.month" class="flex items-center gap-4 p-3">
+              <span class="text-sm font-black uppercase tracking-wider text-slate-500 w-20 shrink-0"
+                >{{ monthYear(s.month) }}</span
+              >
+              <div class="w-10 h-10 rounded-md overflow-hidden bg-fill shrink-0">
+                <app-cover [.cover-id]="s.album_id" [.size]="100"></app-cover>
+              </div>
+              <p class="flex-1 text-sm font-semibold truncate">{{ s.title }}</p>
+              <span class="text-sm font-bold tabular-nums shrink-0">
+                {{ t('cards.plays', { count: s.plays }) }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <div *if="activeTab === 'activity'" class="grid grid-cols-1 expanded:grid-cols-2 gap-8">
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.recent.title') }}
+        </h2>
+        <p class="text-xs text-ink-faint mb-3">{{ t('artist.recent.note') }}</p>
+        <div class="rounded-xl bg-surface-sunken overflow-hidden">
+          <p *if="data.recent_scrobbles.length === 0" class="p-6 text-sm text-ink-muted">
+            {{ t('artist.recent.empty') }}
+          </p>
+
+          <ul *else class="divide-y divide-edge">
+            <li *for="r of data.recent_scrobbles" class="flex items-center gap-3 p-3">
+              <div class="w-10 h-10 rounded-md overflow-hidden bg-fill shrink-0">
+                <app-cover [.cover-id]="r.album_id" [.size]="100"></app-cover>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate">{{ r.title }}</p>
+                <p class="text-xs text-ink-muted truncate">{{ r.album }}</p>
+              </div>
+              <span class="text-xs font-mono text-ink-faint tabular-nums shrink-0"
+                >{{ formatRelative(r.played_at) }}</span
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted mb-4">
+          {{ t('artist.lifetime.title') }}
+        </h2>
+        <div class="rounded-xl bg-surface-sunken p-5 space-y-4">
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.lifetime.firstHeard') }}</span>
+            <span class="text-sm font-semibold">{{ formatDate(data.first_scrobble) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.lifetime.lastHeard') }}</span>
+            <span class="text-sm font-semibold">{{ formatDate(data.last_scrobble) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.lifetime.totalPlays') }}</span>
+            <span class="text-sm font-semibold tabular-nums"
+              >{{ num(data.lifetime_plays) }}</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.lifetime.uniqueTracks') }}</span>
+            <span class="text-sm font-semibold tabular-nums"
+              >{{ data.lifetime_unique_tracks }}</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.lifetime.libraryTracks') }}</span>
+            <span class="text-sm font-semibold tabular-nums">{{ data.library_tracks }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-ink-muted">{{ t('artist.metrics.libraryDepth') }}</span>
+            <span class="text-sm font-semibold tabular-nums">{{ percent(libraryDepthPct, 0, 1) }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

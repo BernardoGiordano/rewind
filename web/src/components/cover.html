@@ -1,0 +1,8 @@
+<img
+  *if="visible"
+  [src]="src"
+  alt=""
+  class="w-full h-full object-cover"
+  [loading]="eager ? 'eager' : 'lazy'"
+  (error)="failed()"
+/>

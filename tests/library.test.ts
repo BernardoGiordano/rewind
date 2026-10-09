@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import express from 'express';
 import Database from 'better-sqlite3';
 import type { Server } from 'node:http';
-import { libraryRouter } from '../src/server/library';
+import { libraryRouter } from '../server/library.ts';
 
 let db: Database.Database;
 let server: Server;

@@ -1,0 +1,116 @@
+<!-- Month navigation -->
+<div class="flex items-center gap-0.5 mb-2">
+  <button
+    type="button"
+    (click)="shiftMonths(-12)"
+    class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+    [aria-label]="t('datePicker.previousYear')"
+    [title]="t('datePicker.previousYear')"
+  >
+    <app-icon name="heroChevronDoubleLeft" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
+  </button>
+  <button
+    type="button"
+    (click)="shiftMonths(-1)"
+    class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+    [aria-label]="t('datePicker.previousMonth')"
+    [title]="t('datePicker.previousMonth')"
+  >
+    <app-icon name="heroChevronLeft" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
+  </button>
+  <span class="flex-1 text-center text-sm font-semibold text-ink" aria-live="polite">
+    {{ monthLabel }}
+  </span>
+  <button
+    type="button"
+    (click)="shiftMonths(1)"
+    [disabled]="atLatestMonth"
+    class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
+    [aria-label]="t('datePicker.nextMonth')"
+    [title]="t('datePicker.nextMonth')"
+  >
+    <app-icon name="heroChevronRight" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
+  </button>
+  <button
+    type="button"
+    (click)="shiftMonths(12)"
+    [disabled]="atLatestMonth"
+    class="cursor-pointer flex items-center justify-center w-7 h-7 rounded-md text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
+    [aria-label]="t('datePicker.nextYear')"
+    [title]="t('datePicker.nextYear')"
+  >
+    <app-icon name="heroChevronDoubleRight" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
+  </button>
+</div>
+
+<!-- Weekdays -->
+<div class="grid grid-cols-7 mb-1" aria-hidden="true">
+  <div
+    *for="w of weekdays; key: w"
+    class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint text-center py-1"
+  >
+    {{ w }}
+  </div>
+</div>
+
+<!-- Days. No column gap, so a selected range reads as one band. -->
+<div class="grid grid-cols-7 gap-y-1" (mouseleave)="clearHover()">
+  <div *for="cell of cells; key: cell.iso" class="h-8" [class]="bandClass(cell)">
+    <button
+      type="button"
+      (click)="pick(cell)"
+      (mouseenter)="hover(cell)"
+      [disabled]="cell.disabled"
+      [aria-label]="formatDate(cell.iso)"
+      [aria-pressed]="cell.isStart || cell.isEnd"
+      class="relative w-full h-full rounded-md text-xs font-medium tabular-nums transition-colors"
+      [class]="dayClass(cell)"
+    >
+      {{ cell.day }}
+      <span
+        *if="cell.isToday"
+        class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+        [class]="cell.isStart || cell.isEnd ? 'bg-on-selected' : 'bg-accent'"
+        aria-hidden="true"
+      ></span>
+    </button>
+  </div>
+</div>
+
+<!-- Ends of the selection. The one the next click sets is outlined. -->
+<div class="mt-3 grid grid-cols-2 gap-2">
+  <div
+    *for="end of ends; key: end.labelKey"
+    class="rounded-lg px-3 py-2 border transition-colors"
+    [class]="end.next ? 'border-ink-muted bg-surface-raised' : 'border-edge-raised bg-fill'"
+  >
+    <p class="text-[10px] font-semibold uppercase tracking-wider text-ink-faint leading-none">
+      {{ t(end.labelKey) }}
+    </p>
+    <p
+      class="mt-1 text-sm font-medium tabular-nums truncate"
+      [class]="end.value ? 'text-ink' : 'text-ink-faint'"
+    >
+      {{ endLabel(end.value) }}
+    </p>
+  </div>
+</div>
+
+<div class="mt-3 flex items-center justify-end gap-2">
+  <button
+    *if="start"
+    type="button"
+    (click)="reset()"
+    class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+  >
+    {{ t('datePicker.reset') }}
+  </button>
+  <button
+    type="button"
+    (click)="apply()"
+    [disabled]="!canApply"
+    class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-selected text-on-selected hover:opacity-90 disabled:opacity-30 disabled:cursor-default transition-opacity"
+  >
+    {{ t('datePicker.apply') }}
+  </button>
+</div>

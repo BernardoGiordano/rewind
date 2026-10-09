@@ -1,0 +1,27 @@
+<div
+  class="w-full h-full overflow-hidden relative flex flex-col"
+  [class.medium-up:rounded-xl]="!noRound"
+  [class]="flat
+    ? 'bg-slate-950 ring-1 ring-inset ring-slate-800/60'
+    : gradientStyle ? '' : 'bg-gradient-to-br ' + gradient"
+  [style.background-image]="flat ? null : gradientStyle || null"
+>
+  <!-- The top-left corner stays empty, where story viewers overlay the poster's name. -->
+  <div class="px-8 pt-8 flex items-center justify-end shrink-0">
+    <span class="text-white/80 text-sm font-mono bg-white/10 px-3 py-1 rounded-full">{{ yearLabel }}</span>
+  </div>
+
+  <div class="flex-1 flex flex-col px-8 pt-4 pb-6 overflow-hidden">
+    <x-content></x-content>
+  </div>
+
+  <!-- The compact stat pill sits over this credit, so it hides on screen there. Exports restore it. -->
+  <div class="export-show px-8 pb-6 shrink-0 compact:opacity-0">
+    <div class="flex items-center gap-2 text-white/40">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"></path>
+      </svg>
+      <span class="text-xs font-mono tracking-wider uppercase">Navidrome Rewind</span>
+    </div>
+  </div>
+</div>

@@ -1,48 +1,37 @@
 {
   "name": "rewind",
   "version": "0.7.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "test:server": "vitest run tests/library.test.ts",
-    "test:unit": "vitest run tests/",
-    "serve:ssr:rewind": "node --env-file=.env dist/rewind/server/server.mjs",
-    "dev": "npm run build && npm run serve:ssr:rewind"
-  },
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:api": "node --env-file-if-exists=.env --watch --experimental-strip-types --no-warnings=ExperimentalWarning server/server.ts",
+    "dev:web": "srl serve --app web --proxy /api=http://localhost:4000",
+    "build": "npm run build:web && npm run build:server",
+    "build:web": "srl build --app web --out dist/web",
+    "build:server": "tsc -p server",
+    "start": "node --env-file-if-exists=.env dist/server/server.js",
+    "check": "srl check && tsc -p server --noEmit",
+    "test": "vitest run tests/",
+    "test:server": "vitest run tests/library.test.ts"
+  },
   "packageManager": "npm@10.9.7",
   "dependencies": {
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@angular/platform-server": "^21.2.0",
-    "@angular/router": "^21.2.0",
-    "@angular/ssr": "^21.2.6",
-    "@ng-icons/core": "^33.2.0",
-    "@ng-icons/heroicons": "^33.2.0",
-    "express": "^5.1.0",
-    "html2canvas-pro": "^2.0.2",
-    "rxjs": "~7.8.0",
     "better-sqlite3": "^11.9.1",
-    "tslib": "^2.3.0"
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.6",
-    "@angular/cli": "^21.2.6",
-    "@angular/compiler-cli": "^21.2.0",
-    "@tailwindcss/postcss": "^4.1.12",
-    "@types/express": "^5.0.1",
-    "@types/node": "^20.17.19",
+    "@srljs/cli": "1.1.0",
+    "@srljs/core": "1.1.0",
+    "@tailwindcss/cli": "4.3.3",
     "@types/better-sqlite3": "^7.6.12",
-    "jsdom": "^28.0.0",
-    "postcss": "^8.5.3",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.15.0",
     "prettier": "^3.8.1",
-    "tailwindcss": "^4.1.12",
+    "tailwindcss": "4.3.3",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

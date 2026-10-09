@@ -1,0 +1,287 @@
+<!-- Route content only — chrome (sections, theme, identity, links) lives in the Shell -->
+<div class="flex h-full bg-surface">
+  <!-- Sidebar collapse toggle — half on the sidebar, half on main content -->
+  <button
+    type="button"
+    (click)="toggleSidebar()"
+    [aria-expanded]="sidebarShowing"
+    [aria-label]="t(sidebarShowing ? 'dashboard.collapseSidebar' : 'dashboard.expandSidebar')"
+    [title]="t('dashboard.toggleSidebar')"
+    class="hidden medium-up:flex fixed top-4 -translate-x-1/2 z-50 items-center justify-center w-7 h-7 rounded-full bg-surface-raised border border-edge-raised text-ink-muted hover:text-ink hover:bg-fill-raised shadow-sm cursor-pointer transition-[left,color,background-color] duration-200"
+    [class]="[
+      sidebarCollapsed ? 'expanded:left-16' : 'expanded:left-[22rem] wide:left-[24rem]',
+      drawerOpen ? 'medium:left-[22rem]' : 'medium:left-16'
+    ]"
+  >
+    <app-icon [name]="sidebarShowing ? 'heroChevronLeft' : 'heroChevronRight'" class="w-4 h-4" aria-hidden="true"></app-icon>
+  </button>
+
+  <!-- Drawer backdrop — medium only. The rail stays clickable. -->
+  <div
+    *if="drawerOpen"
+    class="hidden medium:block fixed inset-y-0 right-0 left-16 z-30 bg-black/30"
+    (click)="closeDrawer()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- SIDEBAR — period + stat list. Pinned at expanded, a drawer at medium.
+       sidebarCollapsed drives the expanded classes and drawerOpen the medium ones,
+       so neither asks how wide the viewport is. -->
+  <aside
+    class="hidden medium-up:flex medium-up:flex-col medium-up:flex-none fixed inset-y-0 left-16 z-40 bg-surface-sunken overflow-hidden border-r border-edge transition-[width,filter] duration-200"
+    [class]="[
+      sidebarCollapsed
+        ? 'expanded:w-0 expanded:border-r-0 expanded:blur-sm'
+        : 'expanded:w-72 wide:w-80',
+      drawerOpen ? 'medium:w-72 medium:shadow-xl' : 'medium:w-0 medium:border-r-0'
+    ]"
+  >
+    <!-- Scrollable content area -->
+    <div class="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-10 pb-4">
+      <!-- The period is chosen from the rail; the sidebar only names it -->
+      <div class="min-w-0">
+        <span class="block text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('range.title') }}</span>
+        <p class="mt-2 flex items-center gap-2 text-base font-bold text-ink">
+          <app-icon name="heroCalendarDays" class="w-4 h-4 shrink-0 text-ink-muted" aria-hidden="true"></app-icon>
+          <span class="truncate" [title]="rangeLabel">{{ rangeLabel }}</span>
+        </p>
+      </div>
+
+      <!-- Stat selector -->
+      <nav class="mt-8">
+        <button
+          type="button"
+          (click)="toggleSongsStats()"
+          class="cursor-pointer w-full flex items-center justify-between mb-3"
+        >
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+            {{ t('dashboard.statistics') }}
+          </h2>
+          <app-icon
+            name="heroChevronDown"
+            class="w-3 h-3 text-ink-muted transition-transform duration-200"
+            [class.rotate-[-90deg]]="songsStatsCollapsed"
+            aria-hidden="true"
+          ></app-icon>
+        </button>
+        <ul *if="!songsStatsCollapsed" role="list" class="space-y-1">
+          <li *for="def of stats; key: def.type">
+            <button
+              type="button"
+              (click)="selectStat(def.type)"
+              class="cursor-pointer w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left"
+              [class]="selectedStat === def.type ? 'bg-fill-strong/80 text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
+            >
+              <app-icon [name]="def.icon" class="w-4 h-4" aria-hidden="true"></app-icon>
+              {{ t(def.labelKey) }}
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Fixed bottom section — project links -->
+    <div class="flex-none border-t border-edge px-5 py-3 grid grid-cols-2 gap-2">
+      <a
+        href="https://github.com/BernardoGiordano/rewind"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-fill hover:text-ink transition-colors"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10Z"
+          ></path>
+        </svg>
+        GitHub
+      </a>
+      <a
+        href="https://www.paypal.com/paypalme/BernardoGiordano"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-fill hover:text-ink transition-colors"
+      >
+        <app-icon name="heroHeart" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
+        {{ t('links.donate') }}
+      </a>
+    </div>
+  </aside>
+
+  <!-- Compact stat sheet -->
+  <app-stat-sheet *if="statSheetOpen" (close)="closeStatSheet()"></app-stat-sheet>
+
+  <!-- MAIN CONTENT — card + sticky export. Expanded pushes it aside and medium
+       overlays it, so only expanded gets a margin. -->
+  <main
+    class="flex-1 flex flex-col bg-surface transition-[margin] duration-200 overflow-y-auto"
+    [class]="sidebarCollapsed ? 'expanded:ml-0' : 'expanded:ml-72 wide:ml-80'"
+  >
+    <div *if="loading" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <div
+          class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
+        ></div>
+        <p class="mt-4 text-sm text-ink-muted">{{ t('dashboard.loading') }}</p>
+      </div>
+    </div>
+    <div *else *if="error" class="flex-1 flex items-center justify-center">
+      <div class="text-center px-6">
+        <p class="text-red-500 font-medium">{{ t(error) }}</p>
+        <button
+          type="button"
+          (click)="reload()"
+          class="cursor-pointer mt-4 text-sm text-ink-muted hover:text-slate-700 dark:hover:text-white underline"
+        >
+          {{ t('common.retry') }}
+        </button>
+      </div>
+    </div>
+    <div *else class="flex-1 flex items-center justify-center [container-type:size]">
+      <!-- Card area. A size container, so cards fit both its width and its height. -->
+      <!-- Outer wrapper: full-bleed at compact, sized from medium up -->
+      <div
+        class="w-full h-full medium-up:h-auto medium-up:max-w-full"
+        [class]="effectiveCardMode === 'landscape' ? 'medium-up:w-full' : 'medium-up:w-auto medium-up:p-6 medium-up:px-12'"
+      >
+        <!-- Inner wrapper: relative anchor for absolute overlays, touch target for swipe -->
+        <div
+          class="relative w-full h-full touch-pan-y group/card"
+          (pointerdown)="onCardPointerDown($event)"
+          (pointerup)="onCardPointerUp($event)"
+          (pointercancel)="onCardPointerCancel()"
+        >
+          <!-- The exported card element -->
+          <app-cards-landscape
+            *if="effectiveCardMode === 'landscape'"
+            (artist-click)="onArtistClick($event)"
+          ></app-cards-landscape>
+          <app-cards-square
+            *else *if="effectiveCardMode === 'square'"
+            (artist-click)="onArtistClick($event)"
+          ></app-cards-square>
+          <app-cards-portrait *else (artist-click)="onArtistClick($event)"></app-cards-portrait>
+
+          <!-- Autoplay progress (not exported) -->
+          <div
+            *if="autoplay"
+            class="export-ignore absolute top-0 left-0 right-0 z-10 flex gap-1 px-3 pt-3 pointer-events-none"
+            aria-hidden="true"
+          >
+            <div
+              *for="stat of stats; key: stat.type; index as i"
+              class="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden"
+            >
+              <div *if="i < statIndex" class="h-full w-full bg-white rounded-full"></div>
+              <div
+                *else *if="i === statIndex"
+                class="h-full bg-white rounded-full"
+                [class.stories-bar-active]="!autoplayPaused"
+                [class.stories-bar-paused]="autoplayPaused"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Pointer adapter: edge arrows. Only the round buttons take clicks, so the
+               rows and lists under the card edges stay usable. Touch swipes instead. -->
+          <button
+            type="button"
+            (click)="prevStat()"
+            class="export-ignore cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
+            [aria-label]="t('dashboard.previousStat')"
+          >
+            <svg
+              class="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            (click)="nextStat()"
+            class="export-ignore cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 z-10 hidden medium-up:flex items-center justify-center w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 text-white opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100 transition-opacity"
+            [aria-label]="t('dashboard.nextStat')"
+          >
+            <svg
+              class="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+            </svg>
+          </button>
+
+          <!-- Compact adapter: current stat, tap to open the sheet -->
+          <button
+            type="button"
+            (click)="openStatSheet()"
+            [aria-expanded]="statSheetOpen"
+            class="export-ignore cursor-pointer medium-up:hidden absolute bottom-3 left-3 z-20 flex items-center gap-1.5 max-w-[55%] pl-3 pr-2 py-1.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-sm font-medium hover:bg-black/60 transition-colors"
+          >
+            <span class="truncate">{{ t(selectedDef?.labelKey ?? 'dashboard.statisticsShort') }}</span>
+            <app-icon name="heroChevronDown" class="w-4 h-4 shrink-0 rotate-180" aria-hidden="true"></app-icon>
+          </button>
+
+          <!-- Bottom-right overlay: pause/resume (autoplay only), music, export (always) -->
+          <div class="export-ignore absolute bottom-3 right-3 z-20 flex items-center gap-2">
+            <button
+              *if="autoplay"
+              type="button"
+              (click)="toggleAutoplayPause()"
+              class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+              [aria-label]="t(autoplayPaused ? 'dashboard.resumeAutoplay' : 'dashboard.pauseAutoplay')"
+            >
+              <svg *if="autoplayPaused" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+                ></path>
+              </svg>
+              <svg *else class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <app-soundtrack-control></app-soundtrack-control>
+            <!-- Export / download button — always visible -->
+            <button
+              type="button"
+              (click)="exportCard()"
+              class="cursor-pointer w-8 h-8 rounded-full bg-black/25 flex items-center justify-center text-white hover:bg-black/40 transition-colors"
+              [aria-label]="t('dashboard.exportImage')"
+              [title]="t('dashboard.exportImage')"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- /inner wrapper -->
+      </div>
+    </div>
+  </main>
+</div>

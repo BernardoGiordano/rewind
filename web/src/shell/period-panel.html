@@ -1,0 +1,71 @@
+<div class="flex items-start justify-between gap-4 px-5 pt-4 pb-3 border-b border-edge-raised">
+  <div class="min-w-0">
+    <h2 class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('range.title') }}</h2>
+    <p class="mt-0.5 text-lg font-bold text-ink truncate">{{ label }}</p>
+  </div>
+  <button
+    type="button"
+    (click)="close()"
+    [aria-label]="t('common.close')"
+    class="cursor-pointer shrink-0 flex items-center justify-center w-8 h-8 -mr-2 rounded-lg text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+  >
+    <app-icon name="heroXMark" class="w-4 h-4" aria-hidden="true"></app-icon>
+  </button>
+</div>
+
+<div class="flex flex-col medium-up:flex-row">
+  <!-- Presets and years apply on click -->
+  <div
+    class="medium-up:w-48 shrink-0 p-3 medium-up:border-r border-b medium-up:border-b-0 border-edge-raised"
+  >
+    <h3 class="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
+      {{ t('range.quickPicks') }}
+    </h3>
+    <ul role="list" class="grid grid-cols-2 medium-up:grid-cols-1 gap-0.5">
+      <li *for="preset of presets; key: preset.labelKey">
+        <button
+          type="button"
+          (click)="choose(preset.range)"
+          [aria-pressed]="isCurrent(preset.range)"
+          class="cursor-pointer w-full flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-left transition-colors"
+          [class]="isCurrent(preset.range) ? 'bg-fill-strong text-ink' : 'text-ink-soft hover:bg-fill-raised hover:text-ink'"
+        >
+          {{ t(preset.labelKey) }}
+          <app-icon *if="isCurrent(preset.range)" name="heroCheck" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
+        </button>
+      </li>
+    </ul>
+
+    <h3
+      *if="years.length"
+      class="mt-4 px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-faint"
+    >
+      {{ t('range.years') }}
+    </h3>
+    <ul *if="years.length" role="list" class="grid grid-cols-4 medium-up:grid-cols-3 gap-1 px-1">
+      <li *for="y of years; key: y">
+        <button
+          type="button"
+          (click)="choose({ kind: 'year', year: y })"
+          [aria-pressed]="isYear(y)"
+          class="cursor-pointer w-full rounded-lg py-1.5 text-sm font-medium tabular-nums transition-colors"
+          [class]="isYear(y) ? 'bg-selected text-on-selected' : 'border border-edge-raised text-ink-soft hover:bg-fill-raised hover:text-ink'"
+        >
+          {{ y }}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Custom range applies on confirm -->
+  <div class="flex-1 min-w-0 px-5 py-4 medium-up:w-80">
+    <h3 class="pb-2 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
+      {{ t('range.custom') }}
+    </h3>
+    <app-date-range-picker
+      [.initial-from]="custom?.from ?? null"
+      [.initial-to]="custom?.to ?? null"
+      (range-selected)="chooseCustom($event)"
+    ></app-date-range-picker>
+  </div>
+</div>

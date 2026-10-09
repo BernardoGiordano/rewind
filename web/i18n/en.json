@@ -1,0 +1,400 @@
+{
+  "$comment": "Keys ending in one/other are plural forms, picked by the count passed as {count}. Numbers in placeholders are formatted for the language.",
+  "common": {
+    "back": "Back",
+    "retry": "Retry",
+    "close": "Close",
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "nav": {
+    "sections": "Sections",
+    "library": "Library",
+    "analytics": "Analytics",
+    "openMenu": "Open options menu"
+  },
+  "account": {
+    "title": "Account",
+    "label": "Account, signed in as {username}",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "envSession": "This server signs you in from its configuration, so there is no session to end."
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "black": "Black"
+  },
+  "locale": {
+    "label": "Language"
+  },
+  "links": {
+    "donate": "Donate"
+  },
+  "byline": {
+    "$comment": "Read around a heart icon and the author's name: Made with ♥ by Bernardo Giordano.",
+    "madeWith": "Made with",
+    "by": "by"
+  },
+  "units": {
+    "minutes": "{value}m",
+    "hours": "{value}h",
+    "decade": "{decade}s"
+  },
+  "range": {
+    "title": "Listening period",
+    "titled": "Listening period · {label}",
+    "change": "Change listening period, currently {label}",
+    "allTime": "All Time",
+    "lastWeek": "Last Week",
+    "lastMonth": "Last Month",
+    "span": "{from} – {to}",
+    "spanInYear": "{from} – {to}, {year}",
+    "short": {
+      "$comment": "Fits a 48 px rail under an icon. Keep it to about six characters.",
+      "allTime": "All",
+      "custom": "Custom"
+    },
+    "preset": {
+      "allTime": "All time",
+      "lastWeek": "Last week",
+      "last30Days": "Last 30 days",
+      "lastMonth": "Last month"
+    },
+    "quickPicks": "Quick picks",
+    "years": "Years",
+    "custom": "Custom range"
+  },
+  "datePicker": {
+    "previousYear": "Previous year",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "nextYear": "Next year",
+    "from": "From",
+    "to": "To",
+    "pickDay": "Pick a day",
+    "reset": "Reset",
+    "apply": "Apply range"
+  },
+  "login": {
+    "title": "Sign in",
+    "intro": "Use your Navidrome username and password.",
+    "username": "Username",
+    "usernamePlaceholder": "username",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "credentialsNote": "Your credentials are sent to your Navidrome server for verification.",
+    "missingCredentials": "Please enter both username and password.",
+    "failed": "Login failed."
+  },
+  "stats": {
+    "summary": "Your Year in Music",
+    "topSongs": "Top Songs",
+    "topArtists": "Top Artists",
+    "topAlbums": "Top Albums",
+    "topGenres": "Top Genres",
+    "listeningClock": "Listening Clock",
+    "monthlyTrends": "Monthly Trends",
+    "dayOfWeek": "Day of the Week",
+    "streak": "Listening Streak",
+    "lateNight": "Late Night Vibes",
+    "onRepeat": "On Repeat",
+    "songOfMonth": "Song of the Month",
+    "favoriteDecades": "Favorite Decades",
+    "recap": "Your Recap"
+  },
+  "dashboard": {
+    "statistics": "Songs statistics",
+    "statisticsShort": "Statistics",
+    "chooseStat": "Choose a statistic",
+    "loading": "Loading stats…",
+    "loadFailed": "Failed to load data.",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "toggleSidebar": "Toggle sidebar",
+    "previousStat": "Previous stat",
+    "nextStat": "Next stat",
+    "autoplay": "Autoplay",
+    "startAutoplay": "Start autoplay",
+    "stopAutoplay": "Stop autoplay",
+    "pauseAutoplay": "Pause autoplay",
+    "resumeAutoplay": "Resume autoplay",
+    "exportImage": "Export image",
+    "music": {
+      "play": "Play music",
+      "mute": "Mute music",
+      "nowPlaying": "Now playing: {title} by {artist}",
+      "volume": "Music volume"
+    },
+    "aspectRatio": "Card aspect ratio",
+    "cardMode": "{mode} card",
+    "cardModes": {
+      "portrait": "Portrait",
+      "square": "Square",
+      "landscape": "Landscape"
+    }
+  },
+  "cards": {
+    "$comment": "Text on the shareable stat cards. Most labels sit under a large number.",
+    "hoursListened": "hours listened",
+    "minutesListened": "minutes listened",
+    "hoursListenedValue": "{value}h listened",
+    "songsPlayed": "songs played",
+    "artists": "artists",
+    "albums": "albums",
+    "uniqueSongs": "unique songs",
+    "topGenre": "top genre",
+    "daysOfMusic": {
+      "one": "That's {count} day of music",
+      "other": "That's {count} days of music"
+    },
+    "topSong": "#1 Song",
+    "topArtist": "#1 Artist",
+    "topAlbum": "#1 Album",
+    "plays": {
+      "one": "{count} play",
+      "other": "{count} plays"
+    },
+    "playsWord": {
+      "one": "play",
+      "other": "plays"
+    },
+    "tracks": {
+      "one": "{count} track",
+      "other": "{count} tracks"
+    },
+    "songCount": {
+      "one": "{count} song",
+      "other": "{count} songs"
+    },
+    "artistCount": {
+      "one": "{count} artist",
+      "other": "{count} artists"
+    },
+    "days": {
+      "one": "{count} day",
+      "other": "{count} days"
+    },
+    "consecutiveDays": {
+      "one": "consecutive day",
+      "other": "consecutive days"
+    },
+    "clockSubtitle": "Plays by hour of day",
+    "peak": "Peak",
+    "longestStreak": "Longest Streak",
+    "otherStreaks": "Other streaks",
+    "dragToReframe": "Drag to reframe",
+    "lateNightSubtitle": "Songs you listened to between midnight and 5 AM",
+    "onRepeatSubtitle": "Songs you played 3+ times in a single day",
+    "columns": {
+      "track": "Track",
+      "artist": "Artist",
+      "album": "Album",
+      "genre": "Genre",
+      "plays": "Plays",
+      "minutes": "Min",
+      "hours": "Hours",
+      "month": "Month",
+      "songs": "Songs",
+      "artists": "Artists",
+      "days": "Days",
+      "period": "Period",
+      "lateNight": "Late Night",
+      "date": "Date",
+      "decade": "Decade"
+    }
+  },
+  "artist": {
+    "loading": "Loading artist…",
+    "loadFailed": "Couldn’t load this artist.",
+    "views": "Artist views",
+    "tabs": {
+      "overview": "Overview",
+      "patterns": "Patterns",
+      "activity": "Activity"
+    },
+    "browseMusic": "Browse music",
+    "kicker": "Artist",
+    "unknown": "Unknown",
+    "noPlays": "No plays yet",
+    "firstHeard": {
+      "one": "First heard {date} · listening for {count} day",
+      "other": "First heard {date} · listening for {count} days"
+    },
+    "metrics": {
+      "plays": "Plays",
+      "hours": "Hours",
+      "uniqueTracks": "Unique tracks",
+      "rank": "Rank",
+      "share": "Share",
+      "libraryDepth": "Library depth"
+    },
+    "heatmap": {
+      "title": "Activity heatmap",
+      "playsInPeriod": {
+        "$comment": "Follows the number of plays, which is shown in bold.",
+        "one": "play in this period",
+        "other": "plays in this period"
+      },
+      "cell": {
+        "one": "{date}: {count} play",
+        "other": "{date}: {count} plays"
+      },
+      "less": "Less",
+      "more": "More"
+    },
+    "topTracks": "Top tracks",
+    "noTracks": "No tracks in this range.",
+    "topAlbums": "Top albums",
+    "noAlbums": "No albums in this range.",
+    "noData": "No data in this range.",
+    "listeningClock": "Listening clock",
+    "clockBar": {
+      "one": "{hour}:00 — {count} play",
+      "other": "{hour}:00 — {count} plays"
+    },
+    "dayOfWeek": "Day of week",
+    "rankTrajectory": "Rank trajectory",
+    "rankNeedsData": "Need at least 2 months of data to show a trajectory.",
+    "songOfMonth": "Song of the month",
+    "recent": {
+      "title": "Recent scrobbles",
+      "note": "Last 25 plays — not limited to selected range",
+      "empty": "No scrobbles yet."
+    },
+    "lifetime": {
+      "title": "Lifetime",
+      "firstHeard": "First heard",
+      "lastHeard": "Last heard",
+      "totalPlays": "Total plays",
+      "uniqueTracks": "Unique tracks played",
+      "libraryTracks": "Library tracks"
+    },
+    "ago": {
+      "now": "just now",
+      "minutes": {
+        "one": "{count}m ago",
+        "other": "{count}m ago"
+      },
+      "hours": {
+        "one": "{count}h ago",
+        "other": "{count}h ago"
+      },
+      "days": {
+        "one": "{count}d ago",
+        "other": "{count}d ago"
+      }
+    }
+  },
+  "library": {
+    "title": "Library",
+    "kicker": "Your collection",
+    "intro": "Everything Rewind can see, including music you have never played. Add the listens that never made it to Navidrome.",
+    "views": "Library views",
+    "breadcrumb": "Breadcrumb",
+    "kinds": {
+      "artists": {
+        "label": "Artists",
+        "all": "All artists",
+        "noMatch": "Nothing matches “{query}” in artists."
+      },
+      "albums": {
+        "label": "Albums",
+        "all": "All albums",
+        "noMatch": "Nothing matches “{query}” in albums."
+      },
+      "songs": {
+        "label": "Songs",
+        "all": "All songs",
+        "noMatch": "Nothing matches “{query}” in songs."
+      }
+    },
+    "album": "Album",
+    "artist": "Artist",
+    "unknownArtist": "Unknown artist",
+    "browse": "Browse {title}",
+    "listeningStats": "Listening stats",
+    "listeningStatsFor": "Listening stats for {title}",
+    "scrobbleAlbum": "Scrobble album",
+    "scrobbleAlbumNamed": "Scrobble the album {title}",
+    "search": {
+      "label": "Search your library",
+      "placeholder": "Search artists, albums or songs",
+      "clear": "Clear search"
+    },
+    "loading": "Loading library…",
+    "loadFailed": "Could not load the library. Try again.",
+    "empty": {
+      "title": "No music found",
+      "view": "This view is empty."
+    },
+    "pageRange": "{start}–{end} of",
+    "count": {
+      "songs": {
+        "one": "{count} song",
+        "other": "{count} songs"
+      },
+      "albums": {
+        "one": "{count} album",
+        "other": "{count} albums"
+      }
+    },
+    "scrobble": {
+      "addOne": "Add scrobble",
+      "addFor": "Add a scrobble for {title}",
+      "add": {
+        "one": "Add {count} scrobble",
+        "other": "Add {count} scrobbles"
+      },
+      "listenedAt": "Listened at",
+      "finishedAt": "Finished listening at",
+      "albumHint": "Tracks are laid out backwards from this time using their durations.",
+      "forwardNote": "Writes to Navidrome and may forward to your connected scrobbling services.",
+      "unavailable": "Manual scrobbles need a Navidrome connection. Set NAVIDROME_URL to enable them.",
+      "preview": "Preview",
+      "preparing": "Preparing…",
+      "submitting": "Submitting…",
+      "invalidTime": "Choose a valid date and time.",
+      "previewFailed": "Could not preview scrobbles.",
+      "outcomeUnknown": "Submission outcome unknown. Check listening history before trying again.",
+      "added": {
+        "one": "Added {count} scrobble to Navidrome.",
+        "other": "Added {count} scrobbles to Navidrome."
+      },
+      "partial": {
+        "one": "Verified {confirmed} of {count} scrobble. Check listening history before trying again; some writes may still have succeeded.",
+        "other": "Verified {confirmed} of {count} scrobbles. Check listening history before trying again; some writes may still have succeeded."
+      },
+      "unverified": "Could not verify this submission. Check listening history before trying again."
+    }
+  },
+  "errors": {
+    "$comment": "Keyed by the code the server sends in `error`.",
+    "login_disabled": "Server is configured for env-based auth; login is disabled.",
+    "credentials_required": "Username and password are required.",
+    "navidrome_not_configured": "NAVIDROME_URL is not configured on the server.",
+    "invalid_credentials": "Invalid username or password.",
+    "user_not_found": "No Navidrome user found with this username.",
+    "library_unavailable": "Could not load this library view.",
+    "invalid_selection": "Select a song or album.",
+    "selection_unavailable": "This selection is no longer available.",
+    "selection_changed": "The selection changed. Preview it again before submitting.",
+    "track_count": "Select between 1 and 1000 songs.",
+    "missing_duration": "Track duration is missing. Scrobble this song separately with a valid timestamp.",
+    "invalid_time": "Choose a valid date and time.",
+    "time_not_past": "Choose a valid date and time in the past.",
+    "time_too_early": "Listening would start before 1970.",
+    "cross_site": "Cross-site submissions are not allowed.",
+    "scrobbling_not_configured": "Configure NAVIDROME_URL to add scrobbles.",
+    "invalid_request_id": "Invalid submission identifier.",
+    "request_id_used": "Submission already in progress or identifier already used.",
+    "submission_pending": "Wait for your current submission to finish.",
+    "capacity_reached": "Submission capacity reached. Restart Rewind before adding more.",
+    "scrobble_exists": "A scrobble already exists at one of these timestamps. Review listening history before adding more."
+  }
+}

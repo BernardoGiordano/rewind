@@ -1,0 +1,14 @@
+<div
+  *if="src"
+  class="w-full h-full bg-cover bg-no-repeat"
+  [style.background-image]="backgroundImage"
+  [style.background-position]="position"
+></div>
+<span
+  *if="src && pannable"
+  class="export-ignore absolute top-2 right-2 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-[0.7em] font-medium pointer-events-none transition-opacity"
+  [class]="dragging ? 'opacity-100' : 'opacity-0 group-hover/pan:opacity-100'"
+  aria-hidden="true"
+>
+  {{ t('cards.dragToReframe') }}
+</span>

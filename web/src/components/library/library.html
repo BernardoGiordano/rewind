@@ -1,0 +1,428 @@
+<div data-scroller class="h-full overflow-y-auto bg-surface text-ink-body">
+  <!-- Sticky tabs -->
+  <div
+    class="sticky top-0 z-20 backdrop-blur bg-surface/80 border-b border-edge"
+  >
+    <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8">
+      <nav class="flex gap-6" role="tablist" [aria-label]="t('library.views')">
+        <button
+          *for="tab of tabs; key: tab.key"
+          type="button"
+          role="tab"
+          [aria-selected]="kind === tab.key"
+          (click)="browse(tab.key)"
+          class="cursor-pointer py-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+          [class]="kind === tab.key
+                ? 'border-accent text-ink'
+                : 'border-transparent text-ink-muted hover:text-ink'"
+        >
+          {{ t(tab.labelKey) }}
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div
+    class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 transition-[padding] duration-200"
+    [class]="heroCollapsed ? 'pt-4 pb-3' : 'pt-8 pb-6'"
+  >
+    <!-- Drill-down: the selected artist or album -->
+    <nav
+      *if="focused"
+      class="flex items-center gap-1.5 text-xs font-medium text-ink-muted mb-4"
+      [aria-label]="t('library.breadcrumb')"
+    >
+      <button
+        type="button"
+        (click)="show(kind, '', '')"
+        class="cursor-pointer shrink-0 hover:text-ink transition-colors"
+      >
+        {{ t(kindText.allKey) }}
+      </button>
+
+      <app-icon
+        *if="artistCrumb"
+        name="heroChevronRight"
+        class="w-3 h-3 shrink-0"
+        aria-hidden="true"
+      ></app-icon>
+
+      <button
+        *if="artistCrumb && focusIsAlbum"
+        type="button"
+        (click)="show('albums', artistCrumb.id, '')"
+        class="cursor-pointer truncate hover:text-ink transition-colors"
+      >
+        {{ artistCrumb.name }}
+      </button>
+
+      <span *if="artistCrumb && !focusIsAlbum" class="truncate text-ink"
+        >{{ artistCrumb.name }}</span
+      >
+
+      <app-icon
+        *if="contextAlbum"
+        name="heroChevronRight"
+        class="w-3 h-3 shrink-0"
+        aria-hidden="true"
+      ></app-icon>
+      <span *if="contextAlbum" class="truncate text-ink">{{ contextAlbum.name }}</span>
+    </nav>
+
+    <div *if="focused" class="flex flex-col medium-up:flex-row gap-6 items-start medium-up:items-end">
+      <div
+        class="w-28 h-28 medium-up:w-36 medium-up:h-36 overflow-hidden bg-fill shrink-0 shadow-xl"
+        [class]="focusIsAlbum ? 'rounded-2xl' : 'rounded-full'"
+      >
+        <app-cover [.cover-id]="focused.cover_id" [.size]="400" [.eager]="true"></app-cover>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold uppercase tracking-widest text-accent">
+          {{ t(focusIsAlbum ? 'library.album' : 'library.artist') }}
+        </p>
+        <h1 class="mt-1 text-3xl medium-up:text-5xl font-black leading-none truncate">
+          {{ focused.name }}
+        </h1>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <a
+            *if="artistCrumb"
+            [href]="artistHref(artistCrumb.id)"
+            class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium bg-fill text-ink-soft hover:bg-fill-strong transition-colors"
+          >
+            <app-icon name="heroChartBarSquare" class="w-4 h-4" aria-hidden="true"></app-icon>
+            {{ t('library.listeningStats') }}
+          </a>
+
+          <button
+            *if="album && canScrobble"
+            type="button"
+            (click)="start('album', album, focused.name)"
+            class="cursor-pointer inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium bg-accent text-white hover:bg-accent-strong transition-colors"
+          >
+            <app-icon name="heroPlus" class="w-4 h-4" aria-hidden="true"></app-icon>
+            {{ t('library.scrobbleAlbum') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <h1 *if="!focused && heroCollapsed" class="text-xl font-black leading-none">
+      {{ t('library.title') }}
+    </h1>
+
+    <p
+      *if="!focused && !heroCollapsed"
+      class="text-xs font-bold uppercase tracking-widest text-accent"
+    >
+      {{ t('library.kicker') }}
+    </p>
+    <h1
+      *if="!focused && !heroCollapsed"
+      class="mt-1 text-4xl medium-up:text-6xl font-black leading-none"
+    >
+      {{ t('library.title') }}
+    </h1>
+    <p *if="!focused && !heroCollapsed" class="mt-4 text-sm text-ink-muted">
+      {{ t('library.intro') }}
+    </p>
+
+    <!-- Search -->
+    <form
+      class="flex gap-2"
+      [class]="heroCollapsed ? 'mt-3' : 'mt-8'"
+      (submit)="submitSearch($event)"
+    >
+      <label class="sr-only" for="library-search">{{ t('library.search.label') }}</label>
+      <div class="relative flex-1 min-w-0">
+        <app-icon
+          name="heroMagnifyingGlass"
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none"
+          aria-hidden="true"
+        ></app-icon>
+        <input
+          id="library-search"
+          type="search"
+          name="search"
+          autocomplete="off"
+          [.value]="search"
+          (input)="onSearchInput($event.target.value)"
+          [placeholder]="t('library.search.placeholder')"
+          class="w-full rounded-xl bg-surface-sunken border border-edge pl-9 pr-9 py-2.5 text-sm placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+        />
+
+        <button
+          *if="search"
+          type="button"
+          (click)="clearSearch()"
+          [aria-label]="t('library.search.clear')"
+          class="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full text-ink-faint hover:text-ink hover:bg-fill-strong transition-colors"
+        >
+          <app-icon name="heroXMark" class="w-4 h-4" aria-hidden="true"></app-icon>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 pb-16">
+    <div *if="loadFailed" class="rounded-xl bg-surface-sunken p-8 text-center" role="alert">
+      <p class="text-red-500 font-medium">{{ t('library.loadFailed') }}</p>
+      <button
+        type="button"
+        (click)="load()"
+        class="mt-4 text-sm text-ink-muted hover:text-ink underline cursor-pointer"
+      >
+        {{ t('common.retry') }}
+      </button>
+    </div>
+
+    <div *else *if="loading" class="py-24 text-center" role="status">
+      <div
+        class="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"
+      ></div>
+      <p class="mt-4 text-sm text-ink-muted">{{ t('library.loading') }}</p>
+    </div>
+
+    <div *else *if="!items.length" class="rounded-xl bg-surface-sunken p-12 text-center">
+      <p class="text-sm font-medium text-ink">{{ t('library.empty.title') }}</p>
+      <p class="mt-1 text-sm text-ink-muted">
+        {{ search ? t(kindText.noMatchKey, { query: search }) : t('library.empty.view') }}
+      </p>
+    </div>
+
+    <div *else>
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink-muted">
+          {{ t(kindText.labelKey) }}
+        </h2>
+        <p class="text-sm text-ink-muted tabular-nums">
+          {{ t('library.pageRange', { start: rangeStart, end: rangeEnd }) }}
+          <span class="font-black text-ink">{{ num(total) }}</span>
+        </p>
+      </div>
+
+      <div *if="kind === 'songs'" class="rounded-xl bg-surface-sunken overflow-hidden">
+        <ul class="divide-y divide-edge">
+          <li *for="item of items; key: item.id" class="flex items-center gap-3 p-3">
+            <span
+              *if="album"
+              class="text-sm font-black tabular-nums text-ink-faint w-6 text-right shrink-0"
+              >{{ item.track_number }}</span
+            >
+
+            <div class="w-10 h-10 rounded-md overflow-hidden bg-fill shrink-0">
+              <app-cover [.cover-id]="item.cover_id" [.size]="100"></app-cover>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold truncate">{{ item.title }}</p>
+              <p class="text-xs text-ink-muted truncate">{{ item.artist }} · {{ item.album }}</p>
+            </div>
+            <div class="text-right shrink-0 w-16">
+              <p class="text-sm font-bold tabular-nums">{{ item.plays }}</p>
+              <p class="text-xs text-ink-faint">{{ t('cards.playsWord', { count: item.plays ?? 0 }) }}</p>
+            </div>
+
+            <button
+              *if="canScrobble"
+              type="button"
+              (click)="start('song', item.id, item.title)"
+              [aria-label]="t('library.scrobble.addFor', { title: item.title })"
+              [title]="t('library.scrobble.addOne')"
+              class="cursor-pointer shrink-0 flex items-center justify-center w-8 h-8 rounded-md text-ink-muted hover:bg-fill-strong hover:text-ink transition-colors"
+            >
+              <app-icon name="heroPlus" class="w-4 h-4" aria-hidden="true"></app-icon>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div
+        *else
+        class="grid grid-cols-2 medium-up:grid-cols-3 expanded:grid-cols-4 wide:grid-cols-5 gap-x-5 gap-y-8"
+      >
+        <article *for="item of items; key: item.id" class="group relative isolate min-w-0">
+          <div class="relative">
+            <div
+              class="aspect-square overflow-hidden bg-fill shadow-sm group-hover:shadow-xl transition-shadow"
+              [class]="kind === 'artists' ? 'rounded-full' : 'rounded-xl'"
+            >
+              <app-cover [.cover-id]="item.cover_id" [.size]="300"></app-cover>
+            </div>
+
+            <!-- Secondary action, revealed on hover where hover exists -->
+            <div
+              class="absolute z-20 opacity-80 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+              [class]="kind === 'artists' ? 'bottom-[13%] right-[13%]' : 'bottom-2 right-2'"
+            >
+              <a
+                *if="kind === 'artists'"
+                [href]="artistHref(item.id)"
+                [title]="t('library.listeningStats')"
+                [aria-label]="t('library.listeningStatsFor', { title: item.title })"
+                class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-raised/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
+              >
+                <app-icon name="heroChartBarSquare" class="w-4 h-4" aria-hidden="true"></app-icon>
+              </a>
+
+              <button
+                *else
+                *if="canScrobble"
+                type="button"
+                (click)="start('album', item.id, item.title)"
+                [title]="t('library.scrobbleAlbum')"
+                [aria-label]="t('library.scrobbleAlbumNamed', { title: item.title })"
+                class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-full bg-surface-raised/90 backdrop-blur text-ink-soft hover:text-ink shadow-md ring-1 ring-edge-raised transition-colors"
+              >
+                <app-icon name="heroPlus" class="w-4 h-4" aria-hidden="true"></app-icon>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="mt-3 text-sm font-semibold truncate">
+            {{ item.title || t('library.unknownArtist') }}
+          </h3>
+
+          <p *if="item.artist" class="text-xs text-ink-muted truncate">{{ item.artist }}</p>
+
+          <p class="mt-0.5 text-xs text-ink-faint tabular-nums truncate">{{ tileCounts(item) }}</p>
+          <p class="text-xs text-ink-faint tabular-nums truncate">
+            {{ t('cards.plays', { count: item.plays ?? 0 }) }}
+          </p>
+
+          <!-- Covers the whole tile so the card itself is the primary target -->
+          <button
+            type="button"
+            (click)="open(item)"
+            [aria-label]="t('library.browse', { title: item.title || t('library.unknownArtist') })"
+            class="absolute inset-0 z-10 cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          ></button>
+        </article>
+      </div>
+
+      <!-- Pagination -->
+
+      <div *if="hasPrevious || hasNext" class="flex items-center justify-center gap-2 mt-10">
+        <button
+          type="button"
+          [disabled]="!hasPrevious"
+          (click)="page(offset - pageSize)"
+          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-surface-raised transition-colors"
+        >
+          {{ t('common.previous') }}
+        </button>
+        <button
+          type="button"
+          [disabled]="!hasNext"
+          (click)="page(offset + pageSize)"
+          class="cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium bg-surface-raised text-ink-soft border border-edge-raised hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default disabled:hover:bg-surface-raised transition-colors"
+        >
+          {{ t('common.next') }}
+        </button>
+      </div>
+
+      <p *if="!canScrobble" class="mt-8 text-center text-xs text-ink-faint">
+        {{ t('library.scrobble.unavailable') }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Scrobble dialog -->
+<dialog
+  data-scrobble-dialog
+  (cancel)="close($event)"
+  aria-labelledby="scrobble-title"
+  class="w-[min(32rem,calc(100vw-2rem))] rounded-xl bg-surface-raised text-ink-body shadow-lg ring-1 ring-edge-raised p-0"
+>
+  <div class="p-6">
+    <p class="text-xs font-bold uppercase tracking-widest text-accent">
+      {{ t(selection?.kind === 'album' ? 'library.scrobbleAlbum' : 'library.scrobble.addOne') }}
+    </p>
+    <h2 id="scrobble-title" class="mt-1 text-xl font-black leading-tight truncate">
+      {{ selection?.title }}
+    </h2>
+
+    <label
+      *if="!submitted"
+      for="scrobble-time"
+      class="block mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted"
+    >
+      {{ t(selection?.kind === 'album' ? 'library.scrobble.finishedAt' : 'library.scrobble.listenedAt') }}
+    </label>
+    <input
+      *if="!submitted"
+      id="scrobble-time"
+      type="datetime-local"
+      [.value]="listenedAt"
+      (input)="setListenedAt($event.target.value)"
+      [disabled]="busy"
+      class="w-full rounded-xl bg-surface-sunken border border-edge-raised px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent disabled:opacity-50 transition-colors"
+    />
+    <p *if="!submitted" class="mt-2 text-xs text-ink-muted">
+      {{ timezone }}{{ selection?.kind === 'album' ? ' · ' + t('library.scrobble.albumHint') : '' }}
+    </p>
+
+    <p *if="!submitted && previewError" class="mt-4 text-sm text-red-500 font-medium" role="alert">
+      {{ t(previewError) }}
+    </p>
+
+    <div
+      *if="!submitted && entries.length"
+      class="mt-5 rounded-xl bg-surface-sunken overflow-hidden"
+    >
+      <ol class="max-h-56 overflow-y-auto divide-y divide-edge">
+        <li *for="entry of entries; key: entry.id" class="flex items-center gap-3 px-3 py-2">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold truncate">{{ entry.title }}</p>
+            <p class="text-xs text-ink-muted tabular-nums">{{ mediumDate(entry.time) }}</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <p *if="!submitted && entries.length" class="mt-2 text-xs text-ink-faint">
+      {{ t('library.scrobble.forwardNote') }}
+    </p>
+
+    <p
+      *if="message"
+      class="mt-5 text-sm font-medium"
+      role="status"
+      [class]="failed ? 'text-red-500' : 'text-ink-soft'"
+    >
+      {{ t(message.key, message.params) }}
+    </p>
+
+    <div class="flex justify-end gap-2 mt-6">
+      <button
+        type="button"
+        [disabled]="busy"
+        (click)="close()"
+        class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium text-ink-soft hover:bg-fill-raised disabled:opacity-40 disabled:cursor-default transition-colors"
+      >
+        {{ t(submitted ? 'common.close' : 'common.cancel') }}
+      </button>
+
+      <button
+        *if="!submitted && !entries.length"
+        type="button"
+        [disabled]="busy"
+        (click)="preview()"
+        class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-selected text-on-selected hover:opacity-90 disabled:opacity-40 disabled:cursor-default transition-opacity"
+      >
+        {{ t(busy ? 'library.scrobble.preparing' : 'library.scrobble.preview') }}
+      </button>
+
+      <button
+        *if="!submitted"
+        *else
+        type="button"
+        [disabled]="busy"
+        (click)="submit()"
+        class="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent-strong disabled:opacity-40 disabled:cursor-default transition-colors"
+      >
+        {{ busy ? t('library.scrobble.submitting') : t('library.scrobble.add', { count: entries.length }) }}
+      </button>
+    </div>
+  </div>
+</dialog>

@@ -16,6 +16,8 @@ A self-hosted "Spotify Wrapped"-style experience for [Navidrome](https://www.nav
 
 Rewind gives you a stories-style slideshow (think Instagram stories) that go through your personal stats: top songs, artists, albums, and genres, a listening clock that shows when you listen most, monthly trends, day-of-week breakdowns, your longest listening streaks, late-night favorites, songs you had on repeat, a "song of the month" for each month, and your favorite decades. Each card can be exported as a shareable image for your social media profiles.
 
+Each slide plays a song from your library that fits it, streamed from Navidrome: your #1 song on top songs, the most-played song of your top artist, album, genre or decade, the song you played most in your busiest hour, weekday or month, or during your longest streak. Moving between slides crossfades to the next song. The speaker button next to the export button mutes the music, and hovering it opens a volume slider. Music needs `NAVIDROME_URL`. Browsers hold sound back until your first click or key press on the page.
+
 ## Library and manual scrobbles
 
 Open **Library** to browse artists, albums, and songs, including music with no recorded listens.
@@ -41,7 +43,6 @@ Create a `.env` file next to your `docker-compose.yml`:
 ```env
 NAVIDROME_URL=http://your-navidrome-instance-ip:4533
 NAVIDROME_BASE_PATH=/path/to/your/navidrome/data
-NG_ALLOWED_HOSTS=localhost,127.0.0.1
 SESSION_SECRET=some-random-secret
 ```
 
@@ -57,7 +58,6 @@ services:
       - "42000:4000"
     environment:
       - PORT=4000
-      - NG_ALLOWED_HOSTS=${NG_ALLOWED_HOSTS:-localhost,127.0.0.1}
       - NAVIDROME_URL=${NAVIDROME_URL}
       - SESSION_SECRET=${SESSION_SECRET:-changeme}
       - DB_PATH=/data/navidrome.db
@@ -79,10 +79,27 @@ npm run build
 Create a `.env` file in the project root with the same variables listed above, then start the server:
 
 ```bash
-npm run serve:ssr:rewind
+npm start
 ```
 
 The app will be available at `http://localhost:4000` by default.
+
+## Development
+
+The frontend in `web/` is an [srl](https://github.com/BernardoGiordano/srl) application. The Express server in `server/` serves the API, and in production the built frontend too.
+
+```bash
+npm run dev
+```
+
+This starts the API on port 4000 and the srl development server on `http://localhost:8000`, which proxies `/api` to the API and updates open pages as you edit. Run the checks and tests with:
+
+```bash
+npm run check
+npm test
+```
+
+`npm run check` type-checks the JavaScript and every template, and `npm run build` writes the production frontend to `dist/web` and the server to `dist/server`.
 
 ## Configuration
 
