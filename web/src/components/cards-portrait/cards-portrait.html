@@ -271,34 +271,43 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-6">
       {{ t('stats.listeningClock') }}
     </h2>
-    <div
-      *if="currentSong && peakHour"
-      class="flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/15 rounded-xl p-2.5 pr-4 mb-4 shrink-0 shadow-lg"
-    >
-      <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/10">
-        <app-cover [.cover-id]="currentSong.album_id" [.size]="100"></app-cover>
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-white font-semibold text-base truncate leading-tight"><span *if="isPlayingSong(currentSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ currentSong.title }}</p>
-        <p class="text-white/60 text-sm truncate leading-tight mt-0.5">{{ currentSong.artist }}</p>
-      </div>
-      <p class="text-white/50 text-sm font-mono shrink-0">
-        {{ t('cards.peak') }} <span class="text-white font-semibold">{{ padHour(peakHour.hour) }}:00</span>
-      </p>
-    </div>
     <div class="flex-1 flex flex-col justify-center gap-1.5 min-h-0">
       <div *for="hour of clock; key: hour.hour" class="flex items-center gap-3">
-        <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0"
+        <span
+          class="font-mono text-sm w-7 text-right shrink-0"
+          [class]="peakHour?.hour === hour.hour ? 'text-white font-bold' : 'text-white/40'"
           >{{ padHour(hour.hour) }}</span
         >
-        <div class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
+        <div
+          *if="currentSong && peakHour?.hour === hour.hour"
+          class="flex-1 h-11 bg-white/25 backdrop-blur-md border border-white/30 rounded-full p-1 pr-3.5 flex items-center gap-2.5 shadow-xl overflow-hidden min-w-0"
+        >
+          <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/10 shadow-sm border border-white/20">
+            <app-cover [.cover-id]="currentSong.album_id" [.size]="100"></app-cover>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-white font-semibold text-sm truncate leading-tight flex items-center gap-1.5">
+              <span *if="isPlayingSong(currentSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ currentSong.title }}
+            </p>
+            <p class="text-white/70 text-xs truncate leading-tight mt-0.5">{{ currentSong.artist }}</p>
+          </div>
+          <span class="text-white/70 text-[10px] font-semibold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full shrink-0">
+            {{ t('cards.peak') }}
+          </span>
+        </div>
+        <div
+          *else
+          class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden"
+        >
           <div
             class="h-full rounded-full transition-all"
             [class]="peakHour?.hour === hour.hour ? 'bg-white/90' : 'bg-white/50'"
             [style.width.%]="percentOf(hour.plays, maxClockPlays)"
           ></div>
         </div>
-        <span class="text-white/30 text-sm w-10 text-right shrink-0 tabular-nums"
+        <span
+          class="text-sm w-10 text-right shrink-0 tabular-nums"
+          [class]="peakHour?.hour === hour.hour ? 'text-white font-bold' : 'text-white/30'"
           >{{ hour.plays }}</span
         >
       </div>
