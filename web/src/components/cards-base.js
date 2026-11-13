@@ -87,6 +87,11 @@ export class CardsBase extends SignalElement {
     return this.isPlaying.value && id !== undefined && this.currentSong.value?.id === id;
   }
 
+  /** @param {string | undefined} albumId */
+  isPlayingAlbum(albumId) {
+    return this.isPlaying.value && albumId !== undefined && this.currentSong.value?.album_id === albumId;
+  }
+
   /** The first row of each ranked list, which the cards show larger. */
   get topSong() {
     return this.topSongs.value[0];

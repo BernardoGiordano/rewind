@@ -349,7 +349,7 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topAlbum') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
+          <p class="text-white font-black text-2xl leading-tight truncate"><span *if="isPlayingAlbum(topAlbum.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
@@ -424,7 +424,7 @@
                   </div>
                 </td>
                 <td class="max-w-0 pr-4 py-1.5">
-                  <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
+                  <p class="text-white font-semibold text-sm truncate"><span *if="isPlayingAlbum(album.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ album.album }}</p>
                   <p
                     class="text-white/50 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
                   >

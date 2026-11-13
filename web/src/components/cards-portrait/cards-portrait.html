@@ -195,7 +195,7 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topAlbum') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topAlbum.album }}</p>
+        <p class="text-white font-black text-3xl leading-tight truncate"><span *if="isPlayingAlbum(topAlbum.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topAlbum.album }}</p>
         <p class="text-white/70 text-xl truncate mt-1">{{ topAlbum.album_artist }}</p>
         <p class="text-white/40 text-lg mt-2 font-medium">
           {{ t('cards.plays', { count: topAlbum.plays }) }}
@@ -219,7 +219,7 @@
           <app-cover [.cover-id]="album.album_id" [.size]="200"></app-cover>
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
+          <p class="text-white font-semibold text-xl truncate"><span *if="isPlayingAlbum(album.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ album.album }}</p>
           <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
