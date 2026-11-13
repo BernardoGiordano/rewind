@@ -266,11 +266,11 @@
             <app-cover [.cover-id]="genre.song_album_id" [.size]="100"></app-cover>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-white font-semibold text-base truncate leading-tight flex items-center gap-1.5">
+            <p class="text-white font-semibold text-base truncate leading-tight">
               <span *if="isPlayingSong(genre.song_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ genre.song_title }}
             </p>
             <p
-              *if="genre.song_artist"
+              *if="genre.song_artist && genre.song_artist_id"
               class="text-white/60 text-sm truncate leading-tight mt-0.5 cursor-pointer hover:underline"
               (click)="openArtist(genre.song_artist_id, $event)"
               (keydown)="openArtistOnEnter(genre.song_artist_id, $event)"
@@ -309,7 +309,7 @@
             <app-cover [.cover-id]="currentSong.album_id" [.size]="100"></app-cover>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-white font-semibold text-sm truncate leading-tight flex items-center gap-1.5">
+            <p class="text-white font-semibold text-sm truncate leading-tight">
               <span *if="isPlayingSong(currentSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ currentSong.title }}
             </p>
             <p class="text-white/70 text-xs truncate leading-tight mt-0.5">{{ currentSong.artist }}</p>
