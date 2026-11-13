@@ -69,7 +69,7 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topSong') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topSong.title }}</p>
+        <p class="text-white font-black text-3xl leading-tight truncate"><span *if="isPlayingSong(topSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topSong.title }}</p>
         <p class="text-white/70 text-xl truncate mt-1">{{ topSong.artist }}</p>
         <p class="text-white/40 text-lg mt-2 font-medium">
           {{ t('cards.plays', { count: topSong.plays }) }}
@@ -93,7 +93,7 @@
           <app-cover [.cover-id]="song.album_id" [.size]="200"></app-cover>
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-xl truncate">{{ song.title }}</p>
+          <p class="text-white font-semibold text-xl truncate"><span *if="isPlayingSong(song.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ song.title }}</p>
           <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
@@ -195,7 +195,7 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topAlbum') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topAlbum.album }}</p>
+        <p class="text-white font-black text-3xl leading-tight truncate"><span *if="isPlayingAlbum(topAlbum.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topAlbum.album }}</p>
         <p class="text-white/70 text-xl truncate mt-1">{{ topAlbum.album_artist }}</p>
         <p class="text-white/40 text-lg mt-2 font-medium">
           {{ t('cards.plays', { count: topAlbum.plays }) }}
@@ -219,7 +219,7 @@
           <app-cover [.cover-id]="album.album_id" [.size]="200"></app-cover>
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-xl truncate">{{ album.album }}</p>
+          <p class="text-white font-semibold text-xl truncate"><span *if="isPlayingAlbum(album.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ album.album }}</p>
           <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
@@ -258,6 +258,29 @@
             [style.width.%]="percentOf(genre.plays, maxGenrePlays)"
           ></div>
         </div>
+        <div
+          *if="genre.song_title"
+          class="mt-3.5 flex items-center gap-3 min-w-0"
+        >
+          <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/10">
+            <app-cover [.cover-id]="genre.song_album_id" [.size]="100"></app-cover>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-white font-semibold text-base truncate leading-tight">
+              <span *if="isPlayingSong(genre.song_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ genre.song_title }}
+            </p>
+            <p
+              *if="genre.song_artist && genre.song_artist_id"
+              class="text-white/60 text-sm truncate leading-tight mt-0.5 cursor-pointer hover:underline"
+              (click)="openArtist(genre.song_artist_id, $event)"
+              (keydown)="openArtistOnEnter(genre.song_artist_id, $event)"
+              tabindex="0"
+              role="button"
+            >
+              {{ genre.song_artist }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </app-card-shell>
@@ -273,16 +296,41 @@
     </h2>
     <div class="flex-1 flex flex-col justify-center gap-1.5 min-h-0">
       <div *for="hour of clock; key: hour.hour" class="flex items-center gap-3">
-        <span class="text-white/40 text-sm font-mono w-7 text-right shrink-0"
+        <span
+          class="font-mono text-sm w-7 text-right shrink-0"
+          [class]="peakHour?.hour === hour.hour ? 'text-white font-bold' : 'text-white/40'"
           >{{ padHour(hour.hour) }}</span
         >
-        <div class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
+        <div
+          *if="currentSong && peakHour?.hour === hour.hour"
+          class="flex-1 h-11 bg-white/25 backdrop-blur-md border border-white/30 rounded-full p-1 pr-3.5 flex items-center gap-2.5 shadow-xl overflow-hidden min-w-0"
+        >
+          <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/10 shadow-sm border border-white/20">
+            <app-cover [.cover-id]="currentSong.album_id" [.size]="100"></app-cover>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-white font-semibold text-sm truncate leading-tight">
+              <span *if="isPlayingSong(currentSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ currentSong.title }}
+            </p>
+            <p class="text-white/70 text-xs truncate leading-tight mt-0.5">{{ currentSong.artist }}</p>
+          </div>
+          <span class="text-white/70 text-[10px] font-semibold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full shrink-0">
+            {{ t('cards.peak') }}
+          </span>
+        </div>
+        <div
+          *else
+          class="flex-1 h-4 bg-white/10 rounded-full overflow-hidden"
+        >
           <div
-            class="h-full bg-white/50 rounded-full transition-all"
+            class="h-full rounded-full transition-all"
+            [class]="peakHour?.hour === hour.hour ? 'bg-white/90' : 'bg-white/50'"
             [style.width.%]="percentOf(hour.plays, maxClockPlays)"
           ></div>
         </div>
-        <span class="text-white/30 text-sm w-10 text-right shrink-0 tabular-nums"
+        <span
+          class="text-sm w-10 text-right shrink-0 tabular-nums"
+          [class]="peakHour?.hour === hour.hour ? 'text-white font-bold' : 'text-white/30'"
           >{{ hour.plays }}</span
         >
       </div>
@@ -422,7 +470,7 @@
           <app-cover [.cover-id]="song.album_id"></app-cover>
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-lg truncate">{{ song.title }}</p>
+          <p class="text-white font-semibold text-lg truncate"><span *if="isPlayingSong(song.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ song.title }}</p>
           <p class="text-white/60 text-base truncate">{{ song.artist }}</p>
         </div>
         <span class="text-white/50 text-base font-medium shrink-0 tabular-nums"
@@ -452,7 +500,7 @@
         (keydown)="openArtistOnEnter(entry.artist_id, $event)"
       >
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
+          <p class="text-white font-semibold text-lg truncate"><span *if="isPlayingSong(entry.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ entry.title }}</p>
           <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
         </div>
         <div class="text-right shrink-0 ml-3">
@@ -489,7 +537,7 @@
           <app-cover [.cover-id]="s.album_id"></app-cover>
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-white font-semibold text-sm truncate">{{ s.title }}</p>
+          <p class="text-white font-semibold text-sm truncate"><span *if="isPlayingSong(s.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ s.title }}</p>
           <p class="text-white/50 text-xs truncate">{{ s.artist }}</p>
         </div>
         <span class="text-white/40 text-xs font-medium shrink-0 tabular-nums"
@@ -610,7 +658,7 @@
               >{{ i + 1 }}</span
             >
             <div class="min-w-0">
-              <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
+              <p class="text-white text-sm font-semibold truncate"><span *if="isPlayingSong(song.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ song.title }}</p>
               <p class="text-white/40 text-xs truncate">{{ song.artist }}</p>
             </div>
           </div>

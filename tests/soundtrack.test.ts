@@ -16,16 +16,22 @@ const genre = (name: string) => JSON.stringify({ genre: [{ value: name }] });
 let db: Database.Database;
 
 const ids = (soundtrack: ReturnType<typeof soundtrackFor>) =>
-  Object.fromEntries(Object.entries(soundtrack).map(([stat, song]) => [stat, song?.id]));
+  Object.fromEntries(
+    Object.entries(soundtrack).map(([stat, song]) => [
+      stat,
+      Array.isArray(song) ? song.map((s) => s.id) : song?.id,
+    ]),
+  );
 
 beforeEach(() => {
   db = new Database(':memory:');
   db.exec(`CREATE TABLE media_file (id TEXT, title TEXT, artist TEXT, artist_id TEXT,
-      album_id TEXT, duration REAL, missing INTEGER, year INTEGER, tags TEXT);
+      album_id TEXT, duration REAL, missing INTEGER, year INTEGER, tags TEXT,
+      disc_number INTEGER, track_number INTEGER);
     CREATE TABLE scrobbles (user_id TEXT, media_file_id TEXT, submission_time INTEGER);
     CREATE TABLE annotation (item_id TEXT, item_type TEXT, user_id TEXT, play_count INTEGER);`);
 
-  const song = db.prepare('INSERT INTO media_file VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  const song = db.prepare('INSERT INTO media_file VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)');
   song.run('long', 'Long', 'A', 'a', 'x', 600, 0, 1995, genre('Metal'));
   song.run('short', 'Short', 'B', 'b', 'y', 100, 0, 2015, genre('Pop'));
   song.run('other', 'Other', 'B', 'b', 'y', 120, 0, 2015, genre('Pop'));
@@ -59,7 +65,7 @@ describe('soundtrackFor', () => {
 
     // B outlistens A, counting the missing file, so its own most-played song plays.
     expect(songs['top-artists']).toBe('other');
-    expect(songs['top-albums']).toBe('other');
+    expect(songs['top-albums']).toEqual(['other', 'short']);
     expect(songs['top-genres']).toBe('other');
     expect(songs['favorite-decades']).toBe('other');
     expect(songs['listening-clock']).toBe('other');
@@ -77,6 +83,8 @@ describe('soundtrackFor', () => {
 
   it('has no song for a range without listens', () => {
     const empty = { startTs: Date.UTC(2024, 0, 1) / 1000, endTs: Date.UTC(2025, 0, 1) / 1000 };
-    expect(Object.values(soundtrackFor(db, 'listener', empty)).filter(Boolean)).toEqual([]);
+    expect(Object.values(soundtrackFor(db, 'listener', empty)).filter((song) =>
+      Array.isArray(song) ? song.length > 0 : song,
+    )).toEqual([]);
   });
 });

@@ -279,3 +279,44 @@ app-dashboard-rail-controls,
 app-dashboard-menu-actions {
   display: contents;
 }
+
+.equalizer {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.75em;
+  margin-inline-end: 0.4em;
+}
+
+.equalizer i {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: equalizer 0.9s ease-in-out infinite alternate;
+}
+
+.equalizer i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.equalizer i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+@keyframes equalizer {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equalizer i {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+}

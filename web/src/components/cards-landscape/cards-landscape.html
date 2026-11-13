@@ -87,7 +87,7 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topSong') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">{{ topSong.title }}</p>
+          <p class="text-white font-black text-2xl leading-tight truncate"><span *if="isPlayingSong(topSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topSong.title }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topSong.artist }}</p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
@@ -165,7 +165,7 @@
                   <p
                     class="text-white font-semibold text-sm truncate group-hover:underline decoration-white/50 underline-offset-2"
                   >
-                    {{ song.title }}
+                    <span *if="isPlayingSong(song.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ song.title }}
                   </p>
                   <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                 </td>
@@ -349,7 +349,7 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topAlbum') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
+          <p class="text-white font-black text-2xl leading-tight truncate"><span *if="isPlayingAlbum(topAlbum.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
           <div class="flex items-center gap-3 mt-2">
             <span class="text-white/60 text-sm font-bold tabular-nums"
@@ -424,7 +424,7 @@
                   </div>
                 </td>
                 <td class="max-w-0 pr-4 py-1.5">
-                  <p class="text-white font-semibold text-sm truncate">{{ album.album }}</p>
+                  <p class="text-white font-semibold text-sm truncate"><span *if="isPlayingAlbum(album.album_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ album.album }}</p>
                   <p
                     class="text-white/50 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
                   >
@@ -510,6 +510,17 @@
               </td>
               <td class="max-w-0 pr-6 py-1.5">
                 <p class="text-white font-semibold text-base truncate">{{ genre.genre }}</p>
+                <p *if="genre.song_title" class="text-white/50 text-xs truncate flex items-center gap-1 mt-0.5">
+                  <span *if="isPlayingSong(genre.song_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span class="truncate">{{ genre.song_title }} · <span
+                    *if="genre.song_artist && genre.song_artist_id"
+                    class="cursor-pointer hover:underline"
+                    (click)="openArtist(genre.song_artist_id, $event)"
+                    (keydown)="openArtistOnEnter(genre.song_artist_id, $event)"
+                    tabindex="0"
+                    role="button"
+                  >{{ genre.song_artist }}</span></span>
+                </p>
               </td>
               <td class="pr-6 py-1.5">
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
@@ -557,8 +568,27 @@
       <div class="flex-1 flex items-end gap-1.5 min-h-0">
         <div
           *for="hour of clock; key: hour.hour"
-          class="flex-1 flex flex-col items-center justify-end h-full min-w-0"
+          class="relative flex-1 flex flex-col items-center justify-end h-full min-w-0"
         >
+          <div
+            *if="currentSong && peakHour?.hour === hour.hour"
+            class="absolute inset-x-0 pointer-events-none z-10"
+            [style.bottom.%]="percentOf(hour.plays, maxClockPlays * 1.35)"
+          >
+            <div class="absolute left-1/2 -translate-x-1/2 bottom-5 w-px h-6 bg-gradient-to-t from-white/0 to-white/70"></div>
+            <div
+              class="absolute bottom-11 w-max max-w-[18rem] bg-black/60 backdrop-blur-md border border-white/15 rounded-xl p-2 pr-3 flex items-center gap-2.5 shadow-lg"
+              [class]="hour.hour <= 4 ? 'left-0' : hour.hour >= 20 ? 'right-0' : 'left-1/2 -translate-x-1/2'"
+            >
+              <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white/10">
+                <app-cover [.cover-id]="currentSong.album_id" [.size]="100"></app-cover>
+              </div>
+              <div class="min-w-0">
+                <p class="text-white text-sm font-semibold truncate leading-tight"><span *if="isPlayingSong(currentSong.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ currentSong.title }}</p>
+                <p class="text-white/60 text-xs truncate leading-tight mt-0.5">{{ currentSong.artist }} · {{ t('cards.peak') }} {{ padHour(hour.hour) }}:00</p>
+              </div>
+            </div>
+          </div>
           <span class="text-white/60 text-xs font-mono mb-1 tabular-nums leading-none"
             >{{ hour.plays > 0 ? hour.plays : '' }}</span
           >
@@ -569,7 +599,7 @@
                       : hour.hour >= 6 && hour.hour <= 10
                         ? 'bg-white/50'
                         : 'bg-white/35'"
-            [style.height.%]="percentOf(hour.plays, maxClockPlays)"
+            [style.height.%]="percentOf(hour.plays, maxClockPlays * 1.35)"
             [style.min-height.px]="hour.plays > 0 ? 2 : 0"
           ></div>
         </div>
@@ -861,7 +891,7 @@
                 </div>
               </td>
               <td class="max-w-0 pr-4 py-1.5">
-                <p class="text-white font-semibold text-sm truncate">{{ track.title }}</p>
+                <p class="text-white font-semibold text-sm truncate"><span *if="isPlayingSong(track.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ track.title }}</p>
                 <p
                   class="text-white/60 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
                 >
@@ -930,7 +960,7 @@
               (click)="openArtist(entry.artist_id, $event)"
             >
               <td class="max-w-0 pr-4 py-1.5">
-                <p class="text-white font-semibold text-sm truncate">{{ entry.title }}</p>
+                <p class="text-white font-semibold text-sm truncate"><span *if="isPlayingSong(entry.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ entry.title }}</p>
                 <p
                   class="text-white/50 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
                 >
@@ -1014,7 +1044,7 @@
                 </div>
               </td>
               <td class="max-w-0 pr-4 py-2">
-                <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
+                <p class="text-white font-semibold text-base truncate"><span *if="isPlayingSong(s.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ s.title }}</p>
                 <p
                   class="text-white/50 text-sm truncate group-hover:underline decoration-white/50 underline-offset-2"
                 >
@@ -1306,7 +1336,7 @@
                       {{ i + 1 }}
                     </td>
                     <td class="max-w-0 pr-2 py-1.5">
-                      <p class="text-white text-sm font-semibold truncate">{{ song.title }}</p>
+                      <p class="text-white text-sm font-semibold truncate"><span *if="isPlayingSong(song.id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ song.title }}</p>
                       <p
                         class="text-white/40 text-xs truncate group-hover:underline decoration-white/50 underline-offset-2"
                       >

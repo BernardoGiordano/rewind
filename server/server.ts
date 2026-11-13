@@ -692,7 +692,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
     return queryAll(
       db,
       `
-      SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
+      SELECT mf.id AS id, mf.title, mf.artist, mf.album, COUNT(*) AS plays,
         ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
         mf.album_id, mf.artist_id
       FROM scrobbles s
@@ -706,7 +706,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
   return queryAll(
     db,
     `
-    SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
+    SELECT mf.id AS id, mf.title, mf.artist, mf.album, COUNT(*) AS plays,
       ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
     FROM scrobbles s
@@ -791,14 +791,40 @@ function getTopGenres(db: Database, uid: string, range: Range) {
     return queryAll(
       db,
       `
-      SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
-        ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
-      FROM scrobbles s
-      JOIN media_file mf ON s.media_file_id = mf.id,
-        json_each(json_extract(mf.tags, '$.genre')) AS g
-      WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-        AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+      WITH genre_songs AS (
+        SELECT
+          g.value->>'$.value' AS genre,
+          mf.id AS song_id,
+          mf.title AS song_title,
+          mf.artist AS song_artist,
+          mf.artist_id AS song_artist_id,
+          mf.album_id AS song_album_id,
+          COUNT(*) AS song_plays,
+          SUM(mf.duration) AS song_duration,
+          ROW_NUMBER() OVER (
+            PARTITION BY g.value->>'$.value'
+            ORDER BY COALESCE(mf.missing, 0) ASC, COUNT(*) DESC, mf.id ASC
+          ) AS rn
+        FROM scrobbles s
+        JOIN media_file mf ON s.media_file_id = mf.id,
+          json_each(json_extract(mf.tags, '$.genre')) AS g
+        WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
+          AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
+        GROUP BY 1, mf.id
+      )
+      SELECT
+        genre,
+        SUM(song_plays) AS plays,
+        ROUND(SUM(song_duration) / 3600.0, 1) AS total_hours,
+        MAX(CASE WHEN rn = 1 THEN song_id END) AS song_id,
+        MAX(CASE WHEN rn = 1 THEN song_title END) AS song_title,
+        MAX(CASE WHEN rn = 1 THEN song_artist END) AS song_artist,
+        MAX(CASE WHEN rn = 1 THEN song_artist_id END) AS song_artist_id,
+        MAX(CASE WHEN rn = 1 THEN song_album_id END) AS song_album_id
+      FROM genre_songs
+      GROUP BY genre
+      ORDER BY SUM(song_duration) DESC, genre
+      LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -806,14 +832,40 @@ function getTopGenres(db: Database, uid: string, range: Range) {
   return queryAll(
     db,
     `
-    SELECT g.value->>'$.value' AS genre, COUNT(*) AS plays,
-      ROUND(SUM(mf.duration) / 3600.0, 1) AS total_hours
-    FROM scrobbles s
-    JOIN media_file mf ON s.media_file_id = mf.id,
-      json_each(json_extract(mf.tags, '$.genre')) AS g
-    WHERE s.user_id = ?
-      AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+    WITH genre_songs AS (
+      SELECT
+        g.value->>'$.value' AS genre,
+        mf.id AS song_id,
+        mf.title AS song_title,
+        mf.artist AS song_artist,
+        mf.artist_id AS song_artist_id,
+        mf.album_id AS song_album_id,
+        COUNT(*) AS song_plays,
+        SUM(mf.duration) AS song_duration,
+        ROW_NUMBER() OVER (
+          PARTITION BY g.value->>'$.value'
+          ORDER BY COALESCE(mf.missing, 0) ASC, COUNT(*) DESC, mf.id ASC
+        ) AS rn
+      FROM scrobbles s
+      JOIN media_file mf ON s.media_file_id = mf.id,
+        json_each(json_extract(mf.tags, '$.genre')) AS g
+      WHERE s.user_id = ?
+        AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
+      GROUP BY 1, mf.id
+    )
+    SELECT
+      genre,
+      SUM(song_plays) AS plays,
+      ROUND(SUM(song_duration) / 3600.0, 1) AS total_hours,
+      MAX(CASE WHEN rn = 1 THEN song_id END) AS song_id,
+      MAX(CASE WHEN rn = 1 THEN song_title END) AS song_title,
+      MAX(CASE WHEN rn = 1 THEN song_artist END) AS song_artist,
+      MAX(CASE WHEN rn = 1 THEN song_artist_id END) AS song_artist_id,
+      MAX(CASE WHEN rn = 1 THEN song_album_id END) AS song_album_id
+    FROM genre_songs
+    GROUP BY genre
+    ORDER BY SUM(song_duration) DESC, genre
+    LIMIT 100
   `,
     [uid],
   );
@@ -906,7 +958,7 @@ function getLateNight(db: Database, uid: string, range: NonNullable<Range>) {
   return queryAll(
     db,
     `
-    SELECT mf.title, mf.artist, COUNT(*) AS late_night_plays,
+    SELECT mf.id AS id, mf.title, mf.artist, COUNT(*) AS late_night_plays,
       mf.album_id, mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
@@ -924,7 +976,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
     db,
     `
     SELECT date(s.submission_time, 'unixepoch') AS the_date,
-      mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
+      mf.id AS id, mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
@@ -942,7 +994,7 @@ function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
     `
     WITH monthly_counts AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
-        mf.title, mf.artist, COUNT(*) AS plays,
+        mf.id AS id, mf.title, mf.artist, COUNT(*) AS plays,
         mf.album_id, mf.artist_id,
         ROW_NUMBER() OVER (
           PARTITION BY strftime('%Y-%m', s.submission_time, 'unixepoch')
@@ -953,7 +1005,7 @@ function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY month, mf.id
     )
-    SELECT month, title, artist, plays, album_id, artist_id FROM monthly_counts WHERE rn = 1 ORDER BY month
+    SELECT month, id, title, artist, plays, album_id, artist_id FROM monthly_counts WHERE rn = 1 ORDER BY month
   `,
     [uid, startTs, endTs],
   );
@@ -1000,6 +1052,7 @@ function getRecap(db: Database, uid: string, range: Range) {
     artist_id: string;
   }>;
   const topSongs = getTopSongs(db, uid, range) as Array<{
+    id: string;
     title: string;
     artist: string;
     album: string;

@@ -3,6 +3,7 @@ import { computed, inject, locale, signal, SignalElement } from '@srljs/core';
 import { DOMINANT_COLOR } from '../services/dominant-color.js';
 import { NAVIDROME } from '../services/navidrome.js';
 import { REWIND_RANGE } from '../shell/rewind-range.js';
+import { SOUNDTRACK } from './dashboard/soundtrack.js';
 import { STAT_NAVIGATOR } from './dashboard/stat-navigator.js';
 import { STAT_STORE } from './dashboard/stat-store.js';
 import { formatYearMonth, formatYearMonthWithYear } from '../utils/format.js';
@@ -18,6 +19,10 @@ export class CardsBase extends SignalElement {
   #navidrome = inject(NAVIDROME);
   #store = inject(STAT_STORE);
   #nav = inject(STAT_NAVIGATOR);
+  #soundtrack = inject(SOUNDTRACK);
+
+  currentSong = this.#soundtrack.song;
+  isPlaying = this.#soundtrack.playing;
 
   selectedStat = this.#nav.current;
   selectedDef = computed(() => this.#nav.definition.value ?? undefined);
@@ -48,6 +53,13 @@ export class CardsBase extends SignalElement {
     );
   });
 
+  peakHour = computed(() => {
+    const list = this.listeningClock.value;
+    const first = list[0];
+    if (first === undefined) return null;
+    return list.reduce((best, h) => (h.plays > best.plays ? h : best), first);
+  });
+
   maxGenrePlays = computed(() => Math.max(...this.topGenres.value.map((g) => g.plays), 1));
   maxClockPlays = computed(() => Math.max(...this.listeningClock.value.map((c) => c.plays), 1));
   maxDayPlays = computed(() => Math.max(...this.dayOfWeek.value.map((d) => d.plays), 1));
@@ -69,6 +81,16 @@ export class CardsBase extends SignalElement {
       default: return undefined;
     }
   });
+
+  /** @param {string | undefined} id */
+  isPlayingSong(id) {
+    return this.isPlaying.value && id !== undefined && this.currentSong.value?.id === id;
+  }
+
+  /** @param {string | undefined} albumId */
+  isPlayingAlbum(albumId) {
+    return this.isPlaying.value && albumId !== undefined && this.currentSong.value?.album_id === albumId;
+  }
 
   /** The first row of each ranked list, which the cards show larger. */
   get topSong() {
