@@ -73,6 +73,11 @@ export interface TopGenre {
   genre: string;
   plays: number;
   total_hours: number;
+  song_id?: string;
+  song_title?: string;
+  song_artist?: string;
+  song_artist_id?: string;
+  song_album_id?: string;
 }
 
 export interface ListeningSummary {

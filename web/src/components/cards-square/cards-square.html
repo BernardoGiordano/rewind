@@ -271,6 +271,29 @@
             [style.width.%]="percentOf(genre.plays, maxGenrePlays)"
           ></div>
         </div>
+        <div
+          *if="genre.song_title"
+          class="mt-3 flex items-center gap-2.5 min-w-0"
+        >
+          <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white/10">
+            <app-cover [.cover-id]="genre.song_album_id" [.size]="100"></app-cover>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-white font-semibold text-sm truncate leading-tight flex items-center gap-1.5">
+              <span *if="isPlayingSong(genre.song_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>{{ genre.song_title }}
+            </p>
+            <p
+              *if="genre.song_artist"
+              class="text-white/60 text-xs truncate leading-tight mt-0.5 cursor-pointer hover:underline"
+              (click)="openArtist(genre.song_artist_id, $event)"
+              (keydown)="openArtistOnEnter(genre.song_artist_id, $event)"
+              tabindex="0"
+              role="button"
+            >
+              {{ genre.song_artist }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </app-card-shell>

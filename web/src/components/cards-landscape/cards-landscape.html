@@ -510,6 +510,17 @@
               </td>
               <td class="max-w-0 pr-6 py-1.5">
                 <p class="text-white font-semibold text-base truncate">{{ genre.genre }}</p>
+                <p *if="genre.song_title" class="text-white/50 text-xs truncate flex items-center gap-1 mt-0.5">
+                  <span *if="isPlayingSong(genre.song_id)" class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span class="truncate">{{ genre.song_title }} · <span
+                    *if="genre.song_artist"
+                    class="cursor-pointer hover:underline"
+                    (click)="openArtist(genre.song_artist_id, $event)"
+                    (keydown)="openArtistOnEnter(genre.song_artist_id, $event)"
+                    tabindex="0"
+                    role="button"
+                  >{{ genre.song_artist }}</span></span>
+                </p>
               </td>
               <td class="pr-6 py-1.5">
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
