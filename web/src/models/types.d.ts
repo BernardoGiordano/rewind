@@ -41,6 +41,7 @@ export interface I18n {
 }
 
 export interface TopSong {
+  id?: string;
   title: string;
   artist: string;
   album: string;
@@ -110,6 +111,7 @@ export interface ListeningStreak {
 }
 
 export interface LateNightTrack {
+  id?: string;
   title: string;
   artist: string;
   late_night_plays: number;
@@ -118,6 +120,7 @@ export interface LateNightTrack {
 }
 
 export interface OnRepeatEntry {
+  id?: string;
   the_date: string;
   title: string;
   artist: string;
@@ -126,6 +129,7 @@ export interface OnRepeatEntry {
 }
 
 export interface SongOfMonth {
+  id?: string;
   month: string;
   title: string;
   artist: string;
@@ -175,7 +179,7 @@ export interface SoundtrackSong {
 }
 
 /** The song each slide plays. A slide with nothing to show has none. */
-export type SoundtrackSongs = Partial<Record<StatType, SoundtrackSong>>;
+export type SoundtrackSongs = Partial<Record<StatType, SoundtrackSong | SoundtrackSong[]>>;
 
 /** Each stat's response, keyed by the stat that returns it. */
 export interface StatData {

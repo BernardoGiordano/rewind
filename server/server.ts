@@ -692,7 +692,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
     return queryAll(
       db,
       `
-      SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
+      SELECT mf.id AS id, mf.title, mf.artist, mf.album, COUNT(*) AS plays,
         ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
         mf.album_id, mf.artist_id
       FROM scrobbles s
@@ -706,7 +706,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
   return queryAll(
     db,
     `
-    SELECT mf.title, mf.artist, mf.album, COUNT(*) AS plays,
+    SELECT mf.id AS id, mf.title, mf.artist, mf.album, COUNT(*) AS plays,
       ROUND(mf.duration * COUNT(*) / 60.0, 1) AS total_minutes,
       mf.album_id, mf.artist_id
     FROM scrobbles s
@@ -906,7 +906,7 @@ function getLateNight(db: Database, uid: string, range: NonNullable<Range>) {
   return queryAll(
     db,
     `
-    SELECT mf.title, mf.artist, COUNT(*) AS late_night_plays,
+    SELECT mf.id AS id, mf.title, mf.artist, COUNT(*) AS late_night_plays,
       mf.album_id, mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
@@ -924,7 +924,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
     db,
     `
     SELECT date(s.submission_time, 'unixepoch') AS the_date,
-      mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
+      mf.id AS id, mf.title, mf.artist, mf.artist_id, COUNT(*) AS plays_that_day
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
@@ -942,7 +942,7 @@ function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
     `
     WITH monthly_counts AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
-        mf.title, mf.artist, COUNT(*) AS plays,
+        mf.id AS id, mf.title, mf.artist, COUNT(*) AS plays,
         mf.album_id, mf.artist_id,
         ROW_NUMBER() OVER (
           PARTITION BY strftime('%Y-%m', s.submission_time, 'unixepoch')
@@ -953,7 +953,7 @@ function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY month, mf.id
     )
-    SELECT month, title, artist, plays, album_id, artist_id FROM monthly_counts WHERE rn = 1 ORDER BY month
+    SELECT month, id, title, artist, plays, album_id, artist_id FROM monthly_counts WHERE rn = 1 ORDER BY month
   `,
     [uid, startTs, endTs],
   );
@@ -1000,6 +1000,7 @@ function getRecap(db: Database, uid: string, range: Range) {
     artist_id: string;
   }>;
   const topSongs = getTopSongs(db, uid, range) as Array<{
+    id: string;
     title: string;
     artist: string;
     album: string;

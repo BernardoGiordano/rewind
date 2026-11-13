@@ -11,7 +11,7 @@ export type SoundtrackSong = {
   duration: number;
 };
 
-export type Soundtrack = Partial<Record<string, SoundtrackSong>>;
+export type Soundtrack = Partial<Record<string, SoundtrackSong | SoundtrackSong[]>>;
 
 const SONG_COLUMNS = 'mf.id, mf.title, mf.artist, mf.album_id, mf.duration';
 // Song orders end on the id, as the cards' do, so a tie breaks the same way.
@@ -43,7 +43,7 @@ export function soundtrackFor(db: Database, uid: string, range: Range): Soundtra
       'mf.artist_id',
       songs.topKey('mf.artist_id', 'SUM(mf.duration) DESC'),
     ),
-    'top-albums': songs.within('mf.album_id', songs.topKey('mf.album_id', 'SUM(mf.duration) DESC')),
+    'top-albums': songs.album(songs.topKey('mf.album_id', 'SUM(mf.duration) DESC')),
     'top-genres': songs.inGenre(songs.topGenre()),
     'favorite-decades': songs.inDecade(songs.topDecade()),
     recap: top,
@@ -128,6 +128,17 @@ class SongQuery {
     const filter = ` AND EXISTS (SELECT 1 FROM json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE ${GENRE} = ?)`;
     return this.top(BY_PLAYS, filter, [genre]);
+  }
+
+  /** Every playable track on the album, in track order. */
+  album(albumId: unknown): SoundtrackSong[] {
+    if (albumId === undefined || albumId === null) return [];
+    return this.#all<SoundtrackSong>(
+      `SELECT ${SONG_COLUMNS} FROM media_file mf
+      WHERE mf.album_id = ? AND COALESCE(mf.missing, 0) = 0
+      ORDER BY COALESCE(mf.disc_number, 1), COALESCE(mf.track_number, 1), mf.id`,
+      [albumId],
+    );
   }
 
   /** All time ranks decades by play counts, as the card does, because scrobbles start late. */
@@ -216,6 +227,10 @@ class SongQuery {
   /** The user, then the range bounds when there is a range. */
   #params(): unknown[] {
     return this.#range ? [this.#uid, this.#range.startTs, this.#range.endTs] : [this.#uid];
+  }
+
+  #all<T>(sql: string, params: unknown[]): T[] {
+    return this.#db.prepare(sql).all(...params) as T[];
   }
 
   #get<T>(sql: string, params: unknown[]): T | undefined {

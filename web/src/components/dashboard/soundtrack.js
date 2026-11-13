@@ -372,8 +372,9 @@ class Deck {
 }
 
 /**
- * The song for `stat`. A slide without its own song keeps the current one, if the
- * range's soundtrack has it, or plays the range's top song.
+ * The song for `stat`. A slide with a pool of songs plays a random one other than the
+ * current. A slide without its own song keeps the current one, if the range's
+ * soundtrack has it, or plays the range's top song.
  *
  * @param {SoundtrackSongs} songs
  * @param {StatType} stat
@@ -382,9 +383,23 @@ class Deck {
  */
 function songFor(songs, stat, current) {
   const own = songs[stat];
+  if (Array.isArray(own)) {
+    if (own.length <= 1) return own[0] ?? asSong(songs.summary);
+    const others = own.filter((song) => song.id !== current?.id);
+    return others[Math.floor(Math.random() * others.length)];
+  }
   if (own) return own;
-  if (current && Object.values(songs).some((song) => song?.id === current.id)) return current;
-  return songs.summary ?? null;
+  const known = Object.values(songs).flat();
+  if (current && known.some((song) => song?.id === current.id)) return current;
+  return asSong(songs.summary);
+}
+
+/**
+ * @param {SoundtrackSong | SoundtrackSong[] | undefined} entry
+ * @returns {SoundtrackSong | null}
+ */
+function asSong(entry) {
+  return (Array.isArray(entry) ? entry[0] : entry) ?? null;
 }
 
 /** @returns {number} */
