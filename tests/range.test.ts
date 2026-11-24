@@ -17,6 +17,7 @@ import { bundleI18n } from './i18n.js';
 
 const en = bundleI18n('en');
 const it_ = bundleI18n('it');
+const es = bundleI18n('es');
 
 const reader = (params: Record<string, string>) => ({
   get: (name: string) => params[name] ?? null,
@@ -157,6 +158,15 @@ describe('rangeLabel', () => {
     expect(customRangeLabel('2024-03-02', '2024-03-20', it_, today)).toBe('2 mar – 20 mar 2024');
     expect(customRangeLabel('2024-12-20', '2025-01-10', it_, today)).toBe(
       '20 dic 2024 – 10 gen 2025',
+    );
+  });
+  it('writes the same ranges in Spanish', () => {
+    expect(rangeLabel(ALL_TIME, es)).toBe('Desde siempre');
+    expect(customRangeLabel('2026-09-07', '2026-09-14', es, today)).toBe('Última semana');
+    expect(customRangeLabel('2024-03-01', '2024-03-31', es, today)).toBe('Marzo de 2024');
+    expect(customRangeLabel('2024-03-02', '2024-03-20', es, today)).toBe('2 mar – 20 mar 2024');
+    expect(customRangeLabel('2024-12-20', '2025-01-10', es, today)).toBe(
+      '20 dic 2024 – 10 ene 2025',
     );
   });
 });

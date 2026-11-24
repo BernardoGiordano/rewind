@@ -8,17 +8,22 @@ const PLACEHOLDER = /\{(\w+)\}/g;
 const placeholders = (message: string) =>
   [...message.matchAll(PLACEHOLDER)].map((m) => m[1]).sort();
 
-describe('the Italian bundle', () => {
+const TRANSLATIONS = [
+  ['Italian', 'it'],
+  ['Spanish', 'es'],
+] as const;
+
+describe.each(TRANSLATIONS)('the %s bundle', (_name, locale) => {
   const en = readBundle('en');
-  const it_ = readBundle('it');
+  const bundle = readBundle(locale);
 
   it('translates every English key and adds none', () => {
-    expect(Object.keys(it_).sort()).toEqual(Object.keys(en).sort());
+    expect(Object.keys(bundle).sort()).toEqual(Object.keys(en).sort());
   });
 
   it('keeps every placeholder', () => {
     for (const [key, message] of Object.entries(en)) {
-      expect(placeholders(it_[key] ?? ''), key).toEqual(placeholders(message));
+      expect(placeholders(bundle[key] ?? ''), key).toEqual(placeholders(message));
     }
   });
 });
