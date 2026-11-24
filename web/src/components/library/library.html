@@ -218,8 +218,8 @@
               <p class="text-sm font-semibold truncate">{{ item.title }}</p>
               <p class="text-xs text-ink-muted truncate">{{ item.artist }} · {{ item.album }}</p>
             </div>
-            <div class="text-right shrink-0 w-16">
-              <p class="text-sm font-bold tabular-nums">{{ item.plays }}</p>
+            <div class="text-right shrink-0 min-w-16">
+              <p class="text-sm font-bold tabular-nums">{{ num(item.plays ?? 0) }}</p>
               <p class="text-xs text-ink-faint">{{ t('cards.playsWord', { count: item.plays ?? 0 }) }}</p>
             </div>
 

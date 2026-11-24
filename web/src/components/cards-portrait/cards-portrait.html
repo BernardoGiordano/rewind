@@ -37,7 +37,7 @@
       </div>
       <div class="text-center">
         <p class="text-2xl font-semibold text-white/80">
-          {{ t('cards.daysOfMusic', { count: summaryData.total_days }) }}!
+          {{ t('cards.daysOfMusic', { count: summaryData.total_days }) }}
         </p>
       </div>
     </div>
@@ -97,7 +97,7 @@
           <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
-          >{{ song.plays }}</span
+          >{{ num(song.plays) }}</span
         >
       </div>
     </div>
@@ -163,7 +163,7 @@
           </p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
-          >{{ artist.plays }}</span
+          >{{ num(artist.plays) }}</span
         >
       </div>
     </div>
@@ -223,7 +223,7 @@
           <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
         </div>
         <span class="text-white/40 text-lg font-medium shrink-0 tabular-nums"
-          >{{ album.plays }}</span
+          >{{ num(album.plays) }}</span
         >
       </div>
     </div>
@@ -283,7 +283,7 @@
           ></div>
         </div>
         <span class="text-white/30 text-sm w-10 text-right shrink-0 tabular-nums"
-          >{{ hour.plays }}</span
+          >{{ num(hour.plays) }}</span
         >
       </div>
     </div>
@@ -316,7 +316,7 @@
           </p>
         </div>
         <span class="text-white font-bold text-base w-12 text-right shrink-0 tabular-nums"
-          >{{ m.plays }}</span
+          >{{ num(m.plays) }}</span
         >
       </div>
     </div>
@@ -341,7 +341,7 @@
             class="h-full bg-white/40 rounded-full flex items-center justify-end pr-3"
             [style.width.%]="percentOf(d.plays, maxDayPlays)"
           >
-            <span class="text-white/80 text-sm font-semibold">{{ d.plays }}</span>
+            <span class="text-white/80 text-sm font-semibold">{{ num(d.plays) }}</span>
           </div>
         </div>
       </div>
@@ -426,7 +426,7 @@
           <p class="text-white/60 text-base truncate">{{ song.artist }}</p>
         </div>
         <span class="text-white/50 text-base font-medium shrink-0 tabular-nums"
-          >{{ song.late_night_plays }}x</span
+          >{{ num(song.late_night_plays) }}x</span
         >
       </div>
     </div>
@@ -456,7 +456,9 @@
           <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
         </div>
         <div class="text-right shrink-0 ml-3">
-          <p class="text-white/80 text-lg font-bold tabular-nums">{{ entry.plays_that_day }}x</p>
+          <p class="text-white/80 text-lg font-bold tabular-nums">
+            {{ num(entry.plays_that_day) }}x
+          </p>
           <p class="text-white/40 text-sm tabular-nums">{{ entry.the_date }}</p>
         </div>
       </div>
@@ -526,7 +528,7 @@
           </p>
         </div>
         <span class="text-white/60 text-base font-semibold shrink-0 tabular-nums"
-          >{{ dec.total_plays }}</span
+          >{{ num(dec.total_plays) }}</span
         >
       </div>
     </div>

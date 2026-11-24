@@ -118,7 +118,7 @@
       </div>
       <div class="rounded-xl bg-surface-sunken p-4">
         <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.uniqueTracks') }}</p>
-        <p class="mt-1 text-2xl font-black tabular-nums">{{ data.unique_tracks }}</p>
+        <p class="mt-1 text-2xl font-black tabular-nums">{{ num(data.unique_tracks) }}</p>
       </div>
       <div class="rounded-xl bg-surface-sunken p-4">
         <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{{ t('artist.metrics.rank') }}</p>
@@ -126,7 +126,7 @@
           {{ data.rank !== null ? '#' + data.rank : '—' }}<span
             *if="data.rank !== null"
             class="text-sm text-ink-faint font-medium"
-            >/{{ data.total_artists }}</span
+            >/{{ num(data.total_artists ?? 0) }}</span
           >
         </p>
       </div>
@@ -140,7 +140,7 @@
         </p>
         <p class="mt-1 text-2xl font-black tabular-nums">{{ percent(libraryDepthPct, 0, 1) }}</p>
         <p class="text-xs text-ink-faint tabular-nums mt-0.5">
-          {{ data.played_tracks }}/{{ data.library_tracks }}
+          {{ num(data.played_tracks) }}/{{ num(data.library_tracks) }}
         </p>
       </div>
     </div>
@@ -236,7 +236,7 @@
                 <p class="text-xs text-ink-muted truncate">{{ track.album }}</p>
               </div>
               <div class="text-right shrink-0">
-                <p class="text-sm font-bold tabular-nums">{{ track.plays }}</p>
+                <p class="text-sm font-bold tabular-nums">{{ num(track.plays) }}</p>
                 <p class="text-xs text-ink-faint tabular-nums">
                   {{ minutes(track.total_minutes, 0, 0) }}
                 </p>
@@ -271,7 +271,7 @@
                 <p class="text-xs text-ink-muted">{{ t('cards.tracks', { count: a.unique_tracks }) }}</p>
               </div>
               <div class="text-right shrink-0">
-                <p class="text-sm font-bold tabular-nums">{{ a.plays }}</p>
+                <p class="text-sm font-bold tabular-nums">{{ num(a.plays) }}</p>
                 <p class="text-xs text-ink-faint tabular-nums">
                   {{ minutes(a.total_minutes, 0, 0) }}
                 </p>
@@ -339,7 +339,7 @@
                   [style.width.%]="percentOf(day.plays, maxDayPlays)"
                 ></div>
               </div>
-              <span class="text-sm font-bold tabular-nums w-12 text-right">{{ day.plays }}</span>
+              <span class="text-sm font-bold tabular-nums w-12 text-right">{{ num(day.plays) }}</span>
             </div>
           </div>
         </div>
@@ -476,12 +476,12 @@
           <div class="flex justify-between">
             <span class="text-sm text-ink-muted">{{ t('artist.lifetime.uniqueTracks') }}</span>
             <span class="text-sm font-semibold tabular-nums"
-              >{{ data.lifetime_unique_tracks }}</span
+              >{{ num(data.lifetime_unique_tracks) }}</span
             >
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-ink-muted">{{ t('artist.lifetime.libraryTracks') }}</span>
-            <span class="text-sm font-semibold tabular-nums">{{ data.library_tracks }}</span>
+            <span class="text-sm font-semibold tabular-nums">{{ num(data.library_tracks) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-ink-muted">{{ t('artist.metrics.libraryDepth') }}</span>

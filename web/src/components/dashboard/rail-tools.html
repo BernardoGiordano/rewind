@@ -5,7 +5,7 @@
     (click)="select(mode.id)"
     [aria-pressed]="cardMode === mode.id"
     [aria-label]="t('dashboard.cardMode', { mode: t(mode.labelKey) })"
-    [title]="t(mode.labelKey)"
+    [title]="t('dashboard.cardMode', { mode: t(mode.labelKey) })"
     class="cursor-pointer flex items-center justify-center w-10 h-9 rounded-xl transition-colors"
     [class]="cardMode === mode.id ? 'bg-fill-strong text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
   >

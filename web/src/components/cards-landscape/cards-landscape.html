@@ -170,7 +170,7 @@
                   <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                 </td>
                 <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ song.plays }}
+                  {{ num(song.plays) }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
                   {{ minutes(song.total_minutes) }}
@@ -303,7 +303,7 @@
                   </p>
                 </td>
                 <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ artist.plays }}
+                  {{ num(artist.plays) }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
                   {{ hours(artist.total_hours) }}
@@ -432,7 +432,7 @@
                   </p>
                 </td>
                 <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ album.plays }}
+                  {{ num(album.plays) }}
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
                   {{ minutes(album.total_minutes) }}
@@ -520,7 +520,7 @@
                 </div>
               </td>
               <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-6 py-1.5">
-                {{ genre.plays }}
+                {{ num(genre.plays) }}
               </td>
               <td class="text-white/40 text-sm tabular-nums text-right py-1.5">
                 {{ hours(genre.total_hours) }}
@@ -560,7 +560,7 @@
           class="flex-1 flex flex-col items-center justify-end h-full min-w-0"
         >
           <span class="text-white/60 text-xs font-mono mb-1 tabular-nums leading-none"
-            >{{ hour.plays > 0 ? hour.plays : '' }}</span
+            >{{ hour.plays > 0 ? num(hour.plays) : '' }}</span
           >
           <div
             class="w-full rounded-t-md transition-all"
@@ -663,7 +663,7 @@
                 </div>
               </td>
               <td class="text-white font-black text-base tabular-nums text-right pr-4 py-2">
-                {{ m.plays }}
+                {{ num(m.plays) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
                 {{ hours(m.hours) }}
@@ -869,7 +869,7 @@
                 </p>
               </td>
               <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">
-                {{ track.late_night_plays }}x
+                {{ num(track.late_night_plays) }}x
               </td>
             </tr>
           </tbody>
@@ -938,7 +938,7 @@
                 </p>
               </td>
               <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
-                {{ entry.plays_that_day }}x
+                {{ num(entry.plays_that_day) }}x
               </td>
               <td class="text-white/40 text-xs font-mono tabular-nums text-right py-1.5">
                 {{ entry.the_date }}
@@ -1022,7 +1022,7 @@
                 </p>
               </td>
               <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">
-                {{ s.plays }}
+                {{ num(s.plays) }}
               </td>
             </tr>
           </tbody>
@@ -1103,7 +1103,7 @@
                 </div>
               </td>
               <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-2">
-                {{ dec.total_plays }}
+                {{ num(dec.total_plays) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
                 {{ hours(dec.total_hours) }}
@@ -1237,7 +1237,7 @@
                       </p>
                     </td>
                     <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ artist.plays }}
+                      {{ num(artist.plays) }}
                     </td>
                     <td class="text-white/40 text-xs tabular-nums text-right py-1.5">
                       {{ hours(artist.total_hours) }}
@@ -1314,7 +1314,7 @@
                       </p>
                     </td>
                     <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ song.plays }}
+                      {{ num(song.plays) }}
                     </td>
                     <td class="text-white/50 text-xs tabular-nums text-right py-1.5">
                       {{ hours(song.total_minutes / 60) }}

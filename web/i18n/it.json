@@ -151,8 +151,8 @@
     "uniqueSongs": "brani diversi",
     "topGenre": "genere preferito",
     "daysOfMusic": {
-      "one": "È {count} giorno di musica",
-      "other": "Sono {count} giorni di musica"
+      "one": "È {count} giorno di musica!",
+      "other": "Sono {count} giorni di musica!"
     },
     "topSong": "Brano n. 1",
     "topArtist": "Artista n. 1",

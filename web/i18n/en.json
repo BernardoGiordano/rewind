@@ -150,8 +150,8 @@
     "uniqueSongs": "unique songs",
     "topGenre": "top genre",
     "daysOfMusic": {
-      "one": "That's {count} day of music",
-      "other": "That's {count} days of music"
+      "one": "That's {count} day of music!",
+      "other": "That's {count} days of music!"
     },
     "topSong": "#1 Song",
     "topArtist": "#1 Artist",
