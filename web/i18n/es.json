@@ -120,11 +120,11 @@
     "toggleSidebar": "Mostrar u ocultar la barra lateral",
     "previousStat": "Estadística anterior",
     "nextStat": "Estadística siguiente",
-    "autoplay": "Reproducción automática",
-    "startAutoplay": "Iniciar la reproducción automática",
-    "stopAutoplay": "Detener la reproducción automática",
-    "pauseAutoplay": "Pausar la reproducción automática",
-    "resumeAutoplay": "Reanudar la reproducción automática",
+    "autoplay": "Avance automático",
+    "startAutoplay": "Iniciar el avance automático",
+    "stopAutoplay": "Detener el avance automático",
+    "pauseAutoplay": "Pausar el avance automático",
+    "resumeAutoplay": "Reanudar el avance automático",
     "exportImage": "Exportar imagen",
     "music": {
       "play": "Reproducir música",
@@ -151,8 +151,8 @@
     "uniqueSongs": "canciones distintas",
     "topGenre": "género favorito",
     "daysOfMusic": {
-      "one": "Eso es {count} día de música",
-      "other": "Eso son {count} días de música"
+      "one": "¡Es {count} día de música!",
+      "other": "¡Son {count} días de música!"
     },
     "topSong": "Canción n.º 1",
     "topArtist": "Artista n.º 1",
@@ -232,7 +232,7 @@
       "hours": "Horas",
       "uniqueTracks": "Pistas distintas",
       "rank": "Posición",
-      "share": "Cuota",
+      "share": "Porcentaje",
       "libraryDepth": "Cobertura de la biblioteca"
     },
     "heatmap": {

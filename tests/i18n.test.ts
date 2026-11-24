@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { readBundle } from './i18n.js';
 
@@ -8,12 +9,16 @@ const PLACEHOLDER = /\{(\w+)\}/g;
 const placeholders = (message: string) =>
   [...message.matchAll(PLACEHOLDER)].map((m) => m[1]).sort();
 
-const TRANSLATIONS = [
-  ['Italian', 'it'],
-  ['Spanish', 'es'],
-] as const;
+/** Every locale the app ships besides English, so a new one is checked without editing this file. */
+const TRANSLATIONS: string[] = JSON.parse(
+  readFileSync(new URL('../web/app.manifest.json', import.meta.url), 'utf8'),
+).i18n.supportedLocales.filter((locale: string) => locale !== 'en');
 
-describe.each(TRANSLATIONS)('the %s bundle', (_name, locale) => {
+it('ships at least one translation', () => {
+  expect(TRANSLATIONS.length).toBeGreaterThan(0);
+});
+
+describe.each(TRANSLATIONS)('the %s bundle', (locale) => {
   const en = readBundle('en');
   const bundle = readBundle(locale);
 
