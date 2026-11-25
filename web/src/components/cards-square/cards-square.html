@@ -138,11 +138,11 @@
             {{ topArtist.artist }}
           </p>
           <p class="text-white/70 text-xl truncate mt-1">
-            {{ t('cards.tracks', { count: topArtist.unique_tracks }) }} &middot; {{
-            hours(topArtist.total_hours, 0, 1) }}
+            {{ t('cards.tracks', { count: topArtist.unique_tracks }) }}
           </p>
           <p class="text-white/40 text-base mt-2 font-medium">
-            {{ t('cards.plays', { count: topArtist.plays }) }}
+            {{ t('cards.plays', { count: topArtist.plays }) }} &middot; {{ hours(topArtist.total_hours,
+            0, 1) }}
           </p>
         </div>
       </div>
@@ -586,8 +586,7 @@
             {{ recapTopArtist.artist }}
           </p>
           <p class="text-white/70 text-sm mt-1">
-            {{ t('cards.hoursListenedValue', { value: decimal(recapTopArtist.total_hours, 0, 1) })
-            }}
+            {{ t('cards.plays', { count: recapTopArtist.plays }) }}
           </p>
         </div>
       </div>
@@ -614,7 +613,7 @@
               <div class="min-w-0 flex-1">
                 <p class="text-white text-xs font-semibold truncate">{{ artist.artist }}</p>
                 <p class="text-white/40 text-[0.65em] truncate">
-                  {{ hours(artist.total_hours, 0, 1) }}
+                  {{ t('cards.plays', { count: artist.plays }) }}
                 </p>
               </div>
             </div>

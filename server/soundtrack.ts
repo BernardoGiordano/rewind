@@ -16,6 +16,8 @@ export type Soundtrack = Partial<Record<string, SoundtrackSong>>;
 const SONG_COLUMNS = 'mf.id, mf.title, mf.artist, mf.album_id, mf.duration';
 // Song orders end on the id, as the cards' do, so a tie breaks the same way.
 const BY_PLAYS = 'COUNT(*) DESC, SUM(mf.duration) DESC, mf.id';
+// How cards rank artists, albums, genres and (in-range) decades.
+const BY_ENTRY = 'COUNT(*) DESC, SUM(mf.duration) DESC';
 
 const HOUR = `CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER)`;
 const MONTH = `strftime('%Y-%m', s.submission_time, 'unixepoch')`;
@@ -38,11 +40,8 @@ export function soundtrackFor(db: Database, uid: string, range: Range): Soundtra
   const result: Soundtrack = {
     summary: top,
     'top-songs': top,
-    'top-artists': songs.within(
-      'mf.artist_id',
-      songs.topKey('mf.artist_id', 'SUM(mf.duration) DESC'),
-    ),
-    'top-albums': songs.within('mf.album_id', songs.topKey('mf.album_id', 'SUM(mf.duration) DESC')),
+    'top-artists': songs.within('mf.artist_id', songs.topKey('mf.artist_id', BY_ENTRY)),
+    'top-albums': songs.within('mf.album_id', songs.topKey('mf.album_id', BY_ENTRY)),
     'top-genres': songs.inGenre(songs.topGenre()),
     'favorite-decades': songs.inDecade(songs.topDecade()),
     recap: top,
@@ -117,7 +116,7 @@ class SongQuery {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ?${this.#rangeSql()}
         AND ${GENRE} IS NOT NULL AND TRIM(${GENRE}) != ''
-      GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 1`,
+      GROUP BY 1 ORDER BY ${BY_ENTRY}, 1 LIMIT 1`,
       this.#params(),
     )?.value;
   }
@@ -137,7 +136,7 @@ class SongQuery {
         FROM scrobbles s
         JOIN media_file mf ON s.media_file_id = mf.id
         WHERE s.user_id = ?${this.#rangeSql()} AND mf.year > 0
-        GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 1`,
+        GROUP BY 1 ORDER BY ${BY_ENTRY}, 1 LIMIT 1`,
         this.#params(),
       )?.value;
     }
@@ -146,7 +145,7 @@ class SongQuery {
       FROM annotation a
       JOIN media_file mf ON a.item_id = mf.id
       WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-      GROUP BY 1 ORDER BY SUM(mf.duration * a.play_count) DESC, 1 LIMIT 1`,
+      GROUP BY 1 ORDER BY SUM(a.play_count) DESC, SUM(mf.duration * a.play_count) DESC, 1 LIMIT 1`,
       [this.#uid],
     )?.value;
   }

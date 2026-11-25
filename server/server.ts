@@ -732,7 +732,7 @@ function getTopArtists(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       LEFT JOIN artist a ON a.id = mf.artist_id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
+      GROUP BY mf.artist_id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.artist_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -749,7 +749,7 @@ function getTopArtists(db: Database, uid: string, range: Range) {
     JOIN media_file mf ON s.media_file_id = mf.id
     LEFT JOIN artist a ON a.id = mf.artist_id
     WHERE s.user_id = ?
-    GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
+    GROUP BY mf.artist_id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.artist_id LIMIT 100
   `,
     [uid],
   );
@@ -766,7 +766,7 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
+      GROUP BY mf.album_id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.album_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -780,7 +780,7 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
+    GROUP BY mf.album_id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.album_id LIMIT 100
   `,
     [uid],
   );
@@ -798,7 +798,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+      GROUP BY 1 ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, 1 LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -813,7 +813,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
       json_each(json_extract(mf.tags, '$.genre')) AS g
     WHERE s.user_id = ?
       AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+    GROUP BY 1 ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, 1 LIMIT 100
   `,
     [uid],
   );
@@ -971,7 +971,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY SUM(mf.duration) DESC, decade LIMIT 100
+      GROUP BY decade ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, decade LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -985,7 +985,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY SUM(mf.duration * a.play_count) DESC, decade LIMIT 100
+    GROUP BY decade ORDER BY SUM(a.play_count) DESC, SUM(mf.duration * a.play_count) DESC, decade LIMIT 100
   `,
     [uid],
   );
@@ -1107,8 +1107,8 @@ function getArtistProfile(db: Database, uid: string, artistId: string, range: Ra
     db,
     `
     WITH ranked AS (
-      SELECT mf.artist_id, SUM(mf.duration) AS total_duration,
-        RANK() OVER (ORDER BY SUM(mf.duration) DESC) AS rnk
+      SELECT mf.artist_id,
+        RANK() OVER (ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.artist_id) AS rnk
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ?${rc.sql}
@@ -1284,7 +1284,7 @@ function getArtistRankTrajectory(db: Database, uid: string, artistId: string, ra
     `
     WITH monthly AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
-        mf.artist_id, COUNT(*) AS plays
+        mf.artist_id, COUNT(*) AS plays, SUM(mf.duration) AS duration
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ?${rc.sql}
@@ -1292,7 +1292,7 @@ function getArtistRankTrajectory(db: Database, uid: string, artistId: string, ra
     ),
     ranked AS (
       SELECT month, artist_id, plays,
-        RANK() OVER (PARTITION BY month ORDER BY plays DESC) AS rnk
+        RANK() OVER (PARTITION BY month ORDER BY plays DESC, duration DESC, artist_id) AS rnk
       FROM monthly
     )
     SELECT month, plays, rnk FROM ranked WHERE artist_id = ? ORDER BY month

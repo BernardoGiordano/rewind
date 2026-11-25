@@ -131,11 +131,11 @@
         </p>
         <p class="text-white font-black text-3xl leading-tight truncate">{{ topArtist.artist }}</p>
         <p class="text-white/70 text-xl truncate mt-1">
-          {{ t('cards.tracks', { count: topArtist.unique_tracks }) }} &middot; {{
-          hours(topArtist.total_hours, 0, 1) }}
+          {{ t('cards.tracks', { count: topArtist.unique_tracks }) }}
         </p>
         <p class="text-white/40 text-lg mt-2 font-medium">
-          {{ t('cards.plays', { count: topArtist.plays }) }}
+          {{ t('cards.plays', { count: topArtist.plays }) }} &middot; {{ hours(topArtist.total_hours,
+          0, 1) }}
         </p>
       </div>
     </div>
@@ -588,7 +588,7 @@
             <div class="min-w-0">
               <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
               <p class="text-white/40 text-xs truncate">
-                {{ t('cards.hoursListenedValue', { value: decimal(artist.total_hours, 0, 1) }) }}
+                {{ t('cards.plays', { count: artist.plays }) }}
               </p>
             </div>
           </div>
