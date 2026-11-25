@@ -15,7 +15,6 @@ export type Soundtrack = Partial<Record<string, SoundtrackSong>>;
 
 const SONG_COLUMNS = 'mf.id, mf.title, mf.artist, mf.album_id, mf.duration';
 // Song orders end on the id, as the cards' do, so a tie breaks the same way.
-const BY_MINUTES = 'SUM(mf.duration) DESC, mf.id';
 const BY_PLAYS = 'COUNT(*) DESC, SUM(mf.duration) DESC, mf.id';
 
 const HOUR = `CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER)`;
@@ -34,7 +33,7 @@ const GENRE = `g.value->>'$.value'`;
  */
 export function soundtrackFor(db: Database, uid: string, range: Range): Soundtrack {
   const songs = new SongQuery(db, uid, range);
-  const top = songs.top(BY_MINUTES);
+  const top = songs.top(BY_PLAYS);
 
   const result: Soundtrack = {
     summary: top,

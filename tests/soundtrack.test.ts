@@ -33,7 +33,7 @@ beforeEach(() => {
 
   const scrobble = db.prepare(`INSERT INTO scrobbles VALUES ('listener', ?, ?)`);
 
-  // Long has the most minutes, Short repeats one night, Other owns the afternoons.
+  // Other has the most plays, Long has the most minutes. Short repeats one night, Other owns the afternoons.
   scrobble.run('long', at(6, 10));
   scrobble.run('long', at(6, 10, 10));
   for (let i = 0; i < 4; i++) scrobble.run('short', at(7, 2, i * 5));
@@ -47,9 +47,9 @@ describe('soundtrackFor', () => {
   it('plays the first row of a slide that ranks songs, skipping missing files', () => {
     const songs = ids(soundtrackFor(db, 'listener', YEAR_2025));
 
-    expect(songs['top-songs']).toBe('long');
-    expect(songs['summary']).toBe('long');
-    expect(songs['recap']).toBe('long');
+    expect(songs['top-songs']).toBe('other');
+    expect(songs['summary']).toBe('other');
+    expect(songs['recap']).toBe('other');
     expect(songs['late-night']).toBe('short');
     expect(songs['on-repeat']).toBe('short');
   });

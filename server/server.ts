@@ -698,7 +698,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
+      GROUP BY mf.id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -712,7 +712,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
+    GROUP BY mf.id ORDER BY COUNT(*) DESC, SUM(mf.duration) DESC, mf.id LIMIT 100
   `,
     [uid],
   );
