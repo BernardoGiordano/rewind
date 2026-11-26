@@ -108,8 +108,9 @@ export function weekdayShort(name) {
 }
 
 /**
- * Helpers every template calls by bare name, as Angular templates call pipes. srl
- * registers `t`, `num` and `dt` itself. Each reads `locale`, so a template that calls
+ * Helpers every template can name. Templates pipe a value through a formatter, so
+ * `{{ song.total_minutes | minutes:0:1 }}` calls `minutes(song.total_minutes, 0, 1)`.
+ * srl registers `t`, `num` and `dt` itself. Each reads `locale`, so a template that uses
  * one renders again when the language changes.
  */
 registerTemplateGlobals({

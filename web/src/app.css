@@ -22,55 +22,44 @@
 
 /* Surface roles. Templates reference roles (bg-surface, text-ink-muted,
    border-edge) instead of spelling slate pairs inline, so a retune happens here.
-   Each role is defined once for light and flipped once under html.dark. The black
-   theme keeps html.dark and sets surfaces to pure black, fills and edges a step darker.
+   Each role is one light-dark() pair, or one value for both schemes, and the
+   color-scheme on html picks the arm (srl ADR-0142). The black theme keeps
+   html.dark, so it takes the dark arm, and sets surfaces to pure black, fills and
+   edges a step darker.
 
    Card gradients in STAT_DEFINITIONS are artwork, not chrome, and stay literal. */
 @theme {
-  --color-surface: #fff;
-  --color-surface-sunken: oklch(98.4% 0.003 247.858);
-  --color-surface-raised: #fff;
+  --color-surface: light-dark(#fff, oklch(12.9% 0.042 264.695));
+  --color-surface-sunken: light-dark(oklch(98.4% 0.003 247.858), oklch(20.8% 0.042 265.755));
+  --color-surface-raised: light-dark(#fff, oklch(27.9% 0.041 260.031));
 
-  --color-fill: oklch(96.8% 0.007 247.896);
-  --color-fill-raised: oklch(96.8% 0.007 247.896);
-  --color-fill-strong: oklch(92.9% 0.013 255.508);
+  --color-fill: light-dark(oklch(96.8% 0.007 247.896), oklch(27.9% 0.041 260.031));
+  --color-fill-raised: light-dark(oklch(96.8% 0.007 247.896), oklch(37.2% 0.044 257.287));
+  --color-fill-strong: light-dark(oklch(92.9% 0.013 255.508), oklch(37.2% 0.044 257.287));
 
-  --color-edge: oklch(92.9% 0.013 255.508);
-  --color-edge-raised: oklch(92.9% 0.013 255.508);
+  --color-edge: light-dark(oklch(92.9% 0.013 255.508), oklch(27.9% 0.041 260.031));
+  --color-edge-raised: light-dark(oklch(92.9% 0.013 255.508), oklch(37.2% 0.044 257.287));
 
-  --color-ink: oklch(20.8% 0.042 265.755);
-  --color-ink-body: oklch(20.8% 0.042 265.755);
-  --color-ink-soft: oklch(37.2% 0.044 257.287);
-  --color-ink-muted: oklch(55.4% 0.046 257.417);
-  --color-ink-faint: oklch(70.4% 0.04 256.788);
+  --color-ink: light-dark(oklch(20.8% 0.042 265.755), #fff);
+  --color-ink-body: light-dark(oklch(20.8% 0.042 265.755), oklch(96.8% 0.007 247.896));
+  --color-ink-soft: light-dark(oklch(37.2% 0.044 257.287), oklch(92.9% 0.013 255.508));
+  --color-ink-muted: light-dark(oklch(55.4% 0.046 257.417), oklch(70.4% 0.04 256.788));
+  --color-ink-faint: light-dark(oklch(70.4% 0.04 256.788), oklch(55.4% 0.046 257.417));
 
-  --color-selected: oklch(20.8% 0.042 265.755);
-  --color-on-selected: #fff;
+  --color-selected: light-dark(oklch(20.8% 0.042 265.755), #fff);
+  --color-on-selected: light-dark(#fff, oklch(20.8% 0.042 265.755));
 
   --color-accent: oklch(64.5% 0.246 16.439);
   --color-accent-strong: oklch(58.6% 0.253 17.585);
 }
 
+/* ThemeService adds html.dark for the dark and black themes. */
+html {
+  color-scheme: light;
+}
+
 html.dark {
-  --color-surface: oklch(12.9% 0.042 264.695);
-  --color-surface-sunken: oklch(20.8% 0.042 265.755);
-  --color-surface-raised: oklch(27.9% 0.041 260.031);
-
-  --color-fill: oklch(27.9% 0.041 260.031);
-  --color-fill-raised: oklch(37.2% 0.044 257.287);
-  --color-fill-strong: oklch(37.2% 0.044 257.287);
-
-  --color-edge: oklch(27.9% 0.041 260.031);
-  --color-edge-raised: oklch(37.2% 0.044 257.287);
-
-  --color-ink: #fff;
-  --color-ink-body: oklch(96.8% 0.007 247.896);
-  --color-ink-soft: oklch(92.9% 0.013 255.508);
-  --color-ink-muted: oklch(70.4% 0.04 256.788);
-  --color-ink-faint: oklch(55.4% 0.046 257.417);
-
-  --color-selected: #fff;
-  --color-on-selected: oklch(20.8% 0.042 265.755);
+  color-scheme: dark;
 }
 
 html.black {
@@ -261,11 +250,6 @@ app-library input[type='search']::-webkit-search-cancel-button {
 app-library dialog {
   margin: auto;
   max-height: calc(100dvh - 2rem);
-  color-scheme: light;
-}
-
-.dark app-library dialog {
-  color-scheme: dark;
 }
 
 app-library dialog::backdrop {
