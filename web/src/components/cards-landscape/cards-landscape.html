@@ -89,11 +89,11 @@
           </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topSong.title }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topSong.artist }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'"
               >{{ t('cards.plays', { count: topSong.plays }) }}</span
             >
-            <span class="text-white/30 text-sm tabular-nums"
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'"
               >{{ minutes(topSong.total_minutes) }}</span
             >
           </div>
@@ -107,8 +107,8 @@
             <col class="w-10" />
             <col class="w-16" />
             <col />
-            <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -126,12 +126,12 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                {{ t('cards.columns.plays') }}
+                {{ trailHeader('cards.columns.minutes') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                {{ t('cards.columns.minutes') }}
+                {{ leadHeader('cards.columns.minutes') }}
               </th>
             </tr>
           </thead>
@@ -142,8 +142,8 @@
               <col class="w-10" />
               <col class="w-16" />
               <col />
-              <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -169,11 +169,11 @@
                   </p>
                   <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ num(song.plays) }}
+                <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-1.5">
+                  {{ trail(song.plays, minutes(song.total_minutes)) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ minutes(song.total_minutes) }}
+                <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
+                  {{ lead(song.plays, minutes(song.total_minutes)) }}
                 </td>
               </tr>
             </tbody>
@@ -220,12 +220,14 @@
             {{ topArtist.artist }}
           </p>
           <p class="text-white/70 text-base truncate mt-0.5">
-            {{ t('cards.tracks', { count: topArtist.unique_tracks }) }} · {{
-            hours(topArtist.total_hours) }}
+            {{ t('cards.tracks', { count: topArtist.unique_tracks }) }}
           </p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'"
               >{{ t('cards.plays', { count: topArtist.plays }) }}</span
+            >
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'"
+              >{{ hours(topArtist.total_hours) }}</span
             >
           </div>
         </div>
@@ -238,8 +240,8 @@
             <col class="w-10" />
             <col class="w-16" />
             <col />
-            <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -257,12 +259,12 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                {{ t('cards.columns.plays') }}
+                {{ trailHeader('cards.columns.hours') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                {{ t('cards.columns.hours') }}
+                {{ leadHeader('cards.columns.hours') }}
               </th>
             </tr>
           </thead>
@@ -273,8 +275,8 @@
               <col class="w-10" />
               <col class="w-16" />
               <col />
-              <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -302,11 +304,11 @@
                     {{ t('cards.tracks', { count: artist.unique_tracks }) }}
                   </p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ num(artist.plays) }}
+                <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-1.5">
+                  {{ trail(artist.plays, hours(artist.total_hours)) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ hours(artist.total_hours) }}
+                <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
+                  {{ lead(artist.plays, hours(artist.total_hours)) }}
                 </td>
               </tr>
             </tbody>
@@ -351,11 +353,11 @@
           </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'"
               >{{ t('cards.plays', { count: topAlbum.plays }) }}</span
             >
-            <span class="text-white/30 text-sm tabular-nums"
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'"
               >{{ minutes(topAlbum.total_minutes) }}</span
             >
           </div>
@@ -369,8 +371,8 @@
             <col class="w-10" />
             <col class="w-16" />
             <col />
-            <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -388,12 +390,12 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                {{ t('cards.columns.plays') }}
+                {{ trailHeader('cards.columns.minutes') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                {{ t('cards.columns.minutes') }}
+                {{ leadHeader('cards.columns.minutes') }}
               </th>
             </tr>
           </thead>
@@ -404,8 +406,8 @@
               <col class="w-10" />
               <col class="w-16" />
               <col />
-              <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -431,11 +433,11 @@
                     {{ album.album_artist }}
                   </p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
-                  {{ num(album.plays) }}
+                <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-1.5">
+                  {{ trail(album.plays, minutes(album.total_minutes)) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
-                  {{ minutes(album.total_minutes) }}
+                <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
+                  {{ lead(album.plays, minutes(album.total_minutes)) }}
                 </td>
               </tr>
             </tbody>
@@ -479,17 +481,17 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ trailHeader('cards.columns.hours') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
-              {{ t('cards.columns.hours') }}
+              {{ leadHeader('cards.columns.hours') }}
             </th>
           </tr>
         </thead>
@@ -515,15 +517,15 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="percentOf(genre.plays, maxGenrePlays)"
+                    [style.width.%]="percentOf(rankValue(genre.plays, genre.total_hours), maxGenreValue)"
                   ></div>
                 </div>
               </td>
-              <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-6 py-1.5">
-                {{ num(genre.plays) }}
+              <td class="text-white/40 text-sm tabular-nums text-right pr-6 py-1.5">
+                {{ trail(genre.plays, hours(genre.total_hours)) }}
               </td>
-              <td class="text-white/40 text-sm tabular-nums text-right py-1.5">
-                {{ hours(genre.total_hours) }}
+              <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
+                {{ lead(genre.plays, hours(genre.total_hours)) }}
               </td>
             </tr>
           </tbody>
@@ -813,7 +815,8 @@
           <col class="w-10" />
           <col class="w-16" />
           <col />
-          <col class="w-24" />
+          <col class="w-16" />
+          <col class="w-16" />
         </colgroup>
         <thead>
           <tr>
@@ -829,9 +832,14 @@
               {{ t('cards.columns.track') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              {{ t('cards.columns.lateNight') }}
+              {{ trailHeader('cards.columns.minutes') }}
+            </th>
+            <th
+              class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+            >
+              {{ leadHeader('cards.columns.minutes') }}
             </th>
           </tr>
         </thead>
@@ -842,7 +850,8 @@
             <col class="w-10" />
             <col class="w-16" />
             <col />
-            <col class="w-24" />
+            <col class="w-16" />
+            <col class="w-16" />
           </colgroup>
           <tbody>
             <tr
@@ -868,8 +877,11 @@
                   {{ track.artist }}
                 </p>
               </td>
-              <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">
-                {{ num(track.late_night_plays) }}x
+              <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-1.5">
+                {{ trail(track.late_night_plays, minutes(track.late_night_minutes)) }}
+              </td>
+              <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
+                {{ lead(track.late_night_plays, minutes(track.late_night_minutes)) }}
               </td>
             </tr>
           </tbody>
@@ -967,6 +979,7 @@
           <col class="w-20" />
           <col />
           <col class="w-16" />
+          <col class="w-16" />
         </colgroup>
         <thead>
           <tr>
@@ -982,9 +995,14 @@
               {{ t('cards.columns.track') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ trailHeader('cards.columns.minutes') }}
+            </th>
+            <th
+              class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+            >
+              {{ leadHeader('cards.columns.minutes') }}
             </th>
           </tr>
         </thead>
@@ -995,6 +1013,7 @@
             <col class="w-16" />
             <col class="w-20" />
             <col />
+            <col class="w-16" />
             <col class="w-16" />
           </colgroup>
           <tbody>
@@ -1021,8 +1040,11 @@
                   {{ s.artist }}
                 </p>
               </td>
-              <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">
-                {{ num(s.plays) }}
+              <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-2">
+                {{ trail(s.plays, minutes(s.total_minutes)) }}
+              </td>
+              <td class="text-white/70 text-sm font-bold tabular-nums text-right py-2">
+                {{ lead(s.plays, minutes(s.total_minutes)) }}
               </td>
             </tr>
           </tbody>
@@ -1046,9 +1068,9 @@
         <colgroup>
           <col class="w-20" />
           <col />
-          <col class="w-20" />
-          <col class="w-20" />
           <col class="w-24" />
+          <col class="w-20" />
+          <col class="w-20" />
         </colgroup>
         <thead>
           <tr>
@@ -1060,22 +1082,22 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
             </th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
-            >
-              {{ t('cards.columns.plays') }}
-            </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
-            >
-              {{ t('cards.columns.hours') }}
-            </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
             >
               {{ t('cards.columns.artists') }}
+            </th>
+            <th
+              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+            >
+              {{ trailHeader('cards.columns.hours') }}
+            </th>
+            <th
+              class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+            >
+              {{ leadHeader('cards.columns.hours') }}
             </th>
           </tr>
         </thead>
@@ -1085,9 +1107,9 @@
           <colgroup>
             <col class="w-20" />
             <col />
-            <col class="w-20" />
-            <col class="w-20" />
             <col class="w-24" />
+            <col class="w-20" />
+            <col class="w-20" />
           </colgroup>
           <tbody>
             <tr *for="dec of favoriteDecades; key: dec.decade; index as i">
@@ -1098,18 +1120,18 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="percentOf(dec.total_plays, maxDecadePlays)"
+                    [style.width.%]="percentOf(rankValue(dec.total_plays, dec.total_hours), maxDecadeValue)"
                   ></div>
                 </div>
               </td>
-              <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-2">
-                {{ num(dec.total_plays) }}
+              <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
+                {{ t('cards.artistCount', { count: dec.unique_artists }) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
-                {{ hours(dec.total_hours) }}
+                {{ trail(dec.total_plays, hours(dec.total_hours)) }}
               </td>
-              <td class="text-white/50 text-sm tabular-nums text-right py-2">
-                {{ t('cards.artistCount', { count: dec.unique_artists }) }}
+              <td class="text-white/70 text-sm font-bold tabular-nums text-right py-2">
+                {{ lead(dec.total_plays, hours(dec.total_hours)) }}
               </td>
             </tr>
           </tbody>
@@ -1166,8 +1188,7 @@
             </p>
             <p class="text-white font-black text-3xl leading-tight">{{ recapTopArtist.artist }}</p>
             <p class="text-white/70 text-base mt-1">
-              {{ t('cards.hoursListenedValue', { value: decimal(recapTopArtist.total_hours, 1, 1) })
-              }}
+              {{ figures(recapTopArtist.plays, hours(recapTopArtist.total_hours, 0, 1)) }}
             </p>
           </div>
         </div>
@@ -1183,7 +1204,7 @@
                 <col class="w-8" />
                 <col />
                 <col class="w-14" />
-                <col class="w-12" />
+                <col class="w-14" />
               </colgroup>
               <thead>
                 <tr>
@@ -1200,12 +1221,12 @@
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
                   >
-                    {{ t('cards.columns.plays') }}
+                    {{ trailHeader('cards.columns.hours') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    class="text-white/60 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
-                    {{ t('cards.columns.hours') }}
+                    {{ leadHeader('cards.columns.hours') }}
                   </th>
                 </tr>
               </thead>
@@ -1216,7 +1237,7 @@
                   <col class="w-8" />
                   <col />
                   <col class="w-14" />
-                  <col class="w-12" />
+                  <col class="w-14" />
                 </colgroup>
                 <tbody>
                   <tr
@@ -1236,11 +1257,11 @@
                         {{ artist.artist }}
                       </p>
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ num(artist.plays) }}
+                    <td class="text-white/40 text-xs tabular-nums text-right pr-2 py-1.5">
+                      {{ trail(artist.plays, hours(artist.total_hours)) }}
                     </td>
-                    <td class="text-white/40 text-xs tabular-nums text-right py-1.5">
-                      {{ hours(artist.total_hours) }}
+                    <td class="text-white/80 text-xs font-bold tabular-nums text-right py-1.5">
+                      {{ lead(artist.plays, hours(artist.total_hours)) }}
                     </td>
                   </tr>
                 </tbody>
@@ -1259,7 +1280,7 @@
                 <col class="w-8" />
                 <col />
                 <col class="w-14" />
-                <col class="w-16" />
+                <col class="w-14" />
               </colgroup>
               <thead>
                 <tr>
@@ -1276,12 +1297,12 @@
                   <th
                     class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
                   >
-                    {{ t('cards.columns.plays') }}
+                    {{ trailHeader('cards.columns.hours') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    class="text-white/60 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
-                    {{ t('cards.columns.hours') }}
+                    {{ leadHeader('cards.columns.hours') }}
                   </th>
                 </tr>
               </thead>
@@ -1292,7 +1313,7 @@
                   <col class="w-8" />
                   <col />
                   <col class="w-14" />
-                  <col class="w-16" />
+                  <col class="w-14" />
                 </colgroup>
                 <tbody>
                   <tr
@@ -1313,11 +1334,11 @@
                         {{ song.artist }}
                       </p>
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ num(song.plays) }}
+                    <td class="text-white/40 text-xs tabular-nums text-right pr-2 py-1.5">
+                      {{ trail(song.plays, hours(song.total_minutes / 60)) }}
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right py-1.5">
-                      {{ hours(song.total_minutes / 60) }}
+                    <td class="text-white/80 text-xs font-bold tabular-nums text-right py-1.5">
+                      {{ lead(song.plays, hours(song.total_minutes / 60)) }}
                     </td>
                   </tr>
                 </tbody>

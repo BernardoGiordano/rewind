@@ -3,6 +3,7 @@ import BetterSqlite3 from 'better-sqlite3';
 import express from 'express';
 import { libraryRouter } from './library.ts';
 import { soundtrackFor } from './soundtrack.ts';
+import { parseSort, rankBy, type Sort } from './sort.ts';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import {
@@ -478,8 +479,9 @@ app.get('/api/soundtrack', (req, res) => {
       req.query['from'] as string | undefined,
       req.query['to'] as string | undefined,
     );
+    const sort = parseSort(req.query['sort']);
     noCache(res);
-    res.json(soundtrackFor(getDb(), auth.uid, range));
+    res.json(soundtrackFor(getDb(), auth.uid, range, sort));
   } catch (err: unknown) {
     res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
   }
@@ -589,6 +591,7 @@ app.get('/api/stats/:type', (req, res) => {
     const auth = requireAuth(req, res);
     if (!auth) return;
     const range = resolveRange(yearParam, fromParam, toParam);
+    const sort = parseSort(req.query['sort']);
     const db = getDb();
     const uid = auth.uid;
     let result: unknown;
@@ -598,16 +601,16 @@ app.get('/api/stats/:type', (req, res) => {
         result = getSummary(db, uid, range);
         break;
       case 'top-songs':
-        result = getTopSongs(db, uid, range);
+        result = getTopSongs(db, uid, range, sort);
         break;
       case 'top-artists':
-        result = getTopArtists(db, uid, range);
+        result = getTopArtists(db, uid, range, sort);
         break;
       case 'top-albums':
-        result = getTopAlbums(db, uid, range);
+        result = getTopAlbums(db, uid, range, sort);
         break;
       case 'top-genres':
-        result = getTopGenres(db, uid, range);
+        result = getTopGenres(db, uid, range, sort);
         break;
       case 'listening-clock':
         result = range ? getListeningClock(db, uid, range) : [];
@@ -622,19 +625,19 @@ app.get('/api/stats/:type', (req, res) => {
         result = range ? getStreak(db, uid, range) : [];
         break;
       case 'late-night':
-        result = range ? getLateNight(db, uid, range) : [];
+        result = range ? getLateNight(db, uid, range, sort) : [];
         break;
       case 'on-repeat':
         result = range ? getOnRepeat(db, uid, range) : [];
         break;
       case 'song-of-month':
-        result = range ? getSongOfMonth(db, uid, range) : [];
+        result = range ? getSongOfMonth(db, uid, range, sort) : [];
         break;
       case 'favorite-decades':
-        result = getFavoriteDecades(db, uid, range);
+        result = getFavoriteDecades(db, uid, range, sort);
         break;
       case 'recap':
-        result = getRecap(db, uid, range);
+        result = getRecap(db, uid, range, sort);
         break;
       default:
         res.status(404).json({ error: `Unknown stat type: ${statType}` });
@@ -687,7 +690,7 @@ function getSummary(db: Database, uid: string, range: Range) {
   );
 }
 
-function getTopSongs(db: Database, uid: string, range: Range) {
+function getTopSongs(db: Database, uid: string, range: Range, sort: Sort) {
   if (range) {
     return queryAll(
       db,
@@ -698,7 +701,7 @@ function getTopSongs(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
+      GROUP BY mf.id ORDER BY ${rankBy(sort)}, mf.id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -712,13 +715,13 @@ function getTopSongs(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.id ORDER BY SUM(mf.duration) DESC, mf.id LIMIT 100
+    GROUP BY mf.id ORDER BY ${rankBy(sort)}, mf.id LIMIT 100
   `,
     [uid],
   );
 }
 
-function getTopArtists(db: Database, uid: string, range: Range) {
+function getTopArtists(db: Database, uid: string, range: Range, sort: Sort) {
   if (range) {
     return queryAll(
       db,
@@ -732,7 +735,7 @@ function getTopArtists(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       LEFT JOIN artist a ON a.id = mf.artist_id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
+      GROUP BY mf.artist_id ORDER BY ${rankBy(sort)}, mf.artist_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -749,13 +752,13 @@ function getTopArtists(db: Database, uid: string, range: Range) {
     JOIN media_file mf ON s.media_file_id = mf.id
     LEFT JOIN artist a ON a.id = mf.artist_id
     WHERE s.user_id = ?
-    GROUP BY mf.artist_id ORDER BY SUM(mf.duration) DESC, mf.artist_id LIMIT 100
+    GROUP BY mf.artist_id ORDER BY ${rankBy(sort)}, mf.artist_id LIMIT 100
   `,
     [uid],
   );
 }
 
-function getTopAlbums(db: Database, uid: string, range: Range) {
+function getTopAlbums(db: Database, uid: string, range: Range, sort: Sort) {
   if (range) {
     return queryAll(
       db,
@@ -766,7 +769,7 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
-      GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
+      GROUP BY mf.album_id ORDER BY ${rankBy(sort)}, mf.album_id LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -780,13 +783,13 @@ function getTopAlbums(db: Database, uid: string, range: Range) {
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ?
-    GROUP BY mf.album_id ORDER BY SUM(mf.duration) DESC, mf.album_id LIMIT 100
+    GROUP BY mf.album_id ORDER BY ${rankBy(sort)}, mf.album_id LIMIT 100
   `,
     [uid],
   );
 }
 
-function getTopGenres(db: Database, uid: string, range: Range) {
+function getTopGenres(db: Database, uid: string, range: Range, sort: Sort) {
   if (range) {
     return queryAll(
       db,
@@ -798,7 +801,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-      GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+      GROUP BY 1 ORDER BY ${rankBy(sort)}, 1 LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -813,7 +816,7 @@ function getTopGenres(db: Database, uid: string, range: Range) {
       json_each(json_extract(mf.tags, '$.genre')) AS g
     WHERE s.user_id = ?
       AND g.value->>'$.value' IS NOT NULL AND TRIM(g.value->>'$.value') != ''
-    GROUP BY 1 ORDER BY SUM(mf.duration) DESC, 1 LIMIT 100
+    GROUP BY 1 ORDER BY ${rankBy(sort)}, 1 LIMIT 100
   `,
     [uid],
   );
@@ -901,18 +904,19 @@ function getStreak(db: Database, uid: string, range: NonNullable<Range>) {
   );
 }
 
-function getLateNight(db: Database, uid: string, range: NonNullable<Range>) {
+function getLateNight(db: Database, uid: string, range: NonNullable<Range>, sort: Sort) {
   const { startTs, endTs } = range;
   return queryAll(
     db,
     `
     SELECT mf.title, mf.artist, COUNT(*) AS late_night_plays,
+      ROUND(SUM(mf.duration) / 60.0, 1) AS late_night_minutes,
       mf.album_id, mf.artist_id
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       AND CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER) BETWEEN 0 AND 4
-    GROUP BY mf.id ORDER BY late_night_plays DESC, SUM(mf.duration) DESC, mf.id LIMIT 100
+    GROUP BY mf.id ORDER BY ${rankBy(sort)}, mf.id LIMIT 100
   `,
     [uid, startTs, endTs],
   );
@@ -935,7 +939,7 @@ function getOnRepeat(db: Database, uid: string, range: NonNullable<Range>) {
   );
 }
 
-function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
+function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>, sort: Sort) {
   const { startTs, endTs } = range;
   return queryAll(
     db,
@@ -943,23 +947,25 @@ function getSongOfMonth(db: Database, uid: string, range: NonNullable<Range>) {
     WITH monthly_counts AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
         mf.title, mf.artist, COUNT(*) AS plays,
+        ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes,
         mf.album_id, mf.artist_id,
         ROW_NUMBER() OVER (
           PARTITION BY strftime('%Y-%m', s.submission_time, 'unixepoch')
-          ORDER BY COUNT(*) DESC
+          ORDER BY ${rankBy(sort)}, mf.id
         ) AS rn
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
       GROUP BY month, mf.id
     )
-    SELECT month, title, artist, plays, album_id, artist_id FROM monthly_counts WHERE rn = 1 ORDER BY month
+    SELECT month, title, artist, plays, total_minutes, album_id, artist_id
+    FROM monthly_counts WHERE rn = 1 ORDER BY month
   `,
     [uid, startTs, endTs],
   );
 }
 
-function getFavoriteDecades(db: Database, uid: string, range: Range) {
+function getFavoriteDecades(db: Database, uid: string, range: Range, sort: Sort) {
   if (range) {
     return queryAll(
       db,
@@ -971,7 +977,7 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND s.submission_time >= ? AND s.submission_time < ?
         AND mf.year > 0
-      GROUP BY decade ORDER BY SUM(mf.duration) DESC, decade LIMIT 100
+      GROUP BY decade ORDER BY ${rankBy(sort)}, decade LIMIT 100
     `,
       [uid, range.startTs, range.endTs],
     );
@@ -985,21 +991,21 @@ function getFavoriteDecades(db: Database, uid: string, range: Range) {
     FROM annotation a
     JOIN media_file mf ON a.item_id = mf.id
     WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-    GROUP BY decade ORDER BY SUM(mf.duration * a.play_count) DESC, decade LIMIT 100
+    GROUP BY decade ORDER BY ${rankBy(sort, 'SUM(a.play_count)', 'SUM(mf.duration * a.play_count)')}, decade LIMIT 100
   `,
     [uid],
   );
 }
 
-function getRecap(db: Database, uid: string, range: Range) {
-  const topArtists = getTopArtists(db, uid, range) as Array<{
+function getRecap(db: Database, uid: string, range: Range, sort: Sort) {
+  const topArtists = getTopArtists(db, uid, range, sort) as Array<{
     artist: string;
     plays: number;
     unique_tracks: number;
     total_hours: number;
     artist_id: string;
   }>;
-  const topSongs = getTopSongs(db, uid, range) as Array<{
+  const topSongs = getTopSongs(db, uid, range, sort) as Array<{
     title: string;
     artist: string;
     album: string;
@@ -1009,7 +1015,7 @@ function getRecap(db: Database, uid: string, range: Range) {
     artist_id: string;
   }>;
   const summary = getSummary(db, uid, range) as { total_hours: number };
-  const topGenres = getTopGenres(db, uid, range) as Array<{
+  const topGenres = getTopGenres(db, uid, range, sort) as Array<{
     genre: string;
     plays: number;
     total_hours: number;
@@ -1035,10 +1041,11 @@ app.get('/api/artist/:id', (req, res) => {
     const auth = requireAuth(req, res);
     if (!auth) return;
     const range = resolveRange(yearParam, fromParam, toParam);
+    const sort = parseSort(req.query['sort']);
     const db = getDb();
     const uid = auth.uid;
 
-    const profile = getArtistProfile(db, uid, artistId, range);
+    const profile = getArtistProfile(db, uid, artistId, range, sort);
     if (!profile.artist) {
       res.status(404).json({ error: 'Artist not found' });
       return;
@@ -1047,12 +1054,12 @@ app.get('/api/artist/:id', (req, res) => {
     const result = {
       ...profile,
       heatmap: getArtistHeatmap(db, uid, artistId, range),
-      top_tracks: getArtistTopTracks(db, uid, artistId, range),
-      top_albums: getArtistTopAlbums(db, uid, artistId, range),
+      top_tracks: getArtistTopTracks(db, uid, artistId, range, sort),
+      top_albums: getArtistTopAlbums(db, uid, artistId, range, sort),
       listening_clock: getArtistClock(db, uid, artistId, range),
       day_of_week: getArtistDayOfWeek(db, uid, artistId, range),
-      rank_trajectory: getArtistRankTrajectory(db, uid, artistId, range),
-      song_of_month: getArtistSongOfMonth(db, uid, artistId, range),
+      rank_trajectory: getArtistRankTrajectory(db, uid, artistId, range, sort),
+      song_of_month: getArtistSongOfMonth(db, uid, artistId, range, sort),
       recent_scrobbles: getArtistRecentScrobbles(db, uid, artistId),
     };
 
@@ -1071,7 +1078,7 @@ function rangeClause(range: Range, alias = 's'): { sql: string; params: number[]
   };
 }
 
-function getArtistProfile(db: Database, uid: string, artistId: string, range: Range) {
+function getArtistProfile(db: Database, uid: string, artistId: string, range: Range, sort: Sort) {
   const rc = rangeClause(range);
   const inRange = queryOne<{
     artist: string | null;
@@ -1107,8 +1114,8 @@ function getArtistProfile(db: Database, uid: string, artistId: string, range: Ra
     db,
     `
     WITH ranked AS (
-      SELECT mf.artist_id, SUM(mf.duration) AS total_duration,
-        RANK() OVER (ORDER BY SUM(mf.duration) DESC) AS rnk
+      SELECT mf.artist_id,
+        RANK() OVER (ORDER BY ${rankBy(sort)}, mf.artist_id) AS rnk
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ?${rc.sql}
@@ -1204,7 +1211,7 @@ function getArtistHeatmap(db: Database, uid: string, artistId: string, range: Ra
   );
 }
 
-function getArtistTopTracks(db: Database, uid: string, artistId: string, range: Range) {
+function getArtistTopTracks(db: Database, uid: string, artistId: string, range: Range, sort: Sort) {
   const rc = rangeClause(range);
   return queryAll(
     db,
@@ -1215,13 +1222,13 @@ function getArtistTopTracks(db: Database, uid: string, artistId: string, range: 
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
-    GROUP BY mf.id ORDER BY plays DESC, total_minutes DESC LIMIT 100
+    GROUP BY mf.id ORDER BY ${rankBy(sort)}, mf.id LIMIT 100
   `,
     [uid, artistId, ...rc.params],
   );
 }
 
-function getArtistTopAlbums(db: Database, uid: string, artistId: string, range: Range) {
+function getArtistTopAlbums(db: Database, uid: string, artistId: string, range: Range, sort: Sort) {
   const rc = rangeClause(range);
   return queryAll(
     db,
@@ -1233,7 +1240,7 @@ function getArtistTopAlbums(db: Database, uid: string, artistId: string, range: 
     FROM scrobbles s
     JOIN media_file mf ON s.media_file_id = mf.id
     WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
-    GROUP BY mf.album_id ORDER BY plays DESC LIMIT 50
+    GROUP BY mf.album_id ORDER BY ${rankBy(sort)}, mf.album_id LIMIT 50
   `,
     [uid, artistId, ...rc.params],
   );
@@ -1277,14 +1284,14 @@ function getArtistDayOfWeek(db: Database, uid: string, artistId: string, range: 
   );
 }
 
-function getArtistRankTrajectory(db: Database, uid: string, artistId: string, range: Range) {
+function getArtistRankTrajectory(db: Database, uid: string, artistId: string, range: Range, sort: Sort) {
   const rc = rangeClause(range);
   return queryAll(
     db,
     `
     WITH monthly AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
-        mf.artist_id, COUNT(*) AS plays
+        mf.artist_id, COUNT(*) AS plays, SUM(mf.duration) AS duration
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ?${rc.sql}
@@ -1292,7 +1299,7 @@ function getArtistRankTrajectory(db: Database, uid: string, artistId: string, ra
     ),
     ranked AS (
       SELECT month, artist_id, plays,
-        RANK() OVER (PARTITION BY month ORDER BY plays DESC) AS rnk
+        RANK() OVER (PARTITION BY month ORDER BY ${rankBy(sort, 'plays', 'duration')}, artist_id) AS rnk
       FROM monthly
     )
     SELECT month, plays, rnk FROM ranked WHERE artist_id = ? ORDER BY month
@@ -1301,7 +1308,7 @@ function getArtistRankTrajectory(db: Database, uid: string, artistId: string, ra
   );
 }
 
-function getArtistSongOfMonth(db: Database, uid: string, artistId: string, range: Range) {
+function getArtistSongOfMonth(db: Database, uid: string, artistId: string, range: Range, sort: Sort) {
   const rc = rangeClause(range);
   return queryAll(
     db,
@@ -1309,16 +1316,17 @@ function getArtistSongOfMonth(db: Database, uid: string, artistId: string, range
     WITH monthly_counts AS (
       SELECT strftime('%Y-%m', s.submission_time, 'unixepoch') AS month,
         mf.title, mf.album_id, COUNT(*) AS plays,
+        ROUND(SUM(mf.duration) / 60.0, 1) AS total_minutes,
         ROW_NUMBER() OVER (
           PARTITION BY strftime('%Y-%m', s.submission_time, 'unixepoch')
-          ORDER BY COUNT(*) DESC
+          ORDER BY ${rankBy(sort)}, mf.id
         ) AS rn
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ? AND mf.artist_id = ?${rc.sql}
       GROUP BY month, mf.id
     )
-    SELECT month, title, album_id, plays FROM monthly_counts WHERE rn = 1 ORDER BY month
+    SELECT month, title, album_id, plays, total_minutes FROM monthly_counts WHERE rn = 1 ORDER BY month
   `,
     [uid, artistId, ...rc.params],
   );

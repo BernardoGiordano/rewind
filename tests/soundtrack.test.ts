@@ -29,11 +29,11 @@ beforeEach(() => {
   song.run('long', 'Long', 'A', 'a', 'x', 600, 0, 1995, genre('Metal'));
   song.run('short', 'Short', 'B', 'b', 'y', 100, 0, 2015, genre('Pop'));
   song.run('other', 'Other', 'B', 'b', 'y', 120, 0, 2015, genre('Pop'));
-  song.run('gone', 'Gone', 'B', 'b', 'y', 1000, 1, 2015, genre('Pop'));
+  song.run('gone', 'Gone', 'B', 'b', 'y', 50, 1, 2015, genre('Pop'));
 
   const scrobble = db.prepare(`INSERT INTO scrobbles VALUES ('listener', ?, ?)`);
 
-  // Long has the most minutes, Short repeats one night, Other owns the afternoons.
+  // Other has the most plays. Long has the most minutes (Gone is short, so B does not outlisten A).
   scrobble.run('long', at(6, 10));
   scrobble.run('long', at(6, 10, 10));
   for (let i = 0; i < 4; i++) scrobble.run('short', at(7, 2, i * 5));
@@ -41,15 +41,16 @@ beforeEach(() => {
   scrobble.run('gone', at(8, 16));
 
   db.prepare(`INSERT INTO annotation VALUES ('long', 'media_file', 'listener', 50)`).run();
+  db.prepare(`INSERT INTO annotation VALUES ('short', 'media_file', 'listener', 80)`).run();
 });
 
 describe('soundtrackFor', () => {
   it('plays the first row of a slide that ranks songs, skipping missing files', () => {
     const songs = ids(soundtrackFor(db, 'listener', YEAR_2025));
 
-    expect(songs['top-songs']).toBe('long');
-    expect(songs['summary']).toBe('long');
-    expect(songs['recap']).toBe('long');
+    expect(songs['top-songs']).toBe('other');
+    expect(songs['summary']).toBe('other');
+    expect(songs['recap']).toBe('other');
     expect(songs['late-night']).toBe('short');
     expect(songs['on-repeat']).toBe('short');
   });
@@ -57,7 +58,7 @@ describe('soundtrackFor', () => {
   it("plays the most-played song inside the slide's top entry", () => {
     const songs = ids(soundtrackFor(db, 'listener', YEAR_2025));
 
-    // B outlistens A, counting the missing file, so its own most-played song plays.
+    // B has more plays than A, so its own most-played song plays (A would win on minutes).
     expect(songs['top-artists']).toBe('other');
     expect(songs['top-albums']).toBe('other');
     expect(songs['top-genres']).toBe('other');
@@ -67,12 +68,39 @@ describe('soundtrackFor', () => {
     expect(songs['song-of-month']).toBe('other');
   });
 
-  it('ranks all-time decades by play counts and leaves out year-only slides', () => {
+  it('ranks songs and entries by listening time when sorted by time', () => {
+    const songs = ids(soundtrackFor(db, 'listener', YEAR_2025, 'time'));
+
+    // Long has the most minutes, and A, its album, Metal and the 1990s follow it.
+    expect(songs['top-songs']).toBe('long');
+    expect(songs['summary']).toBe('long');
+    expect(songs['recap']).toBe('long');
+    expect(songs['top-artists']).toBe('long');
+    expect(songs['top-albums']).toBe('long');
+    expect(songs['top-genres']).toBe('long');
+    expect(songs['favorite-decades']).toBe('long');
+    expect(songs['streak']).toBe('long');
+    expect(songs['song-of-month']).toBe('long');
+
+    // The busiest hour still counts plays, and only Short plays late or on repeat.
+    expect(songs['listening-clock']).toBe('other');
+    expect(songs['late-night']).toBe('short');
+    expect(songs['on-repeat']).toBe('short');
+  });
+
+  it('ranks all-time decades by annotation play counts and leaves out year-only slides', () => {
     const songs = ids(soundtrackFor(db, 'listener', null));
 
-    expect(songs['favorite-decades']).toBe('long');
+    expect(songs['favorite-decades']).toBe('other');
     expect(songs).not.toHaveProperty('listening-clock');
     expect(songs).not.toHaveProperty('on-repeat');
+  });
+
+  it('ranks all-time decades by annotated minutes when sorted by time', () => {
+    const songs = ids(soundtrackFor(db, 'listener', null, 'time'));
+
+    // Fewer plays of Long outlast more plays of Short.
+    expect(songs['favorite-decades']).toBe('long');
   });
 
   it('has no song for a range without listens', () => {

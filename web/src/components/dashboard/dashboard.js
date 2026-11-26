@@ -17,6 +17,7 @@ import { AppIcon } from '../icon/icon.js';
 import { NAVIDROME } from '../../services/navidrome.js';
 import { LAYOUT } from '../../shell/layout-mode.js';
 import { REWIND_RANGE } from '../../shell/rewind-range.js';
+import { REWIND_SORT } from '../../shell/rewind-sort.js';
 import { SHELL } from '../../shell/shell-state.js';
 import { DASHBOARD } from './dashboard-state.js';
 import { DashboardMenuActions } from './menu-actions.js';
@@ -41,6 +42,7 @@ const SONGS_STATS_KEY = 'rewind.songsStatsCollapsed';
 export class Dashboard extends SignalElement {
   #nav = inject(STAT_NAVIGATOR);
   #range = inject(REWIND_RANGE);
+  #sort = inject(REWIND_SORT);
   #layout = inject(LAYOUT);
   #shell = inject(SHELL);
   #store = inject(STAT_STORE);
@@ -92,15 +94,16 @@ export class Dashboard extends SignalElement {
       });
     });
 
-    // One load path: whatever moves the selection, the range or the history, the
-    // fetch follows. Data still held for what is on screen is shown as it is.
+    // One load path: whatever moves the selection, the range, the sort or the history,
+    // the fetch follows. Data still held for what is on screen is shown as it is.
     watch(this, () => {
       const type = this.#nav.current.value;
       const range = this.#range.current.value;
+      const sort = this.#sort.current.value;
       void navidrome.historyVersion.value;
       if (!ready.value) return;
       untracked(() => {
-        if (!this.#store.holds(type, range)) void this.#store.load(type, range);
+        if (!this.#store.holds(type, range, sort)) void this.#store.load(type, range, sort);
       });
     });
 
@@ -188,7 +191,7 @@ export class Dashboard extends SignalElement {
 
   /** Re-runs the current request, for retry after an error. */
   reload() {
-    void this.#store.load(this.#nav.current.value, this.#range.current.value);
+    void this.#store.load(this.#nav.current.value, this.#range.current.value, this.#sort.current.value);
   }
 
   // Touch adapter: a horizontal drag across the card steps to the neighbouring stat.
@@ -224,7 +227,8 @@ export class Dashboard extends SignalElement {
     }
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.#range.panelOpen.value || this.statSheetOpen.value || this.#shell.menuOpen.value) return;
+    if (this.#range.panelOpen.value || this.#sort.panelOpen.value) return;
+    if (this.statSheetOpen.value || this.#shell.menuOpen.value) return;
     if (this.drawerOpen.value) return;
 
     const target = event.target;

@@ -9,6 +9,7 @@
  * @property {string} route Where the section's navigation entry points.
  * @property {string[]} owns Extra URL prefixes this section owns, such as drill-down pages reached from it.
  * @property {boolean} usesRange The Rewind date range applies to this section's data.
+ * @property {boolean} usesSort The section ranks listening stats, so the sort applies.
  * @property {number} order Position in every adapter, low first.
  */
 
@@ -21,6 +22,7 @@ export const SECTIONS = [
     route: '/library',
     owns: [],
     usesRange: false,
+    usesSort: false,
     order: 10,
   },
   {
@@ -30,6 +32,7 @@ export const SECTIONS = [
     route: '/',
     owns: ['/artist'],
     usesRange: true,
+    usesSort: true,
     order: 20,
   },
 ];

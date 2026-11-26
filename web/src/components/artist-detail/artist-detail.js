@@ -17,6 +17,7 @@ import { AppIcon } from '../icon/icon.js';
 import { NAVIDROME } from '../../services/navidrome.js';
 import { NAVIGATION_HISTORY } from '../../shell/navigation-history.js';
 import { REWIND_RANGE } from '../../shell/rewind-range.js';
+import { REWIND_SORT } from '../../shell/rewind-sort.js';
 import { SECTION_REGISTRY } from '../../shell/section-registry.js';
 import { formatMonthShort, parseIsoDate, toIsoDate } from '../../utils/format.js';
 import { watch } from '../../utils/watch.js';
@@ -43,6 +44,7 @@ const SHORT_DATE = /** @type {Intl.DateTimeFormatOptions} */ ({
 export class ArtistDetail extends SignalElement {
   #navidrome = inject(NAVIDROME);
   #rewindRange = inject(REWIND_RANGE);
+  #sort = inject(REWIND_SORT);
 
   tabs = TABS;
 
@@ -53,8 +55,17 @@ export class ArtistDetail extends SignalElement {
   range = this.#rewindRange.current;
   rangeLabel = this.#rewindRange.label;
 
+  /** The dashboard's sort, which orders the rank and the lists here too. */
+  byTime = computed(() => this.#sort.current.value === 'time');
+
   #artist = resource(
-    (signal) => this.#navidrome.getArtist(this.artistId.value, this.range.value, signal),
+    (signal) =>
+      this.#navidrome.getArtist(
+        this.artistId.value,
+        this.range.value,
+        this.#sort.current.value,
+        signal,
+      ),
     { initial: /** @type {ArtistDetailData | null} */ (null), lifetime: () => this.lifetime },
   );
 
@@ -247,9 +258,10 @@ export class ArtistDetail extends SignalElement {
   connectedCallback() {
     super.connectedCallback();
 
-    // One load path: whatever moves the artist or the range, the fetch follows.
+    // One load path: whatever moves the artist, the range or the sort, the fetch follows.
     watch(this, () => {
       void this.range.value;
+      void this.#sort.current.value;
       if (!this.artistId.value || !this.#rewindRange.ready.value) return;
       void this.#artist.reload();
     });

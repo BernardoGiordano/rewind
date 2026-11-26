@@ -46,6 +46,21 @@
         <span class="font-mono text-[9px] leading-none max-w-full truncate">{{ rangeShortLabel }}</span>
       </button>
 
+      <button
+        *if="showSort"
+        type="button"
+        (click)="toggleSortPanel()"
+        [aria-expanded]="sortPanelOpen"
+        aria-haspopup="dialog"
+        [aria-label]="t('sort.change', { label: t(sortOption.labelKey) })"
+        [title]="t('sort.titled', { label: t(sortOption.labelKey) })"
+        class="cursor-pointer flex flex-col items-center gap-0.5 w-12 py-1.5 rounded-xl transition-colors"
+        [class]="sortPanelOpen ? 'bg-selected text-on-selected' : 'text-ink-muted hover:bg-fill hover:text-ink'"
+      >
+        <app-icon name="heroBarsArrowDown" class="w-5 h-5" aria-hidden="true"></app-icon>
+        <span class="font-mono text-[9px] leading-none max-w-full truncate">{{ t(sortOption.shortKey) }}</span>
+      </button>
+
       <x-outlet [.target]="&railControls"></x-outlet>
 
       <div *if="currentUser" class="w-8 border-t border-edge my-1" aria-hidden="true"></div>
@@ -216,6 +231,21 @@
       </span>
       <app-icon name="heroChevronRight" class="w-4 h-4 shrink-0 text-ink-faint" aria-hidden="true"></app-icon>
     </button>
+    <button
+      *if="showSort"
+      type="button"
+      role="menuitem"
+      (click)="toggleSortPanel()"
+      aria-haspopup="dialog"
+      class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink-soft hover:bg-fill-raised transition-colors text-left"
+    >
+      <app-icon name="heroBarsArrowDown" class="w-4 h-4 shrink-0" aria-hidden="true"></app-icon>
+      <span class="flex-1 min-w-0">
+        <span class="block">{{ t('sort.title') }}</span>
+        <span class="block text-xs text-ink-muted truncate">{{ t(sortOption.labelKey) }}</span>
+      </span>
+      <app-icon name="heroChevronRight" class="w-4 h-4 shrink-0 text-ink-faint" aria-hidden="true"></app-icon>
+    </button>
 
     <div *if="menuActions" role="separator" class="my-1 border-t border-edge-raised"></div>
     <x-outlet [.target]="&menuActions"></x-outlet>
@@ -292,6 +322,23 @@
     class="fixed z-60 inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[env(safe-area-inset-bottom)] medium-up:inset-x-auto medium-up:left-[4.5rem] medium-up:bottom-3 medium-up:max-h-[calc(100dvh-1.5rem)] medium-up:rounded-xl medium-up:pb-0 bg-surface-raised shadow-xl ring-1 ring-edge-raised"
   >
     <app-period-panel (closed)="closeRangePanel()"></app-period-panel>
+  </div>
+
+  <!-- SORT PANEL — placed like the period panel -->
+  <div
+    *if="sortPanelOpen"
+    class="fixed inset-0 z-50 bg-black/40 medium-up:bg-transparent"
+    (click)="closeSortPanel()"
+    aria-hidden="true"
+  ></div>
+  <div
+    *if="sortPanelOpen"
+    role="dialog"
+    aria-modal="true"
+    [aria-label]="t('sort.title')"
+    class="fixed z-60 inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[env(safe-area-inset-bottom)] medium-up:inset-x-auto medium-up:left-[4.5rem] medium-up:bottom-3 medium-up:w-72 medium-up:rounded-xl medium-up:pb-0 bg-surface-raised shadow-xl ring-1 ring-edge-raised"
+  >
+    <app-sort-panel (closed)="closeSortPanel()"></app-sort-panel>
   </div>
 
   <!-- Author credit — expanded only, and only where the route leaves the corner free -->

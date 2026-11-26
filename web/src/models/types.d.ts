@@ -9,6 +9,9 @@ export type StatRange =
   | { kind: 'year'; year: string }
   | { kind: 'custom'; from: string; to: string };
 
+/** What ranked lists order by. Each ranked row shows both figures either way. */
+export type StatSort = 'plays' | 'time';
+
 /**
  * The range as query params, `null` where the param does not apply, so one object both
  * writes the current range and clears the params belonging to the other kinds.
@@ -113,6 +116,7 @@ export interface LateNightTrack {
   title: string;
   artist: string;
   late_night_plays: number;
+  late_night_minutes: number;
   album_id: string;
   artist_id: string;
 }
@@ -130,6 +134,7 @@ export interface SongOfMonth {
   title: string;
   artist: string;
   plays: number;
+  total_minutes: number;
   album_id: string;
   artist_id: string;
 }
@@ -246,6 +251,7 @@ export interface ArtistSongOfMonth {
   title: string;
   album_id: string;
   plays: number;
+  total_minutes: number;
 }
 
 export interface ArtistRecentScrobble {
