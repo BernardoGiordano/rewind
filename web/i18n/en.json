@@ -68,12 +68,19 @@
     "custom": "Custom range"
   },
   "sort": {
-    "$comment": "How ranked lists order their rows. The short labels sit side by side in a menu.",
-    "label": "Rank by",
+    "$comment": "How ranked lists order their rows: by play count or by listening time.",
+    "title": "Rank by",
+    "titled": "Rank by · {label}",
+    "change": "Change ranking, currently {label}",
     "plays": "Plays",
-    "time": "Time",
-    "byPlays": "Rank by plays",
-    "byTime": "Rank by listening time"
+    "time": "Listening time",
+    "playsHint": "Most played first",
+    "timeHint": "Longest listened first",
+    "short": {
+      "$comment": "Fits a 48 px rail under an icon. Keep it to about six characters.",
+      "plays": "Plays",
+      "time": "Time"
+    }
   },
   "datePicker": {
     "previousYear": "Previous year",

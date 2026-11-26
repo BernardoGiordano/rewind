@@ -69,11 +69,17 @@
     "custom": "Intervalo personalizado"
   },
   "sort": {
-    "label": "Ordenar por",
-    "plays": "Reprod.",
-    "time": "Tiempo",
-    "byPlays": "Ordenar por reproducciones",
-    "byTime": "Ordenar por tiempo de escucha"
+    "title": "Ordenar por",
+    "titled": "Ordenar por · {label}",
+    "change": "Cambiar el orden, ahora {label}",
+    "plays": "Reproducciones",
+    "time": "Tiempo de escucha",
+    "playsHint": "Lo más reproducido primero",
+    "timeHint": "Lo más escuchado primero",
+    "short": {
+      "plays": "Reprod.",
+      "time": "Tiempo"
+    }
   },
   "datePicker": {
     "previousYear": "Año anterior",

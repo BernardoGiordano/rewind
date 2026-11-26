@@ -227,7 +227,8 @@ export class Dashboard extends SignalElement {
     }
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (this.#range.panelOpen.value || this.statSheetOpen.value || this.#shell.menuOpen.value) return;
+    if (this.#range.panelOpen.value || this.#sort.panelOpen.value) return;
+    if (this.statSheetOpen.value || this.#shell.menuOpen.value) return;
     if (this.drawerOpen.value) return;
 
     const target = event.target;

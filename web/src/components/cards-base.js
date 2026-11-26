@@ -143,8 +143,28 @@ export class CardsBase extends SignalElement {
   }
 
   /**
-   * The figure a ranked row is ordered by, for the end of the row. Plays show as a
-   * bare number, as the column or the #1 entry above names them.
+   * The header of a table's last column, which holds {@link lead}.
+   *
+   * @param {string} timeKey The message naming the time column, minutes or hours.
+   * @returns {string}
+   */
+  leadHeader(timeKey) {
+    return t(this.byTime.value ? timeKey : 'cards.columns.plays');
+  }
+
+  /**
+   * The header of the column before it, which holds {@link trail}.
+   *
+   * @param {string} timeKey The message naming the time column, minutes or hours.
+   * @returns {string}
+   */
+  trailHeader(timeKey) {
+    return t(this.byTime.value ? 'cards.columns.plays' : timeKey);
+  }
+
+  /**
+   * The figure a ranked row is ordered by, for the end of the row or a table's last
+   * column. Plays show as a bare number, as the column or the #1 entry names them.
    *
    * @param {number} plays
    * @param {string} time Formatted with its unit.

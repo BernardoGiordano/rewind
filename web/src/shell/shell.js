@@ -20,11 +20,10 @@ import { watch } from '../utils/watch.js';
 import { AppByline } from './byline.js';
 import { AppPeriodPanel } from './period-panel.js';
 import { REWIND_RANGE } from './rewind-range.js';
-import { REWIND_SORT, SORTS } from './rewind-sort.js';
+import { REWIND_SORT } from './rewind-sort.js';
 import { SECTION_REGISTRY } from './section-registry.js';
 import { SHELL } from './shell-state.js';
-
-/** @import { StatSort } from '../models/types.js' */
+import { AppSortPanel } from './sort-panel.js';
 
 /**
  * Owns the application chrome: section navigation, theme, identity and links.
@@ -59,10 +58,10 @@ export class Shell extends SignalElement {
   rangeShortLabel = this.#range.shortLabel;
   rangePanelOpen = this.#range.panelOpen;
 
-  /** The sort control sits beside the range, on sections that rank listening stats. */
+  /** The sort control sits under the range, on sections that rank listening stats. */
   showSort = computed(() => this.#registry.active.value?.usesSort === true);
-  sorts = SORTS;
-  sort = this.#sort.current;
+  sortOption = this.#sort.option;
+  sortPanelOpen = this.#sort.panelOpen;
 
   connectedCallback() {
     super.connectedCallback();
@@ -105,6 +104,7 @@ export class Shell extends SignalElement {
   toggleRangePanel() {
     this.#shell.closeMenu();
     this.accountOpen.value = false;
+    this.#sort.closePanel();
     this.#range.togglePanel();
   }
 
@@ -112,13 +112,20 @@ export class Shell extends SignalElement {
     this.#range.closePanel();
   }
 
-  /** @param {StatSort} sort */
-  selectSort(sort) {
-    this.#sort.set(sort);
+  toggleSortPanel() {
+    this.#shell.closeMenu();
+    this.accountOpen.value = false;
+    this.#range.closePanel();
+    this.#sort.togglePanel();
+  }
+
+  closeSortPanel() {
+    this.#sort.closePanel();
   }
 
   toggleAccount() {
     this.#range.closePanel();
+    this.#sort.closePanel();
     this.accountOpen.value = !this.accountOpen.value;
   }
 
@@ -142,11 +149,12 @@ export class Shell extends SignalElement {
     );
   }
 
-  /** Closes the menu, the account popover and the range panel. */
+  /** Closes the menu, the account popover and the range and sort panels. */
   #closeOverlays() {
     this.#shell.closeMenu();
     this.accountOpen.value = false;
     this.#range.closePanel();
+    this.#sort.closePanel();
   }
 }
 
@@ -162,5 +170,6 @@ await defineComponent({
     AppLocalePicker,
     AppThemePicker,
     AppPeriodPanel,
+    AppSortPanel,
   ],
 });

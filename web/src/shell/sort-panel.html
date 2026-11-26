@@ -1,0 +1,40 @@
+<div class="flex items-start justify-between gap-4 px-5 pt-4 pb-3 border-b border-edge-raised">
+  <div class="min-w-0">
+    <h2 class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+      {{ t('sort.title') }}
+    </h2>
+    <p class="mt-0.5 text-lg font-bold text-ink truncate">{{ t(option.labelKey) }}</p>
+  </div>
+  <button
+    type="button"
+    (click)="close()"
+    [aria-label]="t('common.close')"
+    class="cursor-pointer shrink-0 flex items-center justify-center w-8 h-8 -mr-2 rounded-lg text-ink-muted hover:bg-fill-raised hover:text-ink transition-colors"
+  >
+    <app-icon name="heroXMark" class="w-4 h-4" aria-hidden="true"></app-icon>
+  </button>
+</div>
+
+<ul role="list" class="p-2 flex flex-col gap-0.5">
+  <li *for="o of sorts; key: o.id">
+    <button
+      type="button"
+      (click)="choose(o.id)"
+      [aria-pressed]="o.id === current"
+      class="cursor-pointer w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors"
+      [class]="o.id === current ? 'bg-fill-strong text-ink' : 'text-ink-soft hover:bg-fill-raised hover:text-ink'"
+    >
+      <app-icon [name]="o.icon" class="w-5 h-5 shrink-0" aria-hidden="true"></app-icon>
+      <span class="flex-1 min-w-0">
+        <span class="block text-sm font-medium">{{ t(o.labelKey) }}</span>
+        <span class="block text-xs text-ink-muted">{{ t(o.hintKey) }}</span>
+      </span>
+      <app-icon
+        *if="o.id === current"
+        name="heroCheck"
+        class="w-4 h-4 shrink-0"
+        aria-hidden="true"
+      ></app-icon>
+    </button>
+  </li>
+</ul>
