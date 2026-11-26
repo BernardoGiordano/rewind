@@ -9,6 +9,7 @@ import { THEME, ThemeService } from './services/theme.js';
 import { LAYOUT, LayoutModeService } from './shell/layout-mode.js';
 import { NAVIGATION_HISTORY, NavigationHistory } from './shell/navigation-history.js';
 import { REWIND_RANGE, RewindRange } from './shell/rewind-range.js';
+import { REWIND_SORT, RewindSort } from './shell/rewind-sort.js';
 import { SECTION_REGISTRY, SectionRegistry } from './shell/section-registry.js';
 import { SHELL, ShellState } from './shell/shell-state.js';
 import { COVER_FOCUS, CoverFocusStore } from './components/pan-cover.js';
@@ -29,12 +30,19 @@ await startApplication({
     provide(SHELL, () => new ShellState());
     provide(NAVIGATION_HISTORY, () => new NavigationHistory());
     provide(REWIND_RANGE, () => new RewindRange());
+    provide(REWIND_SORT, () => new RewindSort());
     provide(STAT_NAVIGATOR, () => new StatNavigator(inject(REWIND_RANGE)));
     provide(STAT_STORE, () => new StatStore());
     provide(DASHBOARD, () => new DashboardState());
     provide(
       SOUNDTRACK,
-      () => new Soundtrack(inject(NAVIDROME), inject(REWIND_RANGE), inject(STAT_NAVIGATOR)),
+      () =>
+        new Soundtrack(
+          inject(NAVIDROME),
+          inject(REWIND_RANGE),
+          inject(REWIND_SORT),
+          inject(STAT_NAVIGATOR),
+        ),
     );
     provide(COVER_FOCUS, () => new CoverFocusStore());
 

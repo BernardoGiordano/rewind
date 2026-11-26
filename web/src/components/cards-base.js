@@ -1,8 +1,9 @@
-import { computed, inject, locale, signal, SignalElement } from '@srljs/core';
+import { computed, inject, locale, num, signal, SignalElement, t } from '@srljs/core';
 
 import { DOMINANT_COLOR } from '../services/dominant-color.js';
 import { NAVIDROME } from '../services/navidrome.js';
 import { REWIND_RANGE } from '../shell/rewind-range.js';
+import { REWIND_SORT } from '../shell/rewind-sort.js';
 import { STAT_NAVIGATOR } from './dashboard/stat-navigator.js';
 import { STAT_STORE } from './dashboard/stat-store.js';
 import { formatYearMonth, formatYearMonthWithYear } from '../utils/format.js';
@@ -18,6 +19,7 @@ export class CardsBase extends SignalElement {
   #navidrome = inject(NAVIDROME);
   #store = inject(STAT_STORE);
   #nav = inject(STAT_NAVIGATOR);
+  #sort = inject(REWIND_SORT);
 
   selectedStat = this.#nav.current;
   selectedDef = computed(() => this.#nav.definition.value ?? undefined);
@@ -48,10 +50,18 @@ export class CardsBase extends SignalElement {
     );
   });
 
-  maxGenrePlays = computed(() => Math.max(...this.topGenres.value.map((g) => g.plays), 1));
+  /** True while ranked lists order by listening time instead of plays. */
+  byTime = computed(() => this.#sort.current.value === 'time');
+
+  /** Genre and decade bars measure the figure their list ranks by. */
+  maxGenreValue = computed(() =>
+    Math.max(...this.topGenres.value.map((g) => this.rankValue(g.plays, g.total_hours)), 0),
+  );
+  maxDecadeValue = computed(() =>
+    Math.max(...this.favoriteDecades.value.map((d) => this.rankValue(d.total_plays, d.total_hours)), 0),
+  );
   maxClockPlays = computed(() => Math.max(...this.listeningClock.value.map((c) => c.plays), 1));
   maxDayPlays = computed(() => Math.max(...this.dayOfWeek.value.map((d) => d.plays), 1));
-  maxDecadePlays = computed(() => Math.max(...this.favoriteDecades.value.map((d) => d.total_plays), 1));
   maxMonthPlays = computed(() => Math.max(...this.monthlyTrends.value.map((m) => m.plays), 1));
 
   dynamicGradientStyle = signal(/** @type {string | null} */ (null));
@@ -106,6 +116,53 @@ export class CardsBase extends SignalElement {
           if (this.heroCoverId.value === id) this.dynamicGradientStyle.value = gradient;
         });
     });
+  }
+
+  /**
+   * The figure a ranked row is ordered by.
+   *
+   * @param {number} plays
+   * @param {number} time
+   * @returns {number}
+   */
+  rankValue(plays, time) {
+    return this.byTime.value ? time : plays;
+  }
+
+  /**
+   * A ranked row's play count and listening time on one line, the ranked one first,
+   * such as `46 plays · 2.5h`.
+   *
+   * @param {number} plays
+   * @param {string} time Formatted with its unit.
+   * @returns {string}
+   */
+  figures(plays, time) {
+    const count = t('cards.plays', { count: plays });
+    return this.byTime.value ? `${time} · ${count}` : `${count} · ${time}`;
+  }
+
+  /**
+   * The figure a ranked row is ordered by, for the end of the row. Plays show as a
+   * bare number, as the column or the #1 entry above names them.
+   *
+   * @param {number} plays
+   * @param {string} time Formatted with its unit.
+   * @returns {string}
+   */
+  lead(plays, time) {
+    return this.byTime.value ? time : num(plays);
+  }
+
+  /**
+   * The other figure, set smaller under {@link lead}.
+   *
+   * @param {number} plays
+   * @param {string} time Formatted with its unit.
+   * @returns {string}
+   */
+  trail(plays, time) {
+    return this.byTime.value ? num(plays) : time;
   }
 
   /**

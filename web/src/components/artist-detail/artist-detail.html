@@ -235,11 +235,9 @@
                 <p class="text-sm font-semibold truncate">{{ track.title }}</p>
                 <p class="text-xs text-ink-muted truncate">{{ track.album }}</p>
               </div>
-              <div class="text-right shrink-0">
-                <p class="text-sm font-bold tabular-nums">{{ num(track.plays) }}</p>
-                <p class="text-xs text-ink-faint tabular-nums">
-                  {{ minutes(track.total_minutes, 0, 0) }}
-                </p>
+              <div class="text-right shrink-0 tabular-nums">
+                <p class="text-sm font-bold">{{ byTime ? minutes(track.total_minutes, 0, 0) : num(track.plays) }}</p>
+                <p class="text-xs text-ink-faint">{{ byTime ? num(track.plays) : minutes(track.total_minutes, 0, 0) }}</p>
               </div>
             </li>
           </ul>
@@ -270,11 +268,9 @@
                 <p class="text-sm font-semibold truncate">{{ a.album }}</p>
                 <p class="text-xs text-ink-muted">{{ t('cards.tracks', { count: a.unique_tracks }) }}</p>
               </div>
-              <div class="text-right shrink-0">
-                <p class="text-sm font-bold tabular-nums">{{ num(a.plays) }}</p>
-                <p class="text-xs text-ink-faint tabular-nums">
-                  {{ minutes(a.total_minutes, 0, 0) }}
-                </p>
+              <div class="text-right shrink-0 tabular-nums">
+                <p class="text-sm font-bold">{{ byTime ? minutes(a.total_minutes, 0, 0) : num(a.plays) }}</p>
+                <p class="text-xs text-ink-faint">{{ byTime ? num(a.plays) : minutes(a.total_minutes, 0, 0) }}</p>
               </div>
             </li>
           </ul>
@@ -417,9 +413,14 @@
                 <app-cover [.cover-id]="s.album_id" [.size]="100"></app-cover>
               </div>
               <p class="flex-1 text-sm font-semibold truncate">{{ s.title }}</p>
-              <span class="text-sm font-bold tabular-nums shrink-0">
-                {{ t('cards.plays', { count: s.plays }) }}
-              </span>
+              <div class="text-right shrink-0 tabular-nums">
+                <p class="text-sm font-bold">
+                  {{ byTime ? minutes(s.total_minutes, 0, 0) : t('cards.plays', { count: s.plays }) }}
+                </p>
+                <p class="text-xs text-ink-faint">
+                  {{ byTime ? t('cards.plays', { count: s.plays }) : minutes(s.total_minutes, 0, 0) }}
+                </p>
+              </div>
             </li>
           </ul>
         </div>

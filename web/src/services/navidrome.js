@@ -3,7 +3,7 @@ import { inject, signal, token } from '@srljs/core';
 import { API } from './api.js';
 
 /** @import { InjectionToken } from '@core/foundation/types.js' */
-/** @import { ArtistDetail, SoundtrackSongs, StatRange, StatType } from '../models/types.js' */
+/** @import { ArtistDetail, SoundtrackSongs, StatRange, StatSort, StatType } from '../models/types.js' */
 
 /** @type {InjectionToken<NavidromeService>} */
 export const NAVIDROME = token('Navidrome');
@@ -76,32 +76,36 @@ export class NavidromeService {
   /**
    * @param {StatType} type
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @param {AbortSignal} [signal]
    * @returns {Promise<unknown>}
    */
-  getStat(type, range, signal) {
-    return inject(API).get(`/stats/${type}`, rangeQuery(range), signal);
+  getStat(type, range, sort, signal) {
+    return inject(API).get(`/stats/${type}`, { ...rangeQuery(range), sort }, signal);
   }
 
   /**
    * The song each slide plays over `range`.
    *
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @param {AbortSignal} [signal]
    * @returns {Promise<SoundtrackSongs>}
    */
-  getSoundtrack(range, signal) {
-    return inject(API).get('/soundtrack', rangeQuery(range), signal);
+  getSoundtrack(range, sort, signal) {
+    return inject(API).get('/soundtrack', { ...rangeQuery(range), sort }, signal);
   }
 
   /**
    * @param {string} artistId
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @param {AbortSignal} [signal]
    * @returns {Promise<ArtistDetail>}
    */
-  getArtist(artistId, range, signal) {
-    return inject(API).get(`/artist/${encodeURIComponent(artistId)}`, rangeQuery(range), signal);
+  getArtist(artistId, range, sort, signal) {
+    const path = `/artist/${encodeURIComponent(artistId)}`;
+    return inject(API).get(path, { ...rangeQuery(range), sort }, signal);
   }
 }
 

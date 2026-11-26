@@ -89,13 +89,9 @@
           </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topSong.title }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topSong.artist }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ t('cards.plays', { count: topSong.plays }) }}</span
-            >
-            <span class="text-white/30 text-sm tabular-nums"
-              >{{ minutes(topSong.total_minutes) }}</span
-            >
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'">{{ t('cards.plays', { count: topSong.plays }) }}</span>
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'">{{ minutes(topSong.total_minutes) }}</span>
           </div>
         </div>
       </div>
@@ -108,7 +104,7 @@
             <col class="w-16" />
             <col />
             <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -124,12 +120,14 @@
                 {{ t('cards.columns.track') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                [class]="byTime ? 'text-white/30' : 'text-white/60'"
               >
                 {{ t('cards.columns.plays') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                [class]="byTime ? 'text-white/60' : 'text-white/30'"
               >
                 {{ t('cards.columns.minutes') }}
               </th>
@@ -143,7 +141,7 @@
               <col class="w-16" />
               <col />
               <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -169,10 +167,16 @@
                   </p>
                   <p class="text-white/50 text-xs truncate">{{ song.artist }}</p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
+                <td
+                  class="tabular-nums text-right pr-4 py-1.5"
+                  [class]="byTime ? 'text-white/30 text-xs' : 'text-white/70 text-sm font-bold'"
+                >
                   {{ num(song.plays) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
+                <td
+                  class="tabular-nums text-right py-1.5"
+                  [class]="byTime ? 'text-white/70 text-sm font-bold' : 'text-white/30 text-xs'"
+                >
                   {{ minutes(song.total_minutes) }}
                 </td>
               </tr>
@@ -222,13 +226,9 @@
           <p class="text-white/70 text-base truncate mt-0.5">
             {{ t('cards.tracks', { count: topArtist.unique_tracks }) }}
           </p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ t('cards.plays', { count: topArtist.plays }) }}</span
-            >
-            <span class="text-white/30 text-sm tabular-nums"
-              >{{ hours(topArtist.total_hours) }}</span
-            >
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'">{{ t('cards.plays', { count: topArtist.plays }) }}</span>
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'">{{ hours(topArtist.total_hours) }}</span>
           </div>
         </div>
       </div>
@@ -241,7 +241,7 @@
             <col class="w-16" />
             <col />
             <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -257,12 +257,14 @@
                 {{ t('cards.columns.artist') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                [class]="byTime ? 'text-white/30' : 'text-white/60'"
               >
                 {{ t('cards.columns.plays') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                [class]="byTime ? 'text-white/60' : 'text-white/30'"
               >
                 {{ t('cards.columns.hours') }}
               </th>
@@ -276,7 +278,7 @@
               <col class="w-16" />
               <col />
               <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -304,10 +306,16 @@
                     {{ t('cards.tracks', { count: artist.unique_tracks }) }}
                   </p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
+                <td
+                  class="tabular-nums text-right pr-4 py-1.5"
+                  [class]="byTime ? 'text-white/30 text-xs' : 'text-white/70 text-sm font-bold'"
+                >
                   {{ num(artist.plays) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
+                <td
+                  class="tabular-nums text-right py-1.5"
+                  [class]="byTime ? 'text-white/70 text-sm font-bold' : 'text-white/30 text-xs'"
+                >
                   {{ hours(artist.total_hours) }}
                 </td>
               </tr>
@@ -353,13 +361,9 @@
           </p>
           <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-white/60 text-sm font-bold tabular-nums"
-              >{{ t('cards.plays', { count: topAlbum.plays }) }}</span
-            >
-            <span class="text-white/30 text-sm tabular-nums"
-              >{{ minutes(topAlbum.total_minutes) }}</span
-            >
+          <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
+            <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'">{{ t('cards.plays', { count: topAlbum.plays }) }}</span>
+            <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'">{{ minutes(topAlbum.total_minutes) }}</span>
           </div>
         </div>
       </div>
@@ -372,7 +376,7 @@
             <col class="w-16" />
             <col />
             <col class="w-14" />
-            <col class="w-12" />
+            <col class="w-16" />
           </colgroup>
           <thead>
             <tr>
@@ -388,12 +392,14 @@
                 {{ t('cards.columns.album') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+                [class]="byTime ? 'text-white/30' : 'text-white/60'"
               >
                 {{ t('cards.columns.plays') }}
               </th>
               <th
-                class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                [class]="byTime ? 'text-white/60' : 'text-white/30'"
               >
                 {{ t('cards.columns.minutes') }}
               </th>
@@ -407,7 +413,7 @@
               <col class="w-16" />
               <col />
               <col class="w-14" />
-              <col class="w-12" />
+              <col class="w-16" />
             </colgroup>
             <tbody>
               <tr
@@ -433,10 +439,16 @@
                     {{ album.album_artist }}
                   </p>
                 </td>
-                <td class="text-white/60 text-sm font-bold tabular-nums text-right pr-4 py-1.5">
+                <td
+                  class="tabular-nums text-right pr-4 py-1.5"
+                  [class]="byTime ? 'text-white/30 text-xs' : 'text-white/70 text-sm font-bold'"
+                >
                   {{ num(album.plays) }}
                 </td>
-                <td class="text-white/30 text-xs tabular-nums text-right py-1.5">
+                <td
+                  class="tabular-nums text-right py-1.5"
+                  [class]="byTime ? 'text-white/70 text-sm font-bold' : 'text-white/30 text-xs'"
+                >
                   {{ minutes(album.total_minutes) }}
                 </td>
               </tr>
@@ -481,15 +493,17 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10"
+              [class]="byTime ? 'text-white/30' : 'text-white/60'"
             >
               {{ t('cards.columns.plays') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              [class]="byTime ? 'text-white/60' : 'text-white/30'"
             >
               {{ t('cards.columns.hours') }}
             </th>
@@ -517,14 +531,20 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="percentOf(genre.plays, maxGenrePlays)"
+                    [style.width.%]="percentOf(rankValue(genre.plays, genre.total_hours), maxGenreValue)"
                   ></div>
                 </div>
               </td>
-              <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-6 py-1.5">
+              <td
+                class="text-sm tabular-nums text-right pr-6 py-1.5"
+                [class]="byTime ? 'text-white/40' : 'text-white/70 font-bold'"
+              >
                 {{ num(genre.plays) }}
               </td>
-              <td class="text-white/40 text-sm tabular-nums text-right py-1.5">
+              <td
+                class="text-sm tabular-nums text-right py-1.5"
+                [class]="byTime ? 'text-white/70 font-bold' : 'text-white/40'"
+              >
                 {{ hours(genre.total_hours) }}
               </td>
             </tr>
@@ -815,7 +835,8 @@
           <col class="w-10" />
           <col class="w-16" />
           <col />
-          <col class="w-24" />
+          <col class="w-14" />
+          <col class="w-16" />
         </colgroup>
         <thead>
           <tr>
@@ -831,9 +852,16 @@
               {{ t('cards.columns.track') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              [class]="byTime ? 'text-white/30' : 'text-white/60'"
             >
-              {{ t('cards.columns.lateNight') }}
+              {{ t('cards.columns.plays') }}
+            </th>
+            <th
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              [class]="byTime ? 'text-white/60' : 'text-white/30'"
+            >
+              {{ t('cards.columns.minutes') }}
             </th>
           </tr>
         </thead>
@@ -844,7 +872,8 @@
             <col class="w-10" />
             <col class="w-16" />
             <col />
-            <col class="w-24" />
+            <col class="w-14" />
+            <col class="w-16" />
           </colgroup>
           <tbody>
             <tr
@@ -870,8 +899,17 @@
                   {{ track.artist }}
                 </p>
               </td>
-              <td class="text-white/60 text-sm font-bold tabular-nums text-right py-1.5">
-                {{ num(track.late_night_plays) }}x
+              <td
+                class="tabular-nums text-right pr-4 py-1.5"
+                [class]="byTime ? 'text-white/30 text-xs' : 'text-white/70 text-sm font-bold'"
+              >
+                {{ num(track.late_night_plays) }}
+              </td>
+              <td
+                class="tabular-nums text-right py-1.5"
+                [class]="byTime ? 'text-white/70 text-sm font-bold' : 'text-white/30 text-xs'"
+              >
+                {{ minutes(track.late_night_minutes) }}
               </td>
             </tr>
           </tbody>
@@ -968,6 +1006,7 @@
           <col class="w-16" />
           <col class="w-20" />
           <col />
+          <col class="w-14" />
           <col class="w-16" />
         </colgroup>
         <thead>
@@ -984,9 +1023,16 @@
               {{ t('cards.columns.track') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              [class]="byTime ? 'text-white/30' : 'text-white/60'"
             >
               {{ t('cards.columns.plays') }}
+            </th>
+            <th
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              [class]="byTime ? 'text-white/60' : 'text-white/30'"
+            >
+              {{ t('cards.columns.minutes') }}
             </th>
           </tr>
         </thead>
@@ -997,6 +1043,7 @@
             <col class="w-16" />
             <col class="w-20" />
             <col />
+            <col class="w-14" />
             <col class="w-16" />
           </colgroup>
           <tbody>
@@ -1023,8 +1070,17 @@
                   {{ s.artist }}
                 </p>
               </td>
-              <td class="text-white/60 text-sm font-bold tabular-nums text-right py-2">
+              <td
+                class="tabular-nums text-right pr-4 py-2"
+                [class]="byTime ? 'text-white/30 text-xs' : 'text-white/70 text-sm font-bold'"
+              >
                 {{ num(s.plays) }}
+              </td>
+              <td
+                class="tabular-nums text-right py-2"
+                [class]="byTime ? 'text-white/70 text-sm font-bold' : 'text-white/30 text-xs'"
+              >
+                {{ minutes(s.total_minutes) }}
               </td>
             </tr>
           </tbody>
@@ -1062,15 +1118,17 @@
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
             >
-              {{ t('cards.columns.plays') }}
+              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              [class]="byTime ? 'text-white/30' : 'text-white/60'"
             >
               {{ t('cards.columns.plays') }}
             </th>
             <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              class="text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
+              [class]="byTime ? 'text-white/60' : 'text-white/30'"
             >
               {{ t('cards.columns.hours') }}
             </th>
@@ -1100,14 +1158,20 @@
                 <div class="h-7 bg-white/10 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-white/35 rounded-lg transition-all"
-                    [style.width.%]="percentOf(dec.total_plays, maxDecadePlays)"
+                    [style.width.%]="percentOf(rankValue(dec.total_plays, dec.total_hours), maxDecadeValue)"
                   ></div>
                 </div>
               </td>
-              <td class="text-white/70 text-sm font-bold tabular-nums text-right pr-4 py-2">
+              <td
+                class="text-sm tabular-nums text-right pr-4 py-2"
+                [class]="byTime ? 'text-white/50' : 'text-white/70 font-bold'"
+              >
                 {{ num(dec.total_plays) }}
               </td>
-              <td class="text-white/50 text-sm tabular-nums text-right pr-4 py-2">
+              <td
+                class="text-sm tabular-nums text-right pr-4 py-2"
+                [class]="byTime ? 'text-white/70 font-bold' : 'text-white/50'"
+              >
                 {{ hours(dec.total_hours) }}
               </td>
               <td class="text-white/50 text-sm tabular-nums text-right py-2">
@@ -1168,7 +1232,7 @@
             </p>
             <p class="text-white font-black text-3xl leading-tight">{{ recapTopArtist.artist }}</p>
             <p class="text-white/70 text-base mt-1">
-              {{ t('cards.plays', { count: recapTopArtist.plays }) }}
+              {{ figures(recapTopArtist.plays, hours(recapTopArtist.total_hours, 0, 1)) }}
             </p>
           </div>
         </div>
@@ -1199,12 +1263,14 @@
                     {{ t('cards.columns.artist') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
+                    class="text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
+                    [class]="byTime ? 'text-white/25' : 'text-white/60'"
                   >
                     {{ t('cards.columns.plays') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    class="text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    [class]="byTime ? 'text-white/60' : 'text-white/25'"
                   >
                     {{ t('cards.columns.hours') }}
                   </th>
@@ -1237,10 +1303,16 @@
                         {{ artist.artist }}
                       </p>
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
+                    <td
+                      class="text-xs tabular-nums text-right pr-2 py-1.5"
+                      [class]="byTime ? 'text-white/40' : 'text-white/80 font-bold'"
+                    >
                       {{ num(artist.plays) }}
                     </td>
-                    <td class="text-white/40 text-xs tabular-nums text-right py-1.5">
+                    <td
+                      class="text-xs tabular-nums text-right py-1.5"
+                      [class]="byTime ? 'text-white/80 font-bold' : 'text-white/40'"
+                    >
                       {{ hours(artist.total_hours) }}
                     </td>
                   </tr>
@@ -1275,12 +1347,14 @@
                     {{ t('cards.columns.track') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
+                    class="text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
+                    [class]="byTime ? 'text-white/25' : 'text-white/60'"
                   >
                     {{ t('cards.columns.plays') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    class="text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
+                    [class]="byTime ? 'text-white/60' : 'text-white/25'"
                   >
                     {{ t('cards.columns.hours') }}
                   </th>
@@ -1314,10 +1388,16 @@
                         {{ song.artist }}
                       </p>
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right pr-2 py-1.5">
+                    <td
+                      class="text-xs tabular-nums text-right pr-2 py-1.5"
+                      [class]="byTime ? 'text-white/40' : 'text-white/80 font-bold'"
+                    >
                       {{ num(song.plays) }}
                     </td>
-                    <td class="text-white/50 text-xs tabular-nums text-right py-1.5">
+                    <td
+                      class="text-xs tabular-nums text-right py-1.5"
+                      [class]="byTime ? 'text-white/80 font-bold' : 'text-white/40'"
+                    >
                       {{ hours(song.total_minutes / 60) }}
                     </td>
                   </tr>

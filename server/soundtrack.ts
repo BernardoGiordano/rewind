@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3';
+import { DEFAULT_SORT, rankBy, type Sort } from './sort.ts';
 
 type Range = { startTs: number; endTs: number } | null;
 
@@ -14,10 +15,6 @@ export type SoundtrackSong = {
 export type Soundtrack = Partial<Record<string, SoundtrackSong>>;
 
 const SONG_COLUMNS = 'mf.id, mf.title, mf.artist, mf.album_id, mf.duration';
-// Song orders end on the id, as the cards' do, so a tie breaks the same way.
-const BY_PLAYS = 'COUNT(*) DESC, SUM(mf.duration) DESC, mf.id';
-// How cards rank artists, albums, genres and (in-range) decades.
-const BY_ENTRY = 'COUNT(*) DESC, SUM(mf.duration) DESC';
 
 const HOUR = `CAST(strftime('%H', s.submission_time, 'unixepoch') AS INTEGER)`;
 const MONTH = `strftime('%Y-%m', s.submission_time, 'unixepoch')`;
@@ -29,19 +26,25 @@ const GENRE = `g.value->>'$.value'`;
  * One song per stat slide, tied to what the slide shows over the range.
  *
  * A slide that ranks songs plays its #1 row. A slide that ranks something else plays
- * the most-played song inside its #1 entry: the top artist, album, genre or decade,
- * the busiest hour, weekday or month, or the longest streak. Entries are ranked the
- * way the cards rank them. A slide with nothing to show gets no song.
+ * the top song inside its #1 entry: the top artist, album, genre or decade, the
+ * busiest hour, weekday or month, or the longest streak. Songs and entries rank by
+ * `sort`, as the cards do. A slide with nothing to show gets no song.
  */
-export function soundtrackFor(db: Database, uid: string, range: Range): Soundtrack {
-  const songs = new SongQuery(db, uid, range);
-  const top = songs.top(BY_PLAYS);
+export function soundtrackFor(
+  db: Database,
+  uid: string,
+  range: Range,
+  sort: Sort = DEFAULT_SORT,
+): Soundtrack {
+  const songs = new SongQuery(db, uid, range, sort);
+  const top = songs.top();
+  const byEntry = rankBy(sort);
 
   const result: Soundtrack = {
     summary: top,
     'top-songs': top,
-    'top-artists': songs.within('mf.artist_id', songs.topKey('mf.artist_id', BY_ENTRY)),
-    'top-albums': songs.within('mf.album_id', songs.topKey('mf.album_id', BY_ENTRY)),
+    'top-artists': songs.within('mf.artist_id', songs.topKey('mf.artist_id', byEntry)),
+    'top-albums': songs.within('mf.album_id', songs.topKey('mf.album_id', byEntry)),
     'top-genres': songs.inGenre(songs.topGenre()),
     'favorite-decades': songs.inDecade(songs.topDecade()),
     recap: top,
@@ -55,9 +58,9 @@ export function soundtrackFor(db: Database, uid: string, range: Range): Soundtra
       'monthly-trends': songs.within(MONTH, songs.topKey(MONTH, 'COUNT(*) DESC')),
       'day-of-week': songs.within(WEEKDAY, songs.topKey(WEEKDAY, 'COUNT(*) DESC')),
       streak: streak
-        ? songs.top(BY_PLAYS, ` AND ${DAY} BETWEEN ? AND ?`, [streak.start, streak.end])
+        ? songs.top(` AND ${DAY} BETWEEN ? AND ?`, [streak.start, streak.end])
         : undefined,
-      'late-night': songs.top(BY_PLAYS, ` AND ${HOUR} BETWEEN 0 AND 4`),
+      'late-night': songs.top(` AND ${HOUR} BETWEEN 0 AND 4`),
       'on-repeat': songs.onRepeat(),
       'song-of-month': songs.songOfMonths(),
     });
@@ -66,34 +69,39 @@ export function soundtrackFor(db: Database, uid: string, range: Range): Soundtra
   return result;
 }
 
-/** Queries over one user's scrobbles in one range. */
+/** Queries over one user's scrobbles in one range, ranked by one sort. */
 class SongQuery {
   readonly #db: Database;
   readonly #uid: string;
   readonly #range: Range;
+  readonly #sort: Sort;
 
-  constructor(db: Database, uid: string, range: Range) {
+  constructor(db: Database, uid: string, range: Range, sort: Sort) {
     this.#db = db;
     this.#uid = uid;
     this.#range = range;
+    this.#sort = sort;
   }
 
-  /** The first song by `order` among scrobbles matching `filter`, skipping missing files. */
-  top(order: string, filter = '', params: unknown[] = []): SoundtrackSong | undefined {
+  /**
+   * The top song among scrobbles matching `filter`, skipping missing files. Songs end
+   * on the id, as the cards' do, so a tie breaks the same way.
+   */
+  top(filter = '', params: unknown[] = []): SoundtrackSong | undefined {
     return this.#get<SoundtrackSong>(
       `SELECT ${SONG_COLUMNS}
       FROM scrobbles s
       JOIN media_file mf ON s.media_file_id = mf.id
       WHERE s.user_id = ?${this.#rangeSql()} AND COALESCE(mf.missing, 0) = 0${filter}
-      GROUP BY mf.id ORDER BY ${order} LIMIT 1`,
+      GROUP BY mf.id ORDER BY ${rankBy(this.#sort)}, mf.id LIMIT 1`,
       [...this.#params(), ...params],
     );
   }
 
-  /** The most-played song whose `key` expression equals `value`. */
+  /** The top song whose `key` expression equals `value`. */
   within(key: string, value: unknown): SoundtrackSong | undefined {
     if (value === undefined || value === null) return undefined;
-    return this.top(BY_PLAYS, ` AND ${key} = ?`, [value]);
+    return this.top(` AND ${key} = ?`, [value]);
   }
 
   /** The value of `key` that ranks first by `order` over the range, the lowest value on a tie. */
@@ -116,7 +124,7 @@ class SongQuery {
         json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE s.user_id = ?${this.#rangeSql()}
         AND ${GENRE} IS NOT NULL AND TRIM(${GENRE}) != ''
-      GROUP BY 1 ORDER BY ${BY_ENTRY}, 1 LIMIT 1`,
+      GROUP BY 1 ORDER BY ${rankBy(this.#sort)}, 1 LIMIT 1`,
       this.#params(),
     )?.value;
   }
@@ -125,10 +133,10 @@ class SongQuery {
     if (genre === undefined) return undefined;
     const filter = ` AND EXISTS (SELECT 1 FROM json_each(json_extract(mf.tags, '$.genre')) AS g
       WHERE ${GENRE} = ?)`;
-    return this.top(BY_PLAYS, filter, [genre]);
+    return this.top(filter, [genre]);
   }
 
-  /** All time ranks decades by play counts, as the card does, because scrobbles start late. */
+  /** All time ranks decades from annotated play counts, as the card does, because scrobbles start late. */
   topDecade(): number | undefined {
     if (this.#range) {
       return this.#get<{ value: number }>(
@@ -136,7 +144,7 @@ class SongQuery {
         FROM scrobbles s
         JOIN media_file mf ON s.media_file_id = mf.id
         WHERE s.user_id = ?${this.#rangeSql()} AND mf.year > 0
-        GROUP BY 1 ORDER BY ${BY_ENTRY}, 1 LIMIT 1`,
+        GROUP BY 1 ORDER BY ${rankBy(this.#sort)}, 1 LIMIT 1`,
         this.#params(),
       )?.value;
     }
@@ -145,14 +153,15 @@ class SongQuery {
       FROM annotation a
       JOIN media_file mf ON a.item_id = mf.id
       WHERE a.item_type = 'media_file' AND a.user_id = ? AND a.play_count > 0 AND mf.year > 0
-      GROUP BY 1 ORDER BY SUM(a.play_count) DESC, SUM(mf.duration * a.play_count) DESC, 1 LIMIT 1`,
+      GROUP BY 1 ORDER BY ${rankBy(this.#sort, 'SUM(a.play_count)', 'SUM(mf.duration * a.play_count)')}, 1
+      LIMIT 1`,
       [this.#uid],
     )?.value;
   }
 
   inDecade(decade: number | undefined): SoundtrackSong | undefined {
     if (decade === undefined) return undefined;
-    return this.top(BY_PLAYS, ' AND mf.year >= ? AND mf.year < ?', [decade, decade + 10]);
+    return this.top(' AND mf.year >= ? AND mf.year < ?', [decade, decade + 10]);
   }
 
   /** Ordered like the streak card, so its first row is this one. */
@@ -187,12 +196,12 @@ class SongQuery {
     );
   }
 
-  /** The song that tops the most months, then the one with the most plays in those months. */
+  /** The song that tops the most months, then the one that ranks highest in those months. */
   songOfMonths(): SoundtrackSong | undefined {
     return this.#get<SoundtrackSong>(
       `WITH monthly AS (
-        SELECT mf.id AS id, COUNT(*) AS plays,
-          ROW_NUMBER() OVER (PARTITION BY ${MONTH} ORDER BY COUNT(*) DESC) AS rn
+        SELECT mf.id AS id, COUNT(*) AS plays, SUM(mf.duration) AS seconds,
+          ROW_NUMBER() OVER (PARTITION BY ${MONTH} ORDER BY ${rankBy(this.#sort)}, mf.id) AS rn
         FROM scrobbles s
         JOIN media_file mf ON s.media_file_id = mf.id
         WHERE s.user_id = ?${this.#rangeSql()}
@@ -202,7 +211,8 @@ class SongQuery {
       FROM monthly m
       JOIN media_file mf ON mf.id = m.id
       WHERE m.rn = 1 AND COALESCE(mf.missing, 0) = 0
-      GROUP BY mf.id ORDER BY COUNT(*) DESC, SUM(m.plays) DESC, mf.id LIMIT 1`,
+      GROUP BY mf.id
+      ORDER BY COUNT(*) DESC, ${rankBy(this.#sort, 'SUM(m.plays)', 'SUM(m.seconds)')}, mf.id LIMIT 1`,
       this.#params(),
     );
   }

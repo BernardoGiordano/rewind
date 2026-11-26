@@ -68,6 +68,13 @@
     "years": "Anni",
     "custom": "Intervallo personalizzato"
   },
+  "sort": {
+    "label": "Ordina per",
+    "plays": "Ascolti",
+    "time": "Tempo",
+    "byPlays": "Ordina per ascolti",
+    "byTime": "Ordina per tempo di ascolto"
+  },
   "datePicker": {
     "previousYear": "Anno precedente",
     "previousMonth": "Mese precedente",
@@ -144,7 +151,6 @@
     "$comment": "Testi delle schede condivisibili. Quasi tutte le etichette stanno sotto un numero grande.",
     "hoursListened": "ore di ascolto",
     "minutesListened": "minuti di ascolto",
-    "hoursListenedValue": "{value} h di ascolto",
     "songsPlayed": "brani ascoltati",
     "artists": "artisti",
     "albums": "album",
@@ -205,7 +211,6 @@
       "artists": "Artisti",
       "days": "Giorni",
       "period": "Periodo",
-      "lateNight": "Di notte",
       "date": "Data",
       "decade": "Decennio"
     }

@@ -20,8 +20,11 @@ import { watch } from '../utils/watch.js';
 import { AppByline } from './byline.js';
 import { AppPeriodPanel } from './period-panel.js';
 import { REWIND_RANGE } from './rewind-range.js';
+import { REWIND_SORT, SORTS } from './rewind-sort.js';
 import { SECTION_REGISTRY } from './section-registry.js';
 import { SHELL } from './shell-state.js';
+
+/** @import { StatSort } from '../models/types.js' */
 
 /**
  * Owns the application chrome: section navigation, theme, identity and links.
@@ -32,6 +35,7 @@ export class Shell extends SignalElement {
   #shell = inject(SHELL);
   #registry = inject(SECTION_REGISTRY);
   #range = inject(REWIND_RANGE);
+  #sort = inject(REWIND_SORT);
 
   sections = this.#registry.sections;
   activeSection = this.#registry.active;
@@ -54,6 +58,11 @@ export class Shell extends SignalElement {
   rangeLabel = this.#range.label;
   rangeShortLabel = this.#range.shortLabel;
   rangePanelOpen = this.#range.panelOpen;
+
+  /** The sort control sits beside the range, on sections that rank listening stats. */
+  showSort = computed(() => this.#registry.active.value?.usesSort === true);
+  sorts = SORTS;
+  sort = this.#sort.current;
 
   connectedCallback() {
     super.connectedCallback();
@@ -101,6 +110,11 @@ export class Shell extends SignalElement {
 
   closeRangePanel() {
     this.#range.closePanel();
+  }
+
+  /** @param {StatSort} sort */
+  selectSort(sort) {
+    this.#sort.set(sort);
   }
 
   toggleAccount() {

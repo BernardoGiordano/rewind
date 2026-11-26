@@ -3,7 +3,7 @@ import { batch, inject, signal, token } from '@srljs/core';
 import { NAVIDROME } from '../../services/navidrome.js';
 
 /** @import { InjectionToken, Signal } from '@core/foundation/types.js' */
-/** @import { StatData, StatRange, StatType } from '../../models/types.js' */
+/** @import { StatData, StatRange, StatSort, StatType } from '../../models/types.js' */
 
 /** @typedef {{ [K in StatType]: Signal<StatData[K]> }} StatSignals */
 
@@ -15,7 +15,7 @@ export const STAT_STORE = token('StatStore');
  *
  * Leaving for an artist and coming back finds the card as it was, without a request,
  * because the dashboard mounts again over data that is still here. A change of stat,
- * range or listening history fetches, so the card shows listens made since.
+ * range, sort or listening history fetches, so the card shows listens made since.
  */
 export class StatStore {
   /** @type {StatSignals} */
@@ -40,31 +40,33 @@ export class StatStore {
   /** A message key, so the error follows a language change. */
   error = signal(/** @type {string | null} */ (null));
 
-  /** The stat, range and history version the data on screen answers. */
+  /** The stat, range, sort and history version the data on screen answers. */
   #shown = /** @type {string | null} */ (null);
 
   /** @type {AbortController | null} */
   #request = null;
 
   /**
-   * Whether the data on screen already answers `type` over `range`.
+   * Whether the data on screen already answers `type` over `range`, ranked by `sort`.
    *
    * @param {StatType} type
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @returns {boolean}
    */
-  holds(type, range) {
-    return this.#shown === key(type, range) && this.error.value === null;
+  holds(type, range, sort) {
+    return this.#shown === key(type, range, sort) && this.error.value === null;
   }
 
   /**
-   * Fetch `type` over `range`, cancelling a request still in flight.
+   * Fetch `type` over `range`, ranked by `sort`, cancelling a request still in flight.
    *
    * @param {StatType} type
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @returns {Promise<void>}
    */
-  async load(type, range) {
+  async load(type, range, sort) {
     this.#request?.abort();
     const request = new AbortController();
     this.#request = request;
@@ -75,8 +77,8 @@ export class StatStore {
     });
 
     try {
-      const shown = key(type, range);
-      const data = await inject(NAVIDROME).getStat(type, range, request.signal);
+      const shown = key(type, range, sort);
+      const data = await inject(NAVIDROME).getStat(type, range, sort, request.signal);
       if (request.signal.aborted) return;
       batch(() => {
         /** @type {Signal<unknown>} */ (this.data[type]).value = data;
@@ -96,8 +98,9 @@ export class StatStore {
 /**
  * @param {StatType} type
  * @param {StatRange} range
+ * @param {StatSort} sort
  * @returns {string}
  */
-function key(type, range) {
-  return `${type}|${JSON.stringify(range)}|${inject(NAVIDROME).historyVersion.value}`;
+function key(type, range, sort) {
+  return `${type}|${JSON.stringify(range)}|${sort}|${inject(NAVIDROME).historyVersion.value}`;
 }

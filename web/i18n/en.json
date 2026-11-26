@@ -67,6 +67,14 @@
     "years": "Years",
     "custom": "Custom range"
   },
+  "sort": {
+    "$comment": "How ranked lists order their rows. The short labels sit side by side in a menu.",
+    "label": "Rank by",
+    "plays": "Plays",
+    "time": "Time",
+    "byPlays": "Rank by plays",
+    "byTime": "Rank by listening time"
+  },
   "datePicker": {
     "previousYear": "Previous year",
     "previousMonth": "Previous month",
@@ -143,7 +151,6 @@
     "$comment": "Text on the shareable stat cards. Most labels sit under a large number.",
     "hoursListened": "hours listened",
     "minutesListened": "minutes listened",
-    "hoursListenedValue": "{value}h listened",
     "songsPlayed": "songs played",
     "artists": "artists",
     "albums": "albums",
@@ -204,7 +211,6 @@
       "artists": "Artists",
       "days": "Days",
       "period": "Period",
-      "lateNight": "Late Night",
       "date": "Date",
       "decade": "Decade"
     }

@@ -68,12 +68,39 @@ describe('soundtrackFor', () => {
     expect(songs['song-of-month']).toBe('other');
   });
 
+  it('ranks songs and entries by listening time when sorted by time', () => {
+    const songs = ids(soundtrackFor(db, 'listener', YEAR_2025, 'time'));
+
+    // Long has the most minutes, and A, its album, Metal and the 1990s follow it.
+    expect(songs['top-songs']).toBe('long');
+    expect(songs['summary']).toBe('long');
+    expect(songs['recap']).toBe('long');
+    expect(songs['top-artists']).toBe('long');
+    expect(songs['top-albums']).toBe('long');
+    expect(songs['top-genres']).toBe('long');
+    expect(songs['favorite-decades']).toBe('long');
+    expect(songs['streak']).toBe('long');
+    expect(songs['song-of-month']).toBe('long');
+
+    // The busiest hour still counts plays, and only Short plays late or on repeat.
+    expect(songs['listening-clock']).toBe('other');
+    expect(songs['late-night']).toBe('short');
+    expect(songs['on-repeat']).toBe('short');
+  });
+
   it('ranks all-time decades by annotation play counts and leaves out year-only slides', () => {
     const songs = ids(soundtrackFor(db, 'listener', null));
 
     expect(songs['favorite-decades']).toBe('other');
     expect(songs).not.toHaveProperty('listening-clock');
     expect(songs).not.toHaveProperty('on-repeat');
+  });
+
+  it('ranks all-time decades by annotated minutes when sorted by time', () => {
+    const songs = ids(soundtrackFor(db, 'listener', null, 'time'));
+
+    // Fewer plays of Long outlast more plays of Short.
+    expect(songs['favorite-decades']).toBe('long');
   });
 
   it('has no song for a range without listens', () => {

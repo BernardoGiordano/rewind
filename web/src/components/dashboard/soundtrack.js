@@ -1,9 +1,10 @@
 import { computed, currentPath, effect, signal, token, untracked } from '@srljs/core';
 
 /** @import { InjectionToken } from '@core/foundation/types.js' */
-/** @import { SoundtrackSong, SoundtrackSongs, StatRange, StatType } from '../../models/types.js' */
+/** @import { SoundtrackSong, SoundtrackSongs, StatRange, StatSort, StatType } from '../../models/types.js' */
 /** @import { NavidromeService } from '../../services/navidrome.js' */
 /** @import { RewindRange } from '../../shell/rewind-range.js' */
+/** @import { RewindSort } from '../../shell/rewind-sort.js' */
 /** @import { StatNavigator } from './stat-navigator.js' */
 
 const ENABLED_KEY = 'rewind.music';
@@ -54,7 +55,7 @@ export class Soundtrack {
   #song = signal(/** @type {SoundtrackSong | null} */ (null));
   #playing = signal(false);
 
-  /** The range and history version the songs answer. */
+  /** The range, sort and history version the songs answer. */
   #songsKey = /** @type {string | null} */ (null);
 
   /** @type {AbortController | null} */
@@ -79,18 +80,20 @@ export class Soundtrack {
   /**
    * @param {NavidromeService} navidrome
    * @param {RewindRange} range
+   * @param {RewindSort} sort
    * @param {StatNavigator} navigator
    */
-  constructor(navidrome, range, navigator) {
+  constructor(navidrome, range, sort, navigator) {
     this.#navidrome = navidrome;
 
     effect(() => {
       const active =
         navidrome.musicAvailable.value && range.ready.value && currentPath.value === HOST_PATH;
       const current = range.current.value;
+      const order = sort.current.value;
       const version = navidrome.historyVersion.value;
       untracked(() => {
-        if (active) void this.#load(current, version);
+        if (active) void this.#load(current, order, version);
       });
     });
 
@@ -156,10 +159,11 @@ export class Soundtrack {
 
   /**
    * @param {StatRange} range
+   * @param {StatSort} sort
    * @param {number} version
    */
-  async #load(range, version) {
-    const key = `${JSON.stringify(range)}|${version}`;
+  async #load(range, sort, version) {
+    const key = `${JSON.stringify(range)}|${sort}|${version}`;
     if (key === this.#songsKey) return;
     this.#songsKey = key;
 
@@ -170,7 +174,7 @@ export class Soundtrack {
     /** @type {SoundtrackSongs} */
     let songs;
     try {
-      songs = await this.#navidrome.getSoundtrack(range, request.signal);
+      songs = await this.#navidrome.getSoundtrack(range, sort, request.signal);
     } catch {
       if (request.signal.aborted) return;
       this.#songsKey = null;

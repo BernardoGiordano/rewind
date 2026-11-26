@@ -46,6 +46,21 @@
         <span class="font-mono text-[9px] leading-none max-w-full truncate">{{ rangeShortLabel }}</span>
       </button>
 
+      <div *if="showSort" class="flex flex-col items-center gap-1" role="group" [aria-label]="t('sort.label')">
+        <button
+          *for="option of sorts; key: option.id"
+          type="button"
+          (click)="selectSort(option.id)"
+          [aria-pressed]="sort === option.id"
+          [aria-label]="t(option.titleKey)"
+          [title]="t(option.titleKey)"
+          class="cursor-pointer flex items-center justify-center w-10 h-9 rounded-xl transition-colors"
+          [class]="sort === option.id ? 'bg-fill-strong text-ink' : 'text-ink-muted hover:bg-fill hover:text-ink'"
+        >
+          <app-icon [name]="option.icon" class="w-5 h-5" aria-hidden="true"></app-icon>
+        </button>
+      </div>
+
       <x-outlet [.target]="&railControls"></x-outlet>
 
       <div *if="currentUser" class="w-8 border-t border-edge my-1" aria-hidden="true"></div>
@@ -216,6 +231,23 @@
       </span>
       <app-icon name="heroChevronRight" class="w-4 h-4 shrink-0 text-ink-faint" aria-hidden="true"></app-icon>
     </button>
+    <div *if="showSort" class="px-4 py-2.5 flex items-center justify-between gap-3 text-sm text-ink-soft">
+      <span>{{ t('sort.label') }}</span>
+      <div class="flex rounded-lg bg-fill p-0.5" role="group" [aria-label]="t('sort.label')">
+        <button
+          *for="option of sorts; key: option.id"
+          type="button"
+          (click)="selectSort(option.id)"
+          [aria-pressed]="sort === option.id"
+          [title]="t(option.titleKey)"
+          class="cursor-pointer flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+          [class]="sort === option.id ? 'bg-surface-raised text-ink shadow-sm' : 'text-ink-muted hover:text-ink'"
+        >
+          <app-icon [name]="option.icon" class="w-3.5 h-3.5" aria-hidden="true"></app-icon>
+          {{ t(option.labelKey) }}
+        </button>
+      </div>
+    </div>
 
     <div *if="menuActions" role="separator" class="my-1 border-t border-edge-raised"></div>
     <x-outlet [.target]="&menuActions"></x-outlet>
