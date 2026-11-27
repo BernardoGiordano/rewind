@@ -23,9 +23,10 @@
   </div>
 </div>
 
-<div *else *if="data" class="h-full overflow-y-auto bg-surface text-ink-body">
+<div *else *if="data" data-scroller class="h-full overflow-y-auto bg-surface text-ink-body">
   <!-- Sticky bar: back, tabs and page actions in one row -->
   <div
+    data-tab-bar
     class="sticky top-0 z-20 backdrop-blur bg-surface/80 border-b border-edge"
   >
     <div
@@ -147,7 +148,7 @@
   </div>
 
   <!-- Tab content -->
-  <div class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 py-8">
+  <div data-tab-content class="max-w-7xl mx-auto px-4 medium-up:px-6 expanded:px-8 py-8">
     <!-- Heatmap -->
 
     <section *if="(activeTab === 'overview') && heatmapCells" class="mb-10">
@@ -236,8 +237,8 @@
                 <p class="text-xs text-ink-muted truncate">{{ track.album }}</p>
               </div>
               <div class="text-right shrink-0 tabular-nums">
-                <p class="text-sm font-bold">{{ byTime ? (track.total_minutes | minutes:0:0) : (track.plays | num) }}</p>
-                <p class="text-xs text-ink-faint">{{ byTime ? (track.plays | num) : (track.total_minutes | minutes:0:0) }}</p>
+                <p class="text-sm font-bold">{{ byTime ? (track.total_minutes | minutes) : (track.plays | num) }}</p>
+                <p class="text-xs text-ink-faint">{{ byTime ? (track.plays | num) : (track.total_minutes | minutes) }}</p>
               </div>
             </li>
           </ul>
@@ -269,8 +270,8 @@
                 <p class="text-xs text-ink-muted">{{ t('cards.tracks', { count: a.unique_tracks }) }}</p>
               </div>
               <div class="text-right shrink-0 tabular-nums">
-                <p class="text-sm font-bold">{{ byTime ? (a.total_minutes | minutes:0:0) : (a.plays | num) }}</p>
-                <p class="text-xs text-ink-faint">{{ byTime ? (a.plays | num) : (a.total_minutes | minutes:0:0) }}</p>
+                <p class="text-sm font-bold">{{ byTime ? (a.total_minutes / 60 | hours) : (a.plays | num) }}</p>
+                <p class="text-xs text-ink-faint">{{ byTime ? (a.plays | num) : (a.total_minutes / 60 | hours) }}</p>
               </div>
             </li>
           </ul>
@@ -415,10 +416,10 @@
               <p class="flex-1 text-sm font-semibold truncate">{{ s.title }}</p>
               <div class="text-right shrink-0 tabular-nums">
                 <p class="text-sm font-bold">
-                  {{ byTime ? (s.total_minutes | minutes:0:0) : t('cards.plays', { count: s.plays }) }}
+                  {{ byTime ? (s.total_minutes | minutes) : t('cards.plays', { count: s.plays }) }}
                 </p>
                 <p class="text-xs text-ink-faint">
-                  {{ byTime ? t('cards.plays', { count: s.plays }) : (s.total_minutes | minutes:0:0) }}
+                  {{ byTime ? t('cards.plays', { count: s.plays }) : (s.total_minutes | minutes) }}
                 </p>
               </div>
             </li>

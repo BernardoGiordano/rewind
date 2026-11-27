@@ -69,10 +69,10 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topSong') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topSong.title }}</p>
+        <p class="text-white font-black text-3xl leading-tight line-clamp-2 break-words">{{ topSong.title }}</p>
         <p class="text-white/70 text-xl truncate mt-1">{{ topSong.artist }}</p>
         <p class="text-white/40 text-lg mt-2 font-medium">
-          {{ figures(topSong.plays, topSong.total_minutes | minutes:0:1) }}
+          {{ figures(topSong.plays, topSong.total_minutes | minutes) }}
         </p>
       </div>
     </div>
@@ -97,8 +97,8 @@
           <p class="text-white/50 text-lg truncate">{{ song.artist }}</p>
         </div>
         <div class="text-right shrink-0 tabular-nums">
-          <p class="text-white/60 text-lg font-semibold">{{ lead(song.plays, song.total_minutes | minutes:0:1) }}</p>
-          <p class="text-white/30 text-sm">{{ trail(song.plays, song.total_minutes | minutes:0:1) }}</p>
+          <p class="text-white/60 text-lg font-semibold">{{ lead(song.plays, song.total_minutes | minutes) }}</p>
+          <p class="text-white/30 text-sm">{{ trail(song.plays, song.total_minutes | minutes) }}</p>
         </div>
       </div>
     </div>
@@ -130,12 +130,12 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topArtist') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topArtist.artist }}</p>
+        <p class="text-white font-black text-3xl leading-tight line-clamp-2 break-words">{{ topArtist.artist }}</p>
         <p class="text-white/70 text-xl truncate mt-1">
           {{ t('cards.tracks', { count: topArtist.unique_tracks }) }}
         </p>
         <p class="text-white/40 text-lg mt-2 font-medium">
-          {{ figures(topArtist.plays, topArtist.total_hours | hours:0:1) }}
+          {{ figures(topArtist.plays, topArtist.total_hours | hours) }}
         </p>
       </div>
     </div>
@@ -162,8 +162,8 @@
           </p>
         </div>
         <div class="text-right shrink-0 tabular-nums">
-          <p class="text-white/60 text-lg font-semibold">{{ lead(artist.plays, artist.total_hours | hours:0:1) }}</p>
-          <p class="text-white/30 text-sm">{{ trail(artist.plays, artist.total_hours | hours:0:1) }}</p>
+          <p class="text-white/60 text-lg font-semibold">{{ lead(artist.plays, artist.total_hours | hours) }}</p>
+          <p class="text-white/30 text-sm">{{ trail(artist.plays, artist.total_hours | hours) }}</p>
         </div>
       </div>
     </div>
@@ -195,10 +195,10 @@
         <p class="text-white/50 text-base font-black uppercase tracking-[0.2em] mb-1">
           {{ t('cards.topAlbum') }}
         </p>
-        <p class="text-white font-black text-3xl leading-tight truncate">{{ topAlbum.album }}</p>
+        <p class="text-white font-black text-3xl leading-tight line-clamp-2 break-words">{{ topAlbum.album }}</p>
         <p class="text-white/70 text-xl truncate mt-1">{{ topAlbum.album_artist }}</p>
         <p class="text-white/40 text-lg mt-2 font-medium">
-          {{ figures(topAlbum.plays, topAlbum.total_minutes | minutes:0:1) }}
+          {{ figures(topAlbum.plays, topAlbum.total_minutes / 60 | hours) }}
         </p>
       </div>
     </div>
@@ -223,8 +223,8 @@
           <p class="text-white/50 text-lg truncate">{{ album.album_artist }}</p>
         </div>
         <div class="text-right shrink-0 tabular-nums">
-          <p class="text-white/60 text-lg font-semibold">{{ lead(album.plays, album.total_minutes | minutes:0:1) }}</p>
-          <p class="text-white/30 text-sm">{{ trail(album.plays, album.total_minutes | minutes:0:1) }}</p>
+          <p class="text-white/60 text-lg font-semibold">{{ lead(album.plays, album.total_minutes / 60 | hours) }}</p>
+          <p class="text-white/30 text-sm">{{ trail(album.plays, album.total_minutes / 60 | hours) }}</p>
         </div>
       </div>
     </div>
@@ -250,7 +250,7 @@
             <p class="text-white font-semibold text-xl truncate">{{ genre.genre }}</p>
           </div>
           <span class="text-white/50 text-base font-medium shrink-0 tabular-nums"
-            >{{ figures(genre.plays, genre.total_hours | hours:0:1) }}</span
+            >{{ figures(genre.plays, genre.total_hours | hours) }}</span
           >
         </div>
         <div class="mt-3 h-3 bg-white/10 rounded-full overflow-hidden">
@@ -313,7 +313,7 @@
           </div>
           <p class="text-white/40 text-xs mt-1 truncate">
             {{ t('cards.songCount', { count: m.unique_songs }) }} &middot; {{ t('cards.artistCount',
-            { count: m.unique_artists }) }} &middot; {{ m.hours | hours:0:1 }}
+            { count: m.unique_artists }) }} &middot; {{ m.hours | hours }}
           </p>
         </div>
         <span class="text-white font-bold text-base w-12 text-right shrink-0 tabular-nums"
@@ -406,7 +406,7 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">
       {{ t('stats.lateNight') }}
     </h2>
-    <p class="text-white/40 text-base mb-5 shrink-0">{{ t('cards.lateNightSubtitle') }}</p>
+    <p class="text-white/70 text-base mb-5 shrink-0">{{ t('cards.lateNightSubtitle') }}</p>
     <div class="flex-1 card-scroll flex flex-col gap-1 -mx-2">
       <div
         *for="song of lateNight; index as i"
@@ -428,10 +428,10 @@
         </div>
         <div class="text-right shrink-0 tabular-nums">
           <p class="text-white/60 text-base font-semibold">
-            {{ lead(song.late_night_plays, song.late_night_minutes | minutes:0:1) }}
+            {{ lead(song.late_night_plays, song.late_night_minutes | minutes) }}
           </p>
           <p class="text-white/30 text-sm">
-            {{ trail(song.late_night_plays, song.late_night_minutes | minutes:0:1) }}
+            {{ trail(song.late_night_plays, song.late_night_minutes | minutes) }}
           </p>
         </div>
       </div>
@@ -447,21 +447,24 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-3">
       {{ t('stats.onRepeat') }}
     </h2>
-    <p class="text-white/40 text-base mb-5 shrink-0">{{ t('cards.onRepeatSubtitle') }}</p>
+    <p class="text-white/70 text-base mb-5 shrink-0">{{ t('cards.onRepeatSubtitle') }}</p>
     <div class="flex-1 card-scroll flex flex-col gap-3">
       <div
         *for="entry of onRepeat; key: entry.the_date + entry.title"
-        class="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
+        class="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-3 py-3 shrink-0 cursor-pointer transition-colors hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none"
         role="button"
         tabindex="0"
         (click)="openArtist(entry.artist_id, $event)"
         (keydown)="openArtistOnEnter(entry.artist_id, $event)"
       >
+        <div class="w-12 h-12 rounded-lg shrink-0 overflow-hidden bg-white/10">
+          <app-cover [.cover-id]="entry.album_id"></app-cover>
+        </div>
         <div class="min-w-0 flex-1">
           <p class="text-white font-semibold text-lg truncate">{{ entry.title }}</p>
           <p class="text-white/60 text-base truncate">{{ entry.artist }}</p>
         </div>
-        <div class="text-right shrink-0 ml-3">
+        <div class="text-right shrink-0">
           <p class="text-white/80 text-lg font-bold tabular-nums">
             {{ entry.plays_that_day | num }}x
           </p>
@@ -501,7 +504,7 @@
           <p class="text-white/50 text-xs truncate">{{ s.artist }}</p>
         </div>
         <span class="text-white/40 text-xs font-medium shrink-0 tabular-nums"
-          >{{ figures(s.plays, s.total_minutes | minutes:0:1) }}</span
+          >{{ figures(s.plays, s.total_minutes | minutes) }}</span
         >
       </div>
     </div>
@@ -534,9 +537,9 @@
         </div>
         <div class="text-right shrink-0 tabular-nums">
           <p class="text-white/60 text-base font-semibold">
-            {{ lead(dec.total_plays, dec.total_hours | hours:0:1) }}
+            {{ lead(dec.total_plays, dec.total_hours | hours) }}
           </p>
-          <p class="text-white/30 text-sm">{{ trail(dec.total_plays, dec.total_hours | hours:0:1) }}</p>
+          <p class="text-white/30 text-sm">{{ trail(dec.total_plays, dec.total_hours | hours) }}</p>
         </div>
       </div>
     </div>
@@ -596,7 +599,7 @@
             <div class="min-w-0">
               <p class="text-white text-sm font-semibold truncate">{{ artist.artist }}</p>
               <p class="text-white/40 text-xs truncate">
-                {{ figures(artist.plays, artist.total_hours | hours:0:1) }}
+                {{ figures(artist.plays, artist.total_hours | hours) }}
               </p>
             </div>
           </div>

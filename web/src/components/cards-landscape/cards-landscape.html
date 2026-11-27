@@ -87,7 +87,7 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topSong') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">{{ topSong.title }}</p>
+          <p class="text-white font-black text-2xl leading-tight line-clamp-2 break-words">{{ topSong.title }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topSong.artist }}</p>
           <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
             <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'"
@@ -216,7 +216,7 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topArtist') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">
+          <p class="text-white font-black text-2xl leading-tight line-clamp-2 break-words">
             {{ topArtist.artist }}
           </p>
           <p class="text-white/70 text-base truncate mt-0.5">
@@ -351,14 +351,14 @@
           <p class="text-white/50 text-xs font-black uppercase tracking-[0.25em] mb-1">
             {{ t('cards.topAlbum') }}
           </p>
-          <p class="text-white font-black text-2xl leading-tight truncate">{{ topAlbum.album }}</p>
+          <p class="text-white font-black text-2xl leading-tight line-clamp-2 break-words">{{ topAlbum.album }}</p>
           <p class="text-white/70 text-base truncate mt-0.5">{{ topAlbum.album_artist }}</p>
           <div class="flex items-center gap-3 mt-2 text-sm tabular-nums">
             <span [class]="byTime ? 'text-white/30' : 'text-white/60 font-bold'"
               >{{ t('cards.plays', { count: topAlbum.plays }) }}</span
             >
             <span [class]="byTime ? 'text-white/60 font-bold' : 'text-white/30'"
-              >{{ topAlbum.total_minutes | minutes }}</span
+              >{{ topAlbum.total_minutes / 60 | hours }}</span
             >
           </div>
         </div>
@@ -390,12 +390,12 @@
               <th
                 class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
               >
-                {{ trailHeader('cards.columns.minutes') }}
+                {{ trailHeader('cards.columns.hours') }}
               </th>
               <th
                 class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
               >
-                {{ leadHeader('cards.columns.minutes') }}
+                {{ leadHeader('cards.columns.hours') }}
               </th>
             </tr>
           </thead>
@@ -434,10 +434,10 @@
                   </p>
                 </td>
                 <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-1.5">
-                  {{ trail(album.plays, album.total_minutes | minutes) }}
+                  {{ trail(album.plays, album.total_minutes / 60 | hours) }}
                 </td>
                 <td class="text-white/70 text-sm font-bold tabular-nums text-right py-1.5">
-                  {{ lead(album.plays, album.total_minutes | minutes) }}
+                  {{ lead(album.plays, album.total_minutes / 60 | hours) }}
                 </td>
               </tr>
             </tbody>
@@ -478,11 +478,7 @@
             >
               {{ t('cards.columns.genre') }}
             </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-6 border-b border-white/10"
-            >
-              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
-            </th>
+            <th class="pb-2 pr-6 border-b border-white/10"></th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-6 border-b border-white/10"
             >
@@ -546,7 +542,7 @@
         <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest">
           {{ t('stats.listeningClock') }}
         </h2>
-        <p class="text-white/40 text-base mt-1">{{ t('cards.clockSubtitle') }}</p>
+        <p class="text-white/70 text-base mt-1">{{ t('cards.clockSubtitle') }}</p>
       </div>
 
       <p *if="peakHour" class="text-white/50 text-sm font-mono">
@@ -613,11 +609,7 @@
             >
               {{ t('cards.columns.month') }}
             </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
-            >
-              {{ t('cards.columns.plays') }}
-            </th>
+            <th class="pb-2 pr-4 border-b border-white/10"></th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
@@ -808,7 +800,7 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">
       {{ t('stats.lateNight') }}
     </h2>
-    <p class="text-white/40 text-sm mb-4 shrink-0">{{ t('cards.lateNightSubtitle') }}</p>
+    <p class="text-white/70 text-sm mb-4 shrink-0">{{ t('cards.lateNightSubtitle') }}</p>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
         <colgroup>
@@ -900,16 +892,18 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-1">
       {{ t('stats.onRepeat') }}
     </h2>
-    <p class="text-white/40 text-sm mb-4 shrink-0">{{ t('cards.onRepeatSubtitle') }}</p>
+    <p class="text-white/70 text-sm mb-4 shrink-0">{{ t('cards.onRepeatSubtitle') }}</p>
     <div class="flex-1 flex flex-col min-h-0">
       <table class="w-full table-fixed border-collapse shrink-0">
         <colgroup>
+          <col class="w-16" />
           <col />
           <col class="w-20" />
           <col class="w-28" />
         </colgroup>
         <thead>
           <tr>
+            <th class="pb-2 border-b border-white/10"></th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
             >
@@ -931,6 +925,7 @@
       <div class="flex-1 card-scroll">
         <table class="w-full table-fixed border-collapse">
           <colgroup>
+            <col class="w-16" />
             <col />
             <col class="w-20" />
             <col class="w-28" />
@@ -941,6 +936,11 @@
               class="cursor-pointer transition-colors hover:bg-white/10 group"
               (click)="openArtist(entry.artist_id, $event)"
             >
+              <td class="py-1.5">
+                <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10">
+                  <app-cover [.cover-id]="entry.album_id" [.size]="100"></app-cover>
+                </div>
+              </td>
               <td class="max-w-0 pr-4 py-1.5">
                 <p class="text-white font-semibold text-sm truncate">{{ entry.title }}</p>
                 <p
@@ -972,83 +972,77 @@
     <h2 class="text-white/80 text-xl font-semibold uppercase tracking-widest mb-4">
       {{ t('stats.songOfMonth') }}
     </h2>
-    <div class="flex-1 flex flex-col min-h-0">
-      <table class="w-full table-fixed border-collapse shrink-0">
-        <colgroup>
-          <col class="w-16" />
-          <col class="w-20" />
-          <col />
-          <col class="w-16" />
-          <col class="w-16" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
-            >
-              {{ t('cards.columns.month') }}
-            </th>
-            <th class="pb-2 pr-6 border-b border-white/10"></th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
-            >
-              {{ t('cards.columns.track') }}
-            </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
-            >
-              {{ trailHeader('cards.columns.minutes') }}
-            </th>
-            <th
-              class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
-            >
-              {{ leadHeader('cards.columns.minutes') }}
-            </th>
-          </tr>
-        </thead>
-      </table>
-      <div class="flex-1 card-scroll">
-        <table class="w-full table-fixed border-collapse">
+    <!-- Two columns of six, so a full year fits without scrolling and exports whole. -->
+    <div class="flex-1 grid grid-cols-2 gap-8 min-h-0">
+      <div *for="column of songOfMonthColumns; key: column[0].month" class="flex flex-col min-h-0 min-w-0">
+        <table class="w-full table-fixed border-collapse shrink-0">
           <colgroup>
+            <col class="w-14" />
             <col class="w-16" />
-            <col class="w-20" />
             <col />
-            <col class="w-16" />
-            <col class="w-16" />
+            <col class="w-20" />
           </colgroup>
-          <tbody>
-            <tr
-              *for="s of songOfMonth; key: s.month"
-              class="cursor-pointer transition-colors hover:bg-white/10 group"
-              (click)="openArtist(s.artist_id, $event)"
-            >
-              <td
-                class="text-white/60 text-sm font-black uppercase tracking-wider py-2 whitespace-nowrap"
+          <thead>
+            <tr>
+              <th
+                class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 border-b border-white/10"
               >
-                {{ monthLabel(s.month, songOfMonth) }}
-              </td>
-              <td class="py-2">
-                <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg mx-auto">
-                  <app-cover [.cover-id]="s.album_id" [.size]="150"></app-cover>
-                </div>
-              </td>
-              <td class="max-w-0 pr-4 py-2">
-                <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
-                <p
-                  class="text-white/50 text-sm truncate group-hover:underline decoration-white/50 underline-offset-2"
-                >
-                  {{ s.artist }}
-                </p>
-              </td>
-              <td class="text-white/30 text-xs tabular-nums text-right pr-4 py-2">
-                {{ trail(s.plays, s.total_minutes | minutes) }}
-              </td>
-              <td class="text-white/70 text-sm font-bold tabular-nums text-right py-2">
-                {{ lead(s.plays, s.total_minutes | minutes) }}
-              </td>
+                {{ t('cards.columns.month') }}
+              </th>
+              <th class="pb-2 border-b border-white/10"></th>
+              <th
+                class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
+              >
+                {{ t('cards.columns.track') }}
+              </th>
+              <th
+                class="text-white/60 text-xs font-bold uppercase tracking-wider text-right pb-2 border-b border-white/10"
+              >
+                {{ leadHeader('cards.columns.minutes') }}
+              </th>
             </tr>
-          </tbody>
+          </thead>
         </table>
+        <div class="flex-1 card-scroll">
+          <table class="w-full table-fixed border-collapse">
+            <colgroup>
+              <col class="w-14" />
+              <col class="w-16" />
+              <col />
+              <col class="w-20" />
+            </colgroup>
+            <tbody>
+              <tr
+                *for="s of column; key: s.month"
+                class="cursor-pointer transition-colors hover:bg-white/10 group"
+                (click)="openArtist(s.artist_id, $event)"
+              >
+                <td
+                  class="text-white/60 text-sm font-black uppercase tracking-wider py-2 whitespace-nowrap"
+                >
+                  {{ monthLabel(s.month, songOfMonth) }}
+                </td>
+                <td class="py-2">
+                  <div class="w-12 h-12 rounded-xl overflow-hidden bg-white/10 shadow-lg mx-auto">
+                    <app-cover [.cover-id]="s.album_id" [.size]="150"></app-cover>
+                  </div>
+                </td>
+                <td class="max-w-0 pl-3 pr-4 py-2">
+                  <p class="text-white font-semibold text-base truncate">{{ s.title }}</p>
+                  <p
+                    class="text-white/50 text-sm truncate group-hover:underline decoration-white/50 underline-offset-2"
+                  >
+                    {{ s.artist }}
+                  </p>
+                </td>
+                <td class="text-right tabular-nums py-2">
+                  <p class="text-white/70 text-sm font-bold">{{ lead(s.plays, s.total_minutes | minutes) }}</p>
+                  <p class="text-white/30 text-xs">{{ trail(s.plays, s.total_minutes | minutes) }}</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </app-card-shell>
@@ -1079,11 +1073,7 @@
             >
               {{ t('cards.columns.decade') }}
             </th>
-            <th
-              class="text-white/30 text-xs font-bold uppercase tracking-wider text-left pb-2 pr-4 border-b border-white/10"
-            >
-              {{ t(byTime ? 'cards.columns.hours' : 'cards.columns.plays') }}
-            </th>
+            <th class="pb-2 pr-4 border-b border-white/10"></th>
             <th
               class="text-white/30 text-xs font-bold uppercase tracking-wider text-right pb-2 pr-4 border-b border-white/10"
             >
@@ -1188,7 +1178,7 @@
             </p>
             <p class="text-white font-black text-3xl leading-tight">{{ recapTopArtist.artist }}</p>
             <p class="text-white/70 text-base mt-1">
-              {{ figures(recapTopArtist.plays, recapTopArtist.total_hours | hours:0:1) }}
+              {{ figures(recapTopArtist.plays, recapTopArtist.total_hours | hours) }}
             </p>
           </div>
         </div>
@@ -1201,10 +1191,9 @@
           <div class="flex-1 flex flex-col min-h-0">
             <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
-                <col class="w-8" />
+                <col class="w-9" />
                 <col />
-                <col class="w-14" />
-                <col class="w-14" />
+                <col class="w-16" />
               </colgroup>
               <thead>
                 <tr>
@@ -1219,11 +1208,6 @@
                     {{ t('cards.columns.artist') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
-                  >
-                    {{ trailHeader('cards.columns.hours') }}
-                  </th>
-                  <th
                     class="text-white/60 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
                     {{ leadHeader('cards.columns.hours') }}
@@ -1234,10 +1218,9 @@
             <div class="flex-1 card-scroll">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
-                  <col class="w-8" />
+                  <col class="w-9" />
                   <col />
-                  <col class="w-14" />
-                  <col class="w-14" />
+                  <col class="w-16" />
                 </colgroup>
                 <tbody>
                   <tr
@@ -1257,9 +1240,6 @@
                         {{ artist.artist }}
                       </p>
                     </td>
-                    <td class="text-white/40 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ trail(artist.plays, artist.total_hours | hours) }}
-                    </td>
                     <td class="text-white/80 text-xs font-bold tabular-nums text-right py-1.5">
                       {{ lead(artist.plays, artist.total_hours | hours) }}
                     </td>
@@ -1277,10 +1257,9 @@
           <div class="flex-1 flex flex-col min-h-0">
             <table class="w-full table-fixed border-collapse shrink-0">
               <colgroup>
-                <col class="w-8" />
+                <col class="w-9" />
                 <col />
-                <col class="w-14" />
-                <col class="w-14" />
+                <col class="w-16" />
               </colgroup>
               <thead>
                 <tr>
@@ -1295,14 +1274,9 @@
                     {{ t('cards.columns.track') }}
                   </th>
                   <th
-                    class="text-white/25 text-xs uppercase tracking-wider text-right pb-2 pr-2 border-b border-white/10"
-                  >
-                    {{ trailHeader('cards.columns.hours') }}
-                  </th>
-                  <th
                     class="text-white/60 text-xs uppercase tracking-wider text-right pb-2 border-b border-white/10"
                   >
-                    {{ leadHeader('cards.columns.hours') }}
+                    {{ leadHeader('cards.columns.minutes') }}
                   </th>
                 </tr>
               </thead>
@@ -1310,10 +1284,9 @@
             <div class="flex-1 card-scroll">
               <table class="w-full table-fixed border-collapse">
                 <colgroup>
-                  <col class="w-8" />
+                  <col class="w-9" />
                   <col />
-                  <col class="w-14" />
-                  <col class="w-14" />
+                  <col class="w-16" />
                 </colgroup>
                 <tbody>
                   <tr
@@ -1334,11 +1307,8 @@
                         {{ song.artist }}
                       </p>
                     </td>
-                    <td class="text-white/40 text-xs tabular-nums text-right pr-2 py-1.5">
-                      {{ trail(song.plays, song.total_minutes / 60 | hours) }}
-                    </td>
                     <td class="text-white/80 text-xs font-bold tabular-nums text-right py-1.5">
-                      {{ lead(song.plays, song.total_minutes / 60 | hours) }}
+                      {{ lead(song.plays, song.total_minutes | minutes) }}
                     </td>
                   </tr>
                 </tbody>

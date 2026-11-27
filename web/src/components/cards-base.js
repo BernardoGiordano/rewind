@@ -40,6 +40,13 @@ export class CardsBase extends SignalElement {
   favoriteDecades = this.#store.data['favorite-decades'];
   recapData = this.#store.data.recap;
 
+  /** Song of the month split in two, earlier months in the first half, for side-by-side columns. */
+  songOfMonthColumns = computed(() => {
+    const months = this.songOfMonth.value;
+    const half = Math.ceil(months.length / 2);
+    return [months.slice(0, half), months.slice(half)].filter((column) => column.length > 0);
+  });
+
   /** All 24 hours, so a quiet hour shows as an empty bar instead of a missing one. */
   clock = computed(() => {
     const byHour = new Map(this.listeningClock.value.map((h) => [h.hour, h]));
@@ -138,7 +145,7 @@ export class CardsBase extends SignalElement {
    * @returns {string}
    */
   figures(plays, time) {
-    const count = t('cards.plays', { count: plays });
+    const count = t('cards.playsCompact', { count: plays });
     return this.byTime.value ? `${time} · ${count}` : `${count} · ${time}`;
   }
 

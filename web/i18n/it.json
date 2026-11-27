@@ -173,6 +173,10 @@
       "one": "{count} ascolto",
       "other": "{count} ascolti"
     },
+    "playsCompact": {
+      "one": "{count} ascolto",
+      "other": "{count} ascolti"
+    },
     "playsWord": {
       "one": "ascolto",
       "other": "ascolti"

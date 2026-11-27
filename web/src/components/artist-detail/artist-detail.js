@@ -274,6 +274,19 @@ export class ArtistDetail extends SignalElement {
   /** @param {TabKey} tab */
   selectTab(tab) {
     this.activeTab.value = tab;
+
+    // A tab opens at its own start. The hero stays out of view if the reader had scrolled past it.
+    const scroller = this.querySelector('[data-scroller]');
+    const content = this.querySelector('[data-tab-content]');
+    if (!(scroller instanceof HTMLElement) || !(content instanceof HTMLElement)) return;
+
+    const barHeight = this.querySelector('[data-tab-bar]')?.getBoundingClientRect().height ?? 0;
+    const start =
+      scroller.scrollTop +
+      content.getBoundingClientRect().top -
+      scroller.getBoundingClientRect().top -
+      barHeight;
+    if (scroller.scrollTop > start) scroller.scrollTo({ top: start });
   }
 
   openRangePanel() {

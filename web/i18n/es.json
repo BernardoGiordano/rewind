@@ -173,6 +173,10 @@
       "one": "{count} reproducción",
       "other": "{count} reproducciones"
     },
+    "playsCompact": {
+      "one": "{count} reprod.",
+      "other": "{count} reprod."
+    },
     "playsWord": {
       "one": "reproducción",
       "other": "reproducciones"

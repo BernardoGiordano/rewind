@@ -126,6 +126,7 @@ export interface OnRepeatEntry {
   title: string;
   artist: string;
   artist_id: string;
+  album_id: string;
   plays_that_day: number;
 }
 
